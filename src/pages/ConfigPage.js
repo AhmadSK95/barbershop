@@ -19,7 +19,8 @@ function ConfigPage() {
     password: '',
     specialty: '',
     rating: 5.0,
-    imageUrl: ''
+    serviceIds: [],
+    imageFile: null
   });
 
   // Services state
@@ -45,6 +46,13 @@ function ConfigPage() {
       fetchData();
     }
   }, [user, activeTab]);
+
+  // Always fetch services for the multi-select
+  useEffect(() => {
+    if (user?.role === 'admin' && services.length === 0) {
+      fetchServices();
+    }
+  }, [user]);
 
   const fetchData = async () => {
     try {
@@ -124,18 +132,25 @@ function ConfigPage() {
   const handleCreateBarber = async (e) => {
     e.preventDefault();
     try {
+      // TODO: Handle image upload to server if imageFile exists
+      const barberData = {
+        ...newBarber,
+        imageUrl: newBarber.imageFile ? `/images/barbers/${newBarber.imageFile.name}` : ''
+      };
+      delete barberData.imageFile;
+
       const response = await fetch('http://localhost:5001/api/config/barbers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(newBarber)
+        body: JSON.stringify(barberData)
       });
       const data = await response.json();
       if (data.success) {
         showSuccess('Barber created successfully');
-        setNewBarber({ firstName: '', lastName: '', email: '', password: '', specialty: '', rating: 5.0, imageUrl: '' });
+        setNewBarber({ firstName: '', lastName: '', email: '', password: '', specialty: '', rating: 5.0, serviceIds: [], imageFile: null });
         fetchBarbers();
       } else {
         setError(data.message);
@@ -459,13 +474,35 @@ function ConfigPage() {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label>Image URL</label>
+                    <label>Services Offered *</label>
+                    <div className="multi-select-container">
+                      {services.map(service => (
+                        <label key={service.id} className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={newBarber.serviceIds.includes(service.id)}
+                            onChange={(e) => {
+                              const serviceIds = e.target.checked
+                                ? [...newBarber.serviceIds, service.id]
+                                : newBarber.serviceIds.filter(id => id !== service.id);
+                              setNewBarber({ ...newBarber, serviceIds });
+                            }}
+                          />
+                          <span>{service.name} (${service.price})</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Barber Image</label>
                     <input
-                      type="text"
-                      value={newBarber.imageUrl}
-                      onChange={(e) => setNewBarber({ ...newBarber, imageUrl: e.target.value })}
-                      placeholder="/images/barbers/name.jpg"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setNewBarber({ ...newBarber, imageFile: e.target.files[0] })}
                     />
+                    {newBarber.imageFile && (
+                      <p className="file-name">Selected: {newBarber.imageFile.name}</p>
+                    )}
                   </div>
                   <button type="submit" className="btn-primary">Add Barber</button>
                 </form>

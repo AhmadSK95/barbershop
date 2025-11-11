@@ -58,7 +58,7 @@ services:
         condition: service_healthy
     networks:
       - barbershop_network
-    command: sh -c "npm run migrate && npm start"
+    command: npm start
 
   # AI Backend
   ai-backend:

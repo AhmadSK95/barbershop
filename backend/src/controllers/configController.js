@@ -4,10 +4,29 @@ const pool = require('../config/database');
 const getAllBarbers = async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT id, first_name, last_name, email, specialty, rating, image_url, is_active, created_at
-      FROM users
-      WHERE role = 'barber'
-      ORDER BY first_name
+      SELECT 
+        b.id,
+        u.first_name,
+        u.last_name,
+        u.email,
+        b.specialty,
+        b.rating,
+        b.is_available as is_active,
+        u.created_at,
+        COALESCE(
+          json_agg(
+            json_build_object('id', s.id, 'name', s.name) 
+            ORDER BY s.name
+          ) FILTER (WHERE s.id IS NOT NULL),
+          '[]'
+        ) as services
+      FROM barbers b
+      JOIN users u ON b.user_id = u.id
+      LEFT JOIN barber_services bs ON b.id = bs.barber_id
+      LEFT JOIN services s ON bs.service_id = s.id
+      WHERE u.role = 'barber'
+      GROUP BY b.id, u.first_name, u.last_name, u.email, b.specialty, b.rating, b.is_available, u.created_at
+      ORDER BY u.first_name
     `);
     
     res.json({
@@ -25,7 +44,7 @@ const getAllBarbers = async (req, res) => {
 
 // Create a new barber
 const createBarber = async (req, res) => {
-  const { firstName, lastName, email, password, specialty, rating, imageUrl } = req.body;
+  const { firstName, lastName, email, password, specialty, rating, serviceIds } = req.body;
   
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({
@@ -34,22 +53,50 @@ const createBarber = async (req, res) => {
     });
   }
 
+  const client = await pool.connect();
   try {
-    const bcrypt = require('bcrypt');
+    await client.query('BEGIN');
+    
+    const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const result = await pool.query(`
-      INSERT INTO users (first_name, last_name, email, password, role, specialty, rating, image_url, is_active)
-      VALUES ($1, $2, $3, $4, 'barber', $5, $6, $7, true)
-      RETURNING id, first_name, last_name, email, specialty, rating, image_url, is_active, created_at
-    `, [firstName, lastName, email, hashedPassword, specialty || 'Barber', rating || 5.0, imageUrl || null]);
+    // Create user
+    const userResult = await client.query(`
+      INSERT INTO users (first_name, last_name, email, password, role, is_verified)
+      VALUES ($1, $2, $3, $4, 'barber', true)
+      RETURNING id
+    `, [firstName, lastName, email, hashedPassword]);
+    
+    const userId = userResult.rows[0].id;
+    
+    // Create barber entry
+    const barberResult = await client.query(`
+      INSERT INTO barbers (user_id, specialty, rating, is_available)
+      VALUES ($1, $2, $3, true)
+      RETURNING id
+    `, [userId, specialty || 'Barber', rating || 5.0]);
+    
+    const barberId = barberResult.rows[0].id;
+    
+    // Assign services if provided
+    if (serviceIds && serviceIds.length > 0) {
+      for (const serviceId of serviceIds) {
+        await client.query(
+          'INSERT INTO barber_services (barber_id, service_id) VALUES ($1, $2)',
+          [barberId, serviceId]
+        );
+      }
+    }
+    
+    await client.query('COMMIT');
     
     res.status(201).json({
       success: true,
-      data: { barber: result.rows[0] },
+      data: { barber: { id: barberId, user_id: userId } },
       message: 'Barber created successfully'
     });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error creating barber:', error);
     if (error.code === '23505') { // Unique violation
       return res.status(400).json({
@@ -61,51 +108,87 @@ const createBarber = async (req, res) => {
       success: false,
       message: 'Failed to create barber'
     });
+  } finally {
+    client.release();
   }
 };
 
 // Update a barber
 const updateBarber = async (req, res) => {
-  const { id } = req.params;
-  const { firstName, lastName, specialty, rating, imageUrl, isActive } = req.body;
+  const { id } = req.params; // This is barber.id
+  const { firstName, lastName, specialty, rating, isActive, serviceIds } = req.body;
   
+  const client = await pool.connect();
   try {
-    const result = await pool.query(`
-      UPDATE users
-      SET first_name = COALESCE($1, first_name),
-          last_name = COALESCE($2, last_name),
-          specialty = COALESCE($3, specialty),
-          rating = COALESCE($4, rating),
-          image_url = COALESCE($5, image_url),
-          is_active = COALESCE($6, is_active)
-      WHERE id = $7 AND role = 'barber'
-      RETURNING id, first_name, last_name, email, specialty, rating, image_url, is_active, created_at
-    `, [firstName, lastName, specialty, rating, imageUrl, isActive, id]);
+    await client.query('BEGIN');
     
-    if (result.rows.length === 0) {
+    // Get user_id for this barber
+    const barberCheck = await client.query('SELECT user_id FROM barbers WHERE id = $1', [id]);
+    if (barberCheck.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({
         success: false,
         message: 'Barber not found'
       });
     }
+    const userId = barberCheck.rows[0].user_id;
+    
+    // Update user info
+    if (firstName || lastName) {
+      await client.query(`
+        UPDATE users
+        SET first_name = COALESCE($1, first_name),
+            last_name = COALESCE($2, last_name)
+        WHERE id = $3
+      `, [firstName, lastName, userId]);
+    }
+    
+    // Update barber info
+    await client.query(`
+      UPDATE barbers
+      SET specialty = COALESCE($1, specialty),
+          rating = COALESCE($2, rating),
+          is_available = COALESCE($3, is_available)
+      WHERE id = $4
+    `, [specialty, rating, isActive, id]);
+    
+    // Update services if provided
+    if (serviceIds !== undefined) {
+      // Remove old services
+      await client.query('DELETE FROM barber_services WHERE barber_id = $1', [id]);
+      
+      // Add new services
+      if (serviceIds && serviceIds.length > 0) {
+        for (const serviceId of serviceIds) {
+          await client.query(
+            'INSERT INTO barber_services (barber_id, service_id) VALUES ($1, $2)',
+            [id, serviceId]
+          );
+        }
+      }
+    }
+    
+    await client.query('COMMIT');
     
     res.json({
       success: true,
-      data: { barber: result.rows[0] },
       message: 'Barber updated successfully'
     });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error updating barber:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update barber'
     });
+  } finally {
+    client.release();
   }
 };
 
 // Delete a barber
 const deleteBarber = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // This is barber.id
   
   try {
     // Check if barber has any bookings
@@ -121,17 +204,21 @@ const deleteBarber = async (req, res) => {
       });
     }
     
-    const result = await pool.query(
-      'DELETE FROM users WHERE id = $1 AND role = $\'barber\' RETURNING id',
+    // Get user_id and delete (cascade will handle barbers and barber_services)
+    const barberResult = await pool.query(
+      'SELECT user_id FROM barbers WHERE id = $1',
       [id]
     );
     
-    if (result.rows.length === 0) {
+    if (barberResult.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Barber not found'
       });
     }
+    
+    const userId = barberResult.rows[0].user_id;
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
     
     res.json({
       success: true,
