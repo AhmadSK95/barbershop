@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: barbershop_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-barbershop_db}
+      POSTGRES_USER: ${DB_USER:-barbershop_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - barbershop_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-barbershop_user} -d ${DB_NAME:-barbershop_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: barbershop_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-barbershop_db}
+      DB_USER: ${DB_USER:-barbershop_user}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRE: ${JWT_REFRESH_EXPIRE:-30d}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@barbershop.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@123456}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
+    ports:
+      - "5001:5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - barbershop_network
+    command: sh -c "npm run migrate && npm start"
+
+  # AI Backend
+  ai-backend:
+    build:
+      context: ./ai-backend
+      dockerfile: Dockerfile
+    container_name: barbershop_ai_backend
+    restart: unless-stopped
+    environment:
+      FLASK_APP: app.py
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5003:5002"
+    volumes:
+      - ai_models:/root/.cache/huggingface
+    networks:
+      - barbershop_network
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5001/api}
+    container_name: barbershop_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - ai-backend
+    networks:
+      - barbershop_network
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5001/api}
+
+networks:
+  barbershop_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  ai_models:
+    driver: local

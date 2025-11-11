@@ -1,0 +1,438 @@
+/* Graffiti Urban Style - Soothing Teal Theme */
+
+/* Add spray paint texture to titles */
+.neon-title, .hero-title {
+  font-family: 'Impact', 'Arial Black', sans-serif !important;
+  color: #26c6da !important;
+  text-shadow: 
+    2px 2px 0px #000,
+    4px 4px 0px rgba(38, 198, 218, 0.5),
+    -1px -1px 0px #4dd0e1 !important;
+  letter-spacing: 3px !important;
+  position: relative;
+}
+
+/* Graffiti drip effect */
+.hero-title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 20%;
+  width: 8px;
+  height: 20px;
+  background: #26c6da;
+  border-radius: 0 0 50% 50%;
+  opacity: 0.7;
+}
+
+/* Urban card styling with graffiti borders */
+.card, .info-card, .booking-card {
+  background: linear-gradient(145deg, #2c3e50 0%, #1a252f 100%) !important;
+  border: 3px solid #26c6da !important;
+  border-radius: 5px !important;
+  box-shadow: 
+    5px 5px 0px rgba(0, 0, 0, 0.3),
+    inset 0 0 20px rgba(38, 198, 218, 0.1) !important;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(45deg, #26c6da, #4dd0e1, #26c6da);
+  border-radius: 5px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover::before {
+  opacity: 0.3;
+}
+
+/* Spray paint button effect */
+.btn-primary, .cta-button, .booking-button, .auth-button {
+  background: linear-gradient(135deg, #00acc1 0%, #0097a7 100%) !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  box-shadow: 
+    4px 4px 0px #000,
+    inset 0 0 10px rgba(77, 208, 225, 0.5) !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  position: relative;
+  overflow: visible;
+}
+
+.btn-primary::after, .cta-button::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 15px;
+  height: 15px;
+  background: #4dd0e1;
+  border-radius: 50%;
+  opacity: 0.6;
+  filter: blur(3px);
+}
+
+.btn-primary:hover, .cta-button:hover, .booking-button:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px #000 !important;
+}
+
+/* Street art text highlights */
+.step-container h2, .about-hero h1, .quick-booking h2 {
+  color: #4dd0e1 !important;
+  text-shadow: 
+    2px 2px 0px #000,
+    4px 4px 0px rgba(38, 198, 218, 0.4) !important;
+  font-weight: 900 !important;
+  -webkit-text-stroke: 1px #000;
+}
+
+/* Navigation graffiti style */
+.navigation {
+  background: rgba(26, 37, 47, 0.95) !important;
+  border-bottom: 4px solid #26c6da !important;
+  box-shadow: 0 4px 0px rgba(0, 0, 0, 0.5) !important;
+}
+
+.nav-logo {
+  background: linear-gradient(45deg, #26c6da, #4dd0e1) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 900 !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  filter: drop-shadow(2px 2px 0px #000);
+}
+
+.nav-link {
+  color: #e0f7fa !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #4dd0e1 !important;
+  text-shadow: 0 0 10px rgba(77, 208, 225, 0.5);
+}
+
+.nav-link-booking {
+  background: linear-gradient(135deg, #00acc1, #0097a7) !important;
+  border: 2px solid #000 !important;
+  box-shadow: 3px 3px 0px #000 !important;
+}
+
+/* Profile page graffiti styling */
+.profile-header, .order-history {
+  background: linear-gradient(145deg, #2c3e50 0%, #1a252f 100%) !important;
+  border: 3px solid #26c6da !important;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.3) !important;
+}
+
+.profile-avatar {
+  background: linear-gradient(135deg, #00acc1 0%, #0097a7 100%) !important;
+  border: 4px solid #000 !important;
+  box-shadow: 
+    0 0 0 3px #4dd0e1,
+    5px 5px 0px rgba(0, 0, 0, 0.4) !important;
+  color: #fff !important;
+}
+
+.order-history h2 {
+  color: #4dd0e1 !important;
+  border-bottom: 3px solid #26c6da !important;
+  text-shadow: 2px 2px 0px #000 !important;
+}
+
+/* Graffiti accents */
+.price, .total-price {
+  color: #4dd0e1 !important;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5) !important;
+  font-weight: 900 !important;
+}
+
+/* Auth page graffiti style */
+.auth-page {
+  background: linear-gradient(135deg, #263238 0%, #1a252f 100%) !important;
+}
+
+.auth-card {
+  background: #2c3e50 !important;
+  border: 3px solid #26c6da !important;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.5) !important;
+}
+
+.auth-title {
+  color: #4dd0e1 !important;
+  text-shadow: 2px 2px 0px #000 !important;
+  font-weight: 900 !important;
+}
+
+.form-group input {
+  background: #1a252f !important;
+  border: 2px solid #455a64 !important;
+  color: #e0f7fa !important;
+}
+
+.form-group input:focus {
+  border-color: #26c6da !important;
+  box-shadow: 0 0 0 3px rgba(38, 198, 218, 0.2) !important;
+}
+
+.form-group label {
+  color: #b2ebf2 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  font-size: 0.8rem !important;
+  letter-spacing: 1px;
+}
+
+/* Calendar graffiti style */
+.calendar-container {
+  background: linear-gradient(145deg, #2c3e50 0%, #1a252f 100%) !important;
+  border: 3px solid #26c6da !important;
+}
+
+.calendar-day.selected {
+  background: linear-gradient(135deg, #00acc1, #0097a7) !important;
+  border: 3px solid #000 !important;
+  box-shadow: 
+    0 0 0 2px #4dd0e1,
+    inset 0 0 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+.calendar-day:not(.empty):not(.past) {
+  background: #34495e !important;
+  border: 2px solid #455a64 !important;
+  color: #e0f7fa !important;
+}
+
+.calendar-day:not(.empty):not(.past):hover {
+  background: rgba(38, 198, 218, 0.3) !important;
+  border-color: #26c6da !important;
+  box-shadow: 0 0 10px rgba(38, 198, 218, 0.4) !important;
+}
+
+.calendar-title {
+  color: #4dd0e1 !important;
+}
+
+.weekday {
+  color: #80deea !important;
+}
+
+/* Time slot graffiti */
+.time-slot {
+  background: linear-gradient(145deg, #34495e 0%, #2c3e50 100%) !important;
+  border: 2px solid #455a64 !important;
+  color: #e0f7fa !important;
+}
+
+.time-slot:hover {
+  border-color: #26c6da !important;
+  background: linear-gradient(145deg, rgba(38, 198, 218, 0.3), rgba(77, 208, 225, 0.2)) !important;
+}
+
+.time-slot.selected {
+  background: linear-gradient(135deg, #00acc1, #0097a7) !important;
+  border: 3px solid #000 !important;
+  box-shadow: 3px 3px 0px #000 !important;
+}
+
+/* Status badges street art style */
+.status-confirmed {
+  background: #66bb6a !important;
+  color: #fff !important;
+  border: 2px solid #000 !important;
+  box-shadow: 2px 2px 0px #000 !important;
+  font-weight: 900 !important;
+}
+
+.status-pending {
+  background: #ffa726 !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+  box-shadow: 2px 2px 0px #000 !important;
+  font-weight: 900 !important;
+}
+
+.status-cancelled {
+  background: #ef5350 !important;
+  color: #fff !important;
+  border: 2px solid #000 !important;
+  box-shadow: 2px 2px 0px #000 !important;
+  font-weight: 900 !important;
+}
+
+.status-completed {
+  background: #42a5f5 !important;
+  color: #fff !important;
+  border: 2px solid #000 !important;
+  box-shadow: 2px 2px 0px #000 !important;
+  font-weight: 900 !important;
+}
+
+/* About/Info sections */
+.info-card h3, .value-card h3 {
+  color: #4dd0e1 !important;
+  text-shadow: 1px 1px 0px #000 !important;
+  font-weight: 900 !important;
+}
+
+.info-card p, .value-card p, .about-text p {
+  color: #e0f7fa !important;
+}
+
+/* Hero description */
+.hero-subtitle {
+  color: #4dd0e1 !important;
+  text-shadow: 1px 1px 0px #000 !important;
+}
+
+.hero-description {
+  color: #b2ebf2 !important;
+}
+
+/* Checkmark graffiti */
+.checkmark {
+  background: linear-gradient(135deg, #00acc1, #0097a7) !important;
+  border: 3px solid #000 !important;
+  box-shadow: 2px 2px 0px #000 !important;
+}
+
+/* Summary card */
+.summary-card {
+  background: linear-gradient(145deg, #2c3e50 0%, #1a252f 100%) !important;
+  border: 3px solid #26c6da !important;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.3) !important;
+}
+
+.summary-section {
+  border-bottom: 1px solid rgba(38, 198, 218, 0.3) !important;
+}
+
+.summary-section h3 {
+  color: #4dd0e1 !important;
+  font-weight: 900 !important;
+}
+
+.summary-item {
+  color: #e0f7fa !important;
+}
+
+.summary-total {
+  border-top: 2px solid #26c6da !important;
+}
+
+/* Barber avatar */
+.barber-avatar {
+  background: linear-gradient(135deg, #00acc1, #0097a7) !important;
+  border: 3px solid #000 !important;
+  box-shadow: 0 0 0 3px #4dd0e1 !important;
+}
+
+/* Specialty and rating */
+.specialty {
+  color: #b2ebf2 !important;
+}
+
+.rating {
+  color: #ffd54f !important;
+  text-shadow: 1px 1px 0px #000 !important;
+}
+
+/* Card descriptions */
+.description, .card .description {
+  color: #b2ebf2 !important;
+}
+
+/* Duration */
+.duration {
+  color: #80deea !important;
+}
+
+/* Profile page text colors */
+.profile-info h1 {
+  color: #e0f7fa !important;
+}
+
+.profile-email, .profile-phone {
+  color: #b2ebf2 !important;
+}
+
+.detail-label {
+  color: #80deea !important;
+}
+
+.detail-value {
+  color: #e0f7fa !important;
+}
+
+.detail-value.price {
+  color: #4dd0e1 !important;
+}
+
+.booking-date {
+  color: #e0f7fa !important;
+}
+
+/* Auth subtitle */
+.auth-subtitle {
+  color: #b2ebf2 !important;
+}
+
+/* Book now button in profile */
+.book-now-btn {
+  background: linear-gradient(135deg, #00acc1, #0097a7) !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  box-shadow: 4px 4px 0px #000 !important;
+}
+
+.book-now-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px #000 !important;
+}
+
+/* Loading/Error messages */
+.loading-message {
+  color: #80deea !important;
+}
+
+.error-message {
+  color: #ff7961 !important;
+}
+
+.no-bookings p {
+  color: #b2ebf2 !important;
+}
+
+/* Auth link */
+.auth-link {
+  color: #4dd0e1 !important;
+}
+
+.auth-link:hover {
+  color: #26c6da !important;
+}
+
+/* Calendar navigation buttons */
+.calendar-nav {
+  background: linear-gradient(135deg, rgba(38, 198, 218, 0.3), rgba(77, 208, 225, 0.3)) !important;
+  border: 2px solid #26c6da !important;
+  color: #4dd0e1 !important;
+}
+
+.calendar-nav:hover {
+  background: linear-gradient(135deg, #00acc1, #0097a7) !important;
+  color: #fff !important;
+}

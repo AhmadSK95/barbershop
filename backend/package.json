@@ -1,0 +1,32 @@
+{
+  "name": "barbershop-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Barbershop Booking System",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "migrate": "node src/config/migrate.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.922.0",
+    "@aws-sdk/client-sns": "^3.922.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.7",
+    "openai": "^6.8.1",
+    "pg": "^8.11.3",
+    "replicate": "^1.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

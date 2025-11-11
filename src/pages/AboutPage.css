@@ -1,0 +1,231 @@
+.about-page {
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+.about-hero {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, rgba(52, 31, 18, 0.4), rgba(70, 42, 25, 0.4));
+  border-bottom: 2px solid rgba(139, 90, 43, 0.3);
+}
+
+.about-hero h1 {
+  font-size: 3rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  background: linear-gradient(45deg, #b8860b, #d4a574);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.tagline {
+  font-size: 1.5rem;
+  color: #c19a6b;
+  font-style: italic;
+  font-family: 'Playfair Display', serif;
+}
+
+.about-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.about-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin: 4rem 0;
+  align-items: center;
+}
+
+.about-section.reverse {
+  direction: rtl;
+}
+
+.about-section.reverse > * {
+  direction: ltr;
+}
+
+.about-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 3px solid rgba(139, 90, 43, 0.5);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  transition: transform 0.3s ease;
+}
+
+.about-image:hover {
+  transform: scale(1.02);
+}
+
+.about-text h2 {
+  font-size: 2rem;
+  color: #d4a574;
+  margin-bottom: 1.5rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.about-text p {
+  font-size: 1.1rem;
+  color: #c8b698;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.testimonial-section {
+  margin: 4rem 0;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(52, 31, 18, 0.5), rgba(70, 42, 25, 0.5));
+  border-radius: 8px;
+  border: 2px solid rgba(139, 90, 43, 0.5);
+}
+
+.testimonial-section h2 {
+  font-size: 2.5rem;
+  color: #d4a574;
+  margin-bottom: 2rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.testimonial-card {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.testimonial-text {
+  font-size: 1.2rem;
+  color: #c8b698;
+  line-height: 1.9;
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+.testimonial-author {
+  font-size: 1rem;
+  color: #d4a574;
+  font-weight: 600;
+}
+
+.values-section {
+  margin: 6rem 0;
+  text-align: center;
+}
+
+.values-section h2 {
+  font-size: 2.5rem;
+  color: #d4a574;
+  margin-bottom: 3rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.value-card {
+  background: linear-gradient(135deg, rgba(52, 31, 18, 0.6), rgba(70, 42, 25, 0.6));
+  border: 2px solid rgba(139, 90, 43, 0.5);
+  border-radius: 8px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.value-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(184, 134, 11, 0.7);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+}
+
+.value-card h3 {
+  font-size: 1.5rem;
+  color: #d4a574;
+  margin-bottom: 1rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.value-card p {
+  color: #c8b698;
+  line-height: 1.6;
+}
+
+.cta-section {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, rgba(52, 31, 18, 0.5), rgba(70, 42, 25, 0.5));
+  border-radius: 8px;
+  border: 2px solid rgba(139, 90, 43, 0.5);
+  margin: 4rem 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.cta-section h2 {
+  font-size: 2.5rem;
+  color: #d4a574;
+  margin-bottom: 2rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.book-button {
+  background: linear-gradient(135deg, #b8860b, #8b6914);
+  color: white;
+  border: 2px solid #d4a574;
+  padding: 1rem 3rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  font-family: 'Crimson Text', serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.book-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(184, 134, 11, 0.6);
+}
+
+@media (max-width: 768px) {
+  .about-hero h1 {
+    font-size: 2rem;
+  }
+
+  .tagline {
+    font-size: 1.2rem;
+  }
+
+  .about-section {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .about-section.reverse {
+    direction: ltr;
+  }
+
+  .about-image {
+    height: 300px;
+  }
+
+  .values-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,13 @@
+<svg width="300" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2C3E50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34495E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="url(#grad2)"/>
+  <ellipse cx="150" cy="120" rx="80" ry="100" fill="#8B7355"/>
+  <ellipse cx="150" cy="65" rx="75" ry="35" fill="#3D3229"/>
+  <text x="150" y="350" font-family="Arial, sans-serif" font-size="24" fill="#ECF0F1" text-anchor="middle">Buzz Cut</text>
+  <text x="150" y="380" font-family="Arial, sans-serif" font-size="14" fill="#BDC3C7" text-anchor="middle">Clean &amp; low-maintenance</text>
+</svg>

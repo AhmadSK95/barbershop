@@ -1,0 +1,102 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { bookingAPI } from '../services/api';
+
+function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack }) {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleConfirm = async () => {
+    try {
+      setLoading(true);
+
+      // Format the booking data for API
+      const hairstyleImage = sessionStorage.getItem('selectedHairstyleImage');
+      const bookingData = {
+        serviceIds: booking.services.map(service => service.id),
+        barberId: booking.barber.id,
+        bookingDate: booking.date,
+        bookingTime: booking.time,
+        notes: '',
+        hairstyleImage: hairstyleImage || null
+      };
+      
+      // Clear the sessionStorage after using it
+      sessionStorage.removeItem('selectedHairstyleImage');
+      sessionStorage.removeItem('selectedHairstyleName');
+
+      console.log('Creating booking:', bookingData); // Debug log
+      const response = await bookingAPI.create(bookingData);
+      console.log('Booking created:', response.data); // Debug log
+      
+      alert('Booking confirmed! ✅\n\nYou will receive a confirmation email shortly.');
+      
+      // Reset booking state
+      onConfirm();
+      
+      // Navigate to profile page immediately to show the updated booking
+      navigate('/profile', { replace: true });
+    } catch (err) {
+      console.error('Booking error:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to create booking. Please try again.';
+      alert('❌ ' + errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="step-container">
+      <h2>Booking Summary</h2>
+      <div className="summary-card">
+        <div className="summary-section">
+          <h3>Services</h3>
+          {booking.services.map(service => (
+            <div key={service.id} className="summary-item">
+              <span>{service.name}</span>
+              <span>${service.price}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="summary-section">
+          <h3>Date & Time</h3>
+          <div className="summary-item">
+            <span>{booking.date}</span>
+            <span>{booking.time}</span>
+          </div>
+        </div>
+
+        <div className="summary-section">
+          <h3>Barber</h3>
+          <div className="summary-item">
+            <span>{booking.barber?.name}</span>
+            <span>{booking.barber?.specialty}</span>
+          </div>
+        </div>
+
+        <div className="summary-total">
+          <div className="summary-item">
+            <strong>Total Duration</strong>
+            <strong>{totalDuration} minutes</strong>
+          </div>
+          <div className="summary-item total-price">
+            <strong>Total Price</strong>
+            <strong>${totalPrice}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div className="button-group">
+        <button className="btn btn-secondary" onClick={onBack} disabled={loading}>
+          Back
+        </button>
+        <button className="btn btn-confirm" onClick={handleConfirm} disabled={loading}>
+          {loading ? 'Creating Booking...' : 'Confirm Booking'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default BookingSummary;
