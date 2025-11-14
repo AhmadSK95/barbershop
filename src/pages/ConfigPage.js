@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './ConfigPage.css';
 
+const API_URL = process.env.REACT_APP_API_URL || '/api';
+
 function ConfigPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('barbers');
@@ -75,7 +77,7 @@ function ConfigPage() {
   };
 
   const fetchBarbers = async () => {
-    const response = await fetch('http://localhost:5001/api/config/barbers', {
+    const response = await fetch(`${API_URL}/config/barbers`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -87,7 +89,7 @@ function ConfigPage() {
   };
 
   const fetchServices = async () => {
-    const response = await fetch('http://localhost:5001/api/config/services', {
+    const response = await fetch(`${API_URL}/config/services`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -99,7 +101,7 @@ function ConfigPage() {
   };
 
   const fetchAvailabilitySettings = async () => {
-    const response = await fetch('http://localhost:5001/api/config/availability/settings', {
+    const response = await fetch(`${API_URL}/config/availability/settings`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -139,7 +141,7 @@ function ConfigPage() {
       };
       delete barberData.imageFile;
 
-      const response = await fetch('http://localhost:5001/api/config/barbers', {
+      const response = await fetch(`${API_URL}/config/barbers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +164,7 @@ function ConfigPage() {
 
   const handleUpdateBarber = async (barberId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/config/barbers/${barberId}`, {
+      const response = await fetch(`${API_URL}/config/barbers/${barberId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -187,7 +189,7 @@ function ConfigPage() {
     if (!window.confirm('Are you sure you want to delete this barber?')) return;
     
     try {
-      const response = await fetch(`http://localhost:5001/api/config/barbers/${barberId}`, {
+      const response = await fetch(`${API_URL}/config/barbers/${barberId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -207,7 +209,7 @@ function ConfigPage() {
 
   const handleToggleBarberActive = async (barber) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/config/barbers/${barber.id}`, {
+      const response = await fetch(`${API_URL}/config/barbers/${barber.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -229,7 +231,7 @@ function ConfigPage() {
   const handleCreateService = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5001/api/config/services', {
+      const response = await fetch(`${API_URL}/config/services`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -252,7 +254,7 @@ function ConfigPage() {
 
   const handleUpdateService = async (serviceId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/config/services/${serviceId}`, {
+      const response = await fetch(`${API_URL}/config/services/${serviceId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -277,7 +279,7 @@ function ConfigPage() {
     if (!window.confirm('Are you sure you want to delete this service?')) return;
     
     try {
-      const response = await fetch(`http://localhost:5001/api/config/services/${serviceId}`, {
+      const response = await fetch(`${API_URL}/config/services/${serviceId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -297,7 +299,7 @@ function ConfigPage() {
 
   const handleToggleServiceActive = async (service) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/config/services/${service.id}`, {
+      const response = await fetch(`${API_URL}/config/services/${service.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -319,7 +321,7 @@ function ConfigPage() {
   const handleUpdateAvailability = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5001/api/config/availability/settings', {
+      const response = await fetch(`${API_URL}/config/availability/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

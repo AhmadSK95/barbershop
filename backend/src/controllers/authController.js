@@ -8,10 +8,12 @@ const {
   generateRandomToken,
   hashToken
 } = require('../utils/auth');
+// Use AWS SES for email sending
 const {
   sendVerificationEmail,
-  sendPasswordResetEmail
-} = require('../utils/email');
+  sendPasswordResetEmail,
+  verifyEmailIdentity
+} = require('../utils/sesEmail');
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -59,12 +61,18 @@ const register = async (req, res) => {
 
     const user = result.rows[0];
 
-    // Send verification email
+    // Verify user email in AWS SES (for sandbox mode) and send verification email
     try {
+      // First, verify the email identity in AWS SES so we can send to it
+      console.log(`Verifying email identity in AWS SES: ${email}`);
+      await verifyEmailIdentity(email);
+      console.log(`✅ AWS SES verification request sent to ${email}`);
+      
+      // Then send the verification email
       await sendVerificationEmail(email, firstName, verificationToken);
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
-      // Don't fail registration if email fails
+      // Don't fail registration if email fails - user can still use the app
     }
 
     // Generate tokens
