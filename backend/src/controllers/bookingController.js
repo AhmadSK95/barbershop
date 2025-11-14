@@ -9,8 +9,10 @@ const { sendBookingConfirmationSMS, sendBookingCancellationSMS } = require('../.
 const createBooking = async (req, res) => {
   const client = await pool.connect();
   try {
-    const { serviceIds, barberId, bookingDate, bookingTime, notes } = req.body;
+    let { serviceIds, barberId, bookingDate, bookingTime, notes } = req.body;
     const userId = req.user.id;
+
+    console.log('📋 Booking Request:', JSON.stringify({ serviceIds, barberId, bookingDate, bookingTime }, null, 2));
 
     if (!serviceIds || serviceIds.length === 0 || !bookingDate || !bookingTime) {
       return res.status(400).json({
@@ -20,6 +22,35 @@ const createBooking = async (req, res) => {
     }
 
     await client.query('BEGIN');
+
+    // If no barber specified (Any Available), assign a random available barber
+    if (!barberId || barberId === null || barberId === 'null') {
+      const availableBarbers = await client.query(
+        `SELECT b.id FROM barbers b
+         WHERE b.is_available = true
+         AND NOT EXISTS (
+           SELECT 1 FROM bookings bk
+           WHERE bk.barber_id = b.id
+           AND bk.booking_date = $1
+           AND bk.booking_time = $2
+           AND bk.status != 'cancelled'
+         )
+         ORDER BY RANDOM()
+         LIMIT 1`,
+        [bookingDate, bookingTime]
+      );
+
+      if (availableBarbers.rows.length > 0) {
+        barberId = availableBarbers.rows[0].id;
+        console.log(`✅ Auto-assigned barber ID ${barberId} for "Any Available" booking`);
+      } else {
+        await client.query('ROLLBACK');
+        return res.status(400).json({
+          success: false,
+          message: 'No barbers available for the selected time slot'
+        });
+      }
+    }
 
     // Get services prices
     const serviceResult = await client.query(
@@ -81,18 +112,19 @@ const createBooking = async (req, res) => {
       const barberName = barberResult.rows.length > 0 
         ? `${barberResult.rows[0].first_name} ${barberResult.rows[0].last_name}`
         : 'Any Available';
+      
+      console.log(`👨‍💼 Barber for email - ID: ${barberId}, Name: ${barberName}`);
 
       const bookingDetails = {
-        customerName: req.user.first_name,
+        service: servicesString,
+        barber: barberName,
         date: bookingDate,
         time: bookingTime,
-        barberName: barberName,
-        services: servicesString,
-        totalPrice: totalPrice.toFixed(2)
+        price: totalPrice.toFixed(2)
       };
 
       // Send email
-      await sendBookingConfirmationEmail(req.user.email, bookingDetails);
+      await sendBookingConfirmationEmail(req.user.email, req.user.first_name, bookingDetails);
       
       // Send SMS if phone number exists
       if (req.user.phone_number) {
@@ -130,6 +162,7 @@ const getMyBookings = async (req, res) => {
     const result = await pool.query(
       `SELECT b.id, b.booking_date, b.booking_time, b.total_price, b.status, b.notes,
               s.name as service_name, s.duration,
+              bar.id as barber_id,
               COALESCE(u.first_name, 'Any Available') as barber_first_name, 
               u.last_name as barber_last_name,
               bar.specialty as barber_specialty

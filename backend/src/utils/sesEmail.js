@@ -233,6 +233,7 @@ const sendBookingConfirmationEmail = async (email, firstName, bookingDetails) =>
                           <div style="background-color: #fff8e1; border-left: 4px solid #D4A574; padding: 15px; margin: 20px 0;">
                             <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.6;">
                               <strong>📍 Location:</strong> Balkan Barbers<br/>
+                              <span style="color: #888; font-size: 13px;">123 Main Street, City, State 12345</span><br/>
                               <strong>⏱️ Please arrive 5 minutes early</strong>
                             </p>
                           </div>
@@ -264,7 +265,7 @@ const sendBookingConfirmationEmail = async (email, firstName, bookingDetails) =>
           Charset: 'UTF-8',
         },
         Text: {
-          Data: `Booking Confirmed!\n\nHi ${firstName},\n\nYour appointment has been confirmed:\n\nService: ${bookingDetails.service}\nBarber: ${bookingDetails.barber}\nDate: ${bookingDetails.date}\nTime: ${bookingDetails.time}\nTotal Price: $${bookingDetails.price}\n\nPlease arrive 5 minutes early.\n\n--\nBalkan Barbers\nPremium Grooming Services`,
+          Data: `Booking Confirmed!\n\nHi ${firstName},\n\nYour appointment has been confirmed:\n\nService: ${bookingDetails.service}\nBarber: ${bookingDetails.barber}\nDate: ${bookingDetails.date}\nTime: ${bookingDetails.time}\nTotal Price: $${bookingDetails.price}\n\nLocation: Balkan Barbers\n123 Main Street, City, State 12345\n\nPlease arrive 5 minutes early.\n\n--\nBalkan Barbers\nPremium Grooming Services`,
           Charset: 'UTF-8',
         },
       },

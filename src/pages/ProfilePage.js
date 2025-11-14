@@ -57,7 +57,9 @@ function ProfilePage() {
             duration: booking.duration
           },
           barber: {
-            name: barberName
+            id: booking.barber_id,
+            name: barberName,
+            specialty: booking.barber_specialty
           },
           addons: [] // TODO: Fetch addons if needed
         };
@@ -111,12 +113,25 @@ function ProfilePage() {
     // Find the service from the services list that matches the booking
     const matchedService = services.find(s => s.name === booking.service?.name);
     
-    if (matchedService) {
-      // Navigate to booking page with pre-selected service, starting at step 2 (date selection)
+    if (matchedService && booking.barber) {
+      // Navigate to booking page with pre-selected service and barber, starting at step 3 (date/time selection)
       navigate('/booking', { 
         state: { 
           preselectedServices: [matchedService],
-          startAtStep: 2
+          preselectedBarber: {
+            id: booking.barber.id,
+            name: booking.barber.name,
+            specialty: booking.barber.specialty
+          },
+          startAtStep: 3
+        } 
+      });
+    } else if (matchedService) {
+      // If only service found, start at barber selection
+      navigate('/booking', { 
+        state: { 
+          preselectedServices: [matchedService],
+          startAtStep: 1
         } 
       });
     } else {

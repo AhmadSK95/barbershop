@@ -25,7 +25,10 @@ function BookingPage() {
         barber: location.state.preselectedBarber || prev.barber
       }));
       
-      if (location.state?.startAtStep) {
+      // If both barber and services are preselected, skip to date/time (step 3)
+      if (location.state.preselectedServices && location.state.preselectedBarber) {
+        setStep(3);
+      } else if (location.state?.startAtStep) {
         setStep(location.state.startAtStep);
       }
       
