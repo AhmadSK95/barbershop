@@ -51,7 +51,6 @@ function ProfilePage() {
           status: booking.status,
           totalPrice: booking.total_price,
           notes: booking.notes,
-          hairstyleImage: booking.hairstyle_image,
           service: {
             name: booking.service_name,
             duration: booking.duration

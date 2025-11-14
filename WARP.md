@@ -4,7 +4,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-A full-stack barbershop booking system with JWT authentication, role-based access control (user/barber/admin), and AI-powered hairstyle generation. Built with React frontend, Node.js/Express backend, PostgreSQL database, and Flask-based AI backend using Stable Diffusion.
+A full-stack barbershop booking system with JWT authentication, role-based access control (user/barber/admin). Built with React frontend, Node.js/Express backend, and PostgreSQL database.
 
 ## Development Commands
 
@@ -40,25 +40,9 @@ npm run dev
 npm start
 ```
 
-### AI Backend (Python/Flask)
-```bash
-cd ai-backend
-
-# Quick setup (creates venv, installs dependencies, downloads AI models ~6GB)
-./setup.sh
-
-# Manual setup
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Start AI server (runs on http://localhost:5002)
-python3 app.py
-```
-
 ### Docker (Recommended for Production)
 ```bash
-# Start all services (frontend, backend, ai-backend, postgres)
+# Start all services (frontend, backend, postgres)
 docker-compose up -d --build
 
 # View logs
@@ -100,16 +84,14 @@ SELECT * FROM bookings;          # View bookings
 │   ├── pages/            # Route-level page components
 │   ├── context/          # React Context (AuthContext)
 │   └── services/         # API client (axios)
-├── backend/              # Node.js API server
-│   └── src/
-│       ├── config/      # Database config & migrations
-│       ├── controllers/ # Request handlers
-│       ├── routes/      # Express route definitions
-│       ├── middleware/  # Auth, rate limiting
-│       └── utils/       # Auth helpers, email service
-├── ai-backend/          # Flask AI service
-│   └── app.py          # Stable Diffusion + ControlNet
-└── backend/services/   # External AI integrations (DALL-E, Replicate)
+└── backend/             # Node.js API server
+    ├── services/        # Email, SMS services
+    └── src/
+        ├── config/      # Database config & migrations
+        ├── controllers/ # Request handlers
+        ├── routes/      # Express route definitions
+        ├── middleware/  # Auth, rate limiting
+        └── utils/       # Auth helpers, email service
 ```
 
 ### Authentication Flow
@@ -124,7 +106,7 @@ SELECT * FROM bookings;          # View bookings
 - **barbers**: user_id reference, specialty, rating, availability
 - **services**: barbershop services (name, price, duration)
 - **addons**: optional add-ons (beard trim, shave)
-- **bookings**: user_id, barber_id, service_id, date/time, status (pending/confirmed/completed/cancelled), hairstyle_image
+- **bookings**: user_id, barber_id, service_id, date/time, status (pending/confirmed/completed/cancelled)
 - **booking_addons**: junction table for many-to-many booking-addon relationship
 - **refresh_tokens**: JWT refresh token storage
 
@@ -141,16 +123,7 @@ API Endpoints:
 - `/api/auth/*` - Registration, login, password reset, email verification
 - `/api/bookings/*` - CRUD for bookings, available barbers
 - `/api/users/*` - User management (admin only)
-- `/api/dalle/*` - AI hairstyle generation (OpenAI DALL-E, Replicate)
 - `/api/config/*` - System configuration
-
-### AI/ML Features
-Three methods for hairstyle generation:
-1. **Stable Diffusion + ControlNet** (ai-backend): Face-preserving transformations using local models
-2. **OpenAI DALL-E** (backend/services/dalle): GPT-4 Vision analyzes face → DALL-E generates
-3. **Replicate API** (backend/services/replicate): Cloud-based Stable Diffusion with InstantID
-
-Virtual Try-On page (`src/pages/VirtualTryOnPage.js`) uses TensorFlow.js for face detection, then calls backend endpoints.
 
 ### Environment Variables
 Frontend (root `.env`):
@@ -160,8 +133,6 @@ Backend (`backend/.env` or root `.env`):
 - `DB_*` - PostgreSQL connection
 - `JWT_SECRET`, `JWT_REFRESH_SECRET` - Token signing
 - `EMAIL_*` - SMTP configuration (Gmail, SendGrid, Mailgun)
-- `OPENAI_API_KEY` - For DALL-E integration
-- `REPLICATE_API_TOKEN` - For Replicate integration
 - `ADMIN_EMAIL`, `ADMIN_PASSWORD` - Initial admin credentials
 
 Copy `backend/.env.example` or `.env.production` as starting point.
@@ -238,11 +209,10 @@ docker-compose logs -f backend
 ```
 
 ### Common Issues
-- **Port conflicts**: Backend uses 5001, frontend 3000, AI backend 5002
+- **Port conflicts**: Backend uses 5001, frontend 3000
   - Find process: `lsof -ti:5001 | xargs kill -9` (Mac/Linux)
 - **Database connection failed**: Check PostgreSQL is running, verify `.env` credentials
 - **Email not sending**: Verify Gmail App Password (not regular password) or SMTP config
-- **AI models not loading**: Clear cache `rm -rf ~/.cache/huggingface` and restart
 
 ### Database Debugging
 ```bash
