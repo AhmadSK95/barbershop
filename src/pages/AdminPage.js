@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './AdminPage.css';
 
+const API_URL = process.env.REACT_APP_API_URL || '/api';
+
 function AdminPage() {
   const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
@@ -21,7 +23,7 @@ function AdminPage() {
   const fetchAllBookings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5001/api/bookings/all', {
+      const response = await fetch(`${API_URL}/bookings/all`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -85,7 +87,7 @@ function AdminPage() {
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
-      await fetch(`http://localhost:5001/api/bookings/${bookingId}/status`, {
+      await fetch(`${API_URL}/bookings/${bookingId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

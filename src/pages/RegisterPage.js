@@ -13,6 +13,7 @@ function RegisterPage() {
     phone: '',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { register } = useAuth();
@@ -48,7 +49,10 @@ function RegisterPage() {
     const result = await register(userData);
 
     if (result.success) {
-      navigate('/', { replace: true });
+      setSuccess('Registration successful! Please check your email to verify your account.');
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 3000); // Give user time to see the message
     } else {
       setError(result.error);
     }
@@ -64,6 +68,11 @@ function RegisterPage() {
           <p className="auth-subtitle">Join us today</p>
 
           {error && <div className="auth-error">{error}</div>}
+          {success && (
+            <div className="auth-success">
+              ✅ {success}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-row">

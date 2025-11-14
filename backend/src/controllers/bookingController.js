@@ -1,5 +1,6 @@
 const pool = require('../config/database');
-const { sendBookingConfirmationEmail } = require('../../services/email');
+// Use AWS SES for email sending
+const { sendBookingConfirmationEmail } = require('../utils/sesEmail');
 const { sendBookingConfirmationSMS, sendBookingCancellationSMS } = require('../../services/sms');
 
 // @desc    Create new booking
