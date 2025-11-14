@@ -11,9 +11,13 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
       setLoading(true);
 
       // Format the booking data for API
+      console.log('DEBUG - Full booking object:', JSON.stringify(booking, null, 2));
+      console.log('DEBUG - booking.barber:', booking.barber);
+      console.log('DEBUG - booking.barber.id:', booking.barber?.id);
+      
       const bookingData = {
         serviceIds: booking.services.map(service => service.id),
-        barberId: booking.barber.id,
+        barberId: booking.barber?.id || null,
         bookingDate: booking.date,
         bookingTime: booking.time,
         notes: ''
