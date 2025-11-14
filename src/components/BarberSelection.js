@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { bookingAPI } from '../services/api';
-import { barbers } from '../data';
 
 function BarberSelection({ selectedBarber, selectedServices, selectedDate, selectedTime, onSelect, onNext, onBack }) {
   const [availableBarbers, setAvailableBarbers] = useState([]);
@@ -21,16 +20,15 @@ function BarberSelection({ selectedBarber, selectedServices, selectedDate, selec
           const response = await bookingAPI.getAvailableBarbers(selectedDate, selectedTime);
           barbersData = response.data.data.barbers;
         } else {
-          // Otherwise, show all barbers from local data
-          barbersData = barbers;
+          // Otherwise, fetch all barbers from API
+          const response = await bookingAPI.getAllBarbers();
+          barbersData = response.data.data.barbers;
         }
         
-        const availableBarbersFromAPI = barbersData;
-        
         // Map barbers to match consistent data structure
-        const mappedBarbers = availableBarbersFromAPI.map(barber => {
+        const mappedBarbers = barbersData.map(barber => {
           // Handle both API format (first_name/last_name) and local format (name)
-          const name = barber.first_name || barber.name;
+          const name = barber.first_name || 'Any Available';
           
           // Map first name to image path
           const imageMap = {
@@ -46,20 +44,10 @@ function BarberSelection({ selectedBarber, selectedServices, selectedDate, selec
             id: barber.id,
             name: name,
             specialty: barber.specialty,
-            rating: barber.rating || barber.rating,
-            image: imageMap[name] || barber.image || barber.photo || null
+            rating: barber.rating,
+            image: imageMap[name] || null
           };
         });
-        
-        // Add "Any Available" option if there are barbers
-        if (mappedBarbers.length > 0) {
-          mappedBarbers.unshift({
-            id: null,
-            name: 'Any Available',
-            specialty: 'Let us choose the best barber for you',
-            rating: null
-          });
-        }
         
         setAvailableBarbers(mappedBarbers);
       } catch (err) {

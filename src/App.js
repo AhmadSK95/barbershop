@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import './graffiti-overrides.css';
+import './design-system.css';
 import { AuthProvider } from './context/AuthContext';
 import Navigation from './components/Navigation';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,7 +13,6 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import ConfigPage from './pages/ConfigPage';
-import VirtualTryOnPage from './pages/VirtualTryOnPage';
 
 function App() {
   return (
@@ -24,7 +23,6 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/virtual-tryon" element={<VirtualTryOnPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route 

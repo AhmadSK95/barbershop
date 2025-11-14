@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navigation.css';
@@ -7,6 +7,15 @@ function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
     <nav className="navigation">
@@ -14,28 +23,28 @@ function Navigation() {
         <Link to="/" className="nav-logo">
           ✂️ Balkan Barber
         </Link>
-        <div className="nav-links">
+        <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
+        <div className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           <Link 
             to="/" 
             className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            onClick={closeMobileMenu}
           >
             Home
           </Link>
           <Link 
             to="/about" 
             className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
+            onClick={closeMobileMenu}
           >
             About
           </Link>
-          <Link 
-            to="/virtual-tryon" 
-            className={`nav-link ${location.pathname === '/virtual-tryon' ? 'active' : ''}`}
-          >
-            ✨ Try Styles
-          </Link>
-          <Link 
+          <Link
             to="/booking" 
             className={`nav-link nav-link-booking ${location.pathname === '/booking' ? 'active' : ''}`}
+            onClick={closeMobileMenu}
           >
             Book Now
           </Link>
@@ -46,12 +55,14 @@ function Navigation() {
                   <Link 
                     to="/admin" 
                     className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
+                    onClick={closeMobileMenu}
                   >
                     📊 Dashboard
                   </Link>
                   <Link 
                     to="/config" 
                     className={`nav-link ${location.pathname === '/config' ? 'active' : ''}`}
+                    onClick={closeMobileMenu}
                   >
                     ⚙️ Config
                   </Link>
@@ -60,10 +71,11 @@ function Navigation() {
               <Link 
                 to="/profile" 
                 className={`nav-link nav-user ${location.pathname === '/profile' ? 'active' : ''}`}
+                onClick={closeMobileMenu}
               >
                 👤 {user?.firstName}
               </Link>
-              <button onClick={logout} className="nav-link nav-logout">
+              <button onClick={() => { logout(); closeMobileMenu(); }} className="nav-link nav-logout">
                 Logout
               </button>
             </>
@@ -71,6 +83,7 @@ function Navigation() {
             <Link 
               to="/login" 
               className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`}
+              onClick={closeMobileMenu}
             >
               Login
             </Link>

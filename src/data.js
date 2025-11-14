@@ -100,13 +100,6 @@ export const barbers = [
     specialty: "Senior Barber",
     rating: 5.0,
     image: "/images/barbers/riza.jpeg"
-  },
-  {
-    id: 7,
-    name: "Any Available",
-    specialty: "Next available barber",
-    rating: null,
-    image: null
   }
 ];
 

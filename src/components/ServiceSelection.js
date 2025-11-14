@@ -1,7 +1,64 @@
-import React from 'react';
-import { services } from '../data';
+import React, { useState, useEffect } from 'react';
+import { bookingAPI } from '../services/api';
 
 function ServiceSelection({ selectedServices, selectedBarber, onToggle, onNext, onBack }) {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      if (!selectedBarber) {
+        setError('Please select a barber first');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await bookingAPI.getBarberServices(selectedBarber.id || 'null');
+        setServices(response.data.data.services);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+        setError('Failed to load services. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, [selectedBarber]);
+
+  if (loading) {
+    return (
+      <div className="step-container">
+        <h2>Select Services</h2>
+        <p style={{ textAlign: 'center', color: '#c19a6b', marginTop: '2rem' }}>
+          Loading services...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="step-container">
+        <h2>Select Services</h2>
+        <p style={{ textAlign: 'center', color: '#ff6b6b', marginTop: '2rem' }}>
+          {error}
+        </p>
+        {onBack && (
+          <div className="button-group">
+            <button className="btn btn-secondary" onClick={onBack}>
+              Back
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="step-container">
       <h2>Select Services</h2>

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -60,23 +58,6 @@ services:
       - barbershop_network
     command: npm start
 
-  # AI Backend
-  ai-backend:
-    build:
-      context: ./ai-backend
-      dockerfile: Dockerfile
-    container_name: barbershop_ai_backend
-    restart: unless-stopped
-    environment:
-      FLASK_APP: app.py
-      PYTHONUNBUFFERED: 1
-    ports:
-      - "5003:5002"
-    volumes:
-      - ai_models:/root/.cache/huggingface
-    networks:
-      - barbershop_network
-
   # Frontend
   frontend:
     build:
@@ -90,7 +71,6 @@ services:
       - "80:80"
     depends_on:
       - backend
-      - ai-backend
     networks:
       - barbershop_network
     environment:
@@ -102,6 +82,4 @@ networks:
 
 volumes:
   postgres_data:
-    driver: local
-  ai_models:
     driver: local

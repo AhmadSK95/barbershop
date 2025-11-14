@@ -7,13 +7,17 @@ const {
   updateBookingStatus,
   cancelBooking,
   getAvailableSlots,
-  getAvailableBarbers
+  getAvailableBarbers,
+  getAllBarbers,
+  getBarberServices
 } = require('../controllers/bookingController');
 const { protect, adminOnly, verifiedOnly } = require('../middleware/auth');
 
 // Public routes
 router.get('/available-slots', getAvailableSlots);
 router.get('/available-barbers', getAvailableBarbers);
+router.get('/barbers', getAllBarbers);
+router.get('/barber-services/:barberId', getBarberServices);
 
 // Protected routes
 router.post('/', protect, createBooking);

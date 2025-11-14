@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Services table
 CREATE TABLE IF NOT EXISTS services (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
+  name VARCHAR(100) UNIQUE NOT NULL,
   description TEXT,
   price DECIMAL(10, 2) NOT NULL,
   duration INTEGER NOT NULL,
@@ -65,26 +65,23 @@ CREATE TABLE IF NOT EXISTS bookings (
   total_price DECIMAL(10, 2) NOT NULL,
   status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
   notes TEXT,
-  hairstyle_image TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(barber_id, booking_date, booking_time)
 );
-
--- Add hairstyle_image column if it doesn't exist (for existing databases)
-DO $$ 
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='bookings' AND column_name='hairstyle_image') THEN
-    ALTER TABLE bookings ADD COLUMN hairstyle_image TEXT;
-  END IF;
-END $$;
 
 -- Booking add-ons junction table
 CREATE TABLE IF NOT EXISTS booking_addons (
   id SERIAL PRIMARY KEY,
   booking_id INTEGER REFERENCES bookings(id) ON DELETE CASCADE,
   addon_id INTEGER REFERENCES addons(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SMS DND table
+CREATE TABLE IF NOT EXISTS sms_dnd_numbers (
+  id SERIAL PRIMARY KEY,
+  phone_number VARCHAR(32) UNIQUE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -111,6 +108,7 @@ CREATE INDEX IF NOT EXISTS idx_bookings_date_time ON bookings(booking_date, book
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_barber_services_barber_id ON barber_services(barber_id);
 CREATE INDEX IF NOT EXISTS idx_barber_services_service_id ON barber_services(service_id);
+CREATE INDEX IF NOT EXISTS idx_sms_dnd_phone_number ON sms_dnd_numbers(phone_number);
 `;
 
 const seedData = async () => {
@@ -186,9 +184,15 @@ const seedData = async () => {
 
     const assignServicesToBarber = async (barberId, isMaster) => {
       const allServiceNames = Object.keys(serviceIdsByName);
-      const selectedNames = isMaster
-        ? allServiceNames
-        : allServiceNames.filter(name => name !== 'Haircut - Master Barber');
+      let selectedNames;
+      
+      if (isMaster) {
+        // Master barbers get: Master haircut + common services (NOT Senior haircut)
+        selectedNames = allServiceNames.filter(name => name !== 'Haircut - Senior Barber');
+      } else {
+        // Senior barbers get: Senior haircut + common services (NOT Master haircut)
+        selectedNames = allServiceNames.filter(name => name !== 'Haircut - Master Barber');
+      }
 
       for (const name of selectedNames) {
         const sid = serviceIdsByName[name];
@@ -239,11 +243,29 @@ const seedData = async () => {
       }
     }
 
-    // Add "Any Available" barber option (no user_id)
-    await client.query(
-      'INSERT INTO barbers (user_id, specialty, rating) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-      [null, 'Next available barber', null]
+    // Add "Any Available" barber option with all services
+    const anyAvailableCheck = await client.query(
+      'SELECT id FROM barbers WHERE user_id IS NULL AND specialty LIKE $1',
+      ['%Any Available%']
     );
+    
+    if (anyAvailableCheck.rows.length === 0) {
+      const anyAvailableResult = await client.query(
+        'INSERT INTO barbers (user_id, specialty, rating, is_available) VALUES ($1, $2, $3, $4) RETURNING id',
+        [null, 'Any Available - Next available barber', null, true]
+      );
+      
+      const anyAvailableBarberId = anyAvailableResult.rows[0].id;
+      
+      // Assign all services to Any Available
+      const allServiceIds = Object.values(serviceIdsByName);
+      for (const sid of allServiceIds) {
+        await client.query(
+          'INSERT INTO barber_services (barber_id, service_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+          [anyAvailableBarberId, sid]
+        );
+      }
+    }
 
     await client.query('COMMIT');
     console.log('✅ Database seeded successfully');

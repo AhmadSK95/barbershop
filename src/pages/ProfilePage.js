@@ -181,13 +181,6 @@ function ProfilePage() {
                     {getStatusBadge(booking.status)}
                   </div>
                   
-                  {booking.hairstyleImage && (
-                    <div className="booking-hairstyle-image">
-                      <img src={booking.hairstyleImage} alt="Selected hairstyle" />
-                      <span className="hairstyle-badge">✨ AI Generated Style</span>
-                    </div>
-                  )}
-                  
                   <div className="booking-details">
                     <div className="detail-row">
                       <span className="detail-label">Barber:</span>

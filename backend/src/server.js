@@ -8,8 +8,8 @@ require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const authRoutes = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const userRoutes = require('./routes/userRoutes');
-const dalleRoutes = require('./routes/dalleRoutes');
 const configRoutes = require('./routes/configRoutes');
+const smsRoutes = require('./routes/smsRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -36,12 +36,9 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json({ limit: '50mb' })); // Increased limit for base64 images
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Logging
-
-// Serve static files for generated images
-app.use('/generated-images', express.static(path.join(__dirname, '../public/generated-images')));
 
 // Apply rate limiting to all API routes
 app.use('/api', apiLimiter);
@@ -55,8 +52,8 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/dalle', dalleRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/sms', smsRoutes);
 
 // 404 handler
 app.use((req, res) => {

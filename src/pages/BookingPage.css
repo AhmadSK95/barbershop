@@ -1,22 +1,23 @@
 .booking-page {
   min-height: 100vh;
+  background: var(--color-brown-dark);
 }
 
 .booking-header {
   text-align: center;
   padding: 2rem 1rem 1rem;
-  background: linear-gradient(135deg, rgba(52, 31, 18, 0.4), rgba(70, 42, 25, 0.4));
+  background: var(--gradient-brown);
   position: relative;
   z-index: 1;
   margin-bottom: 1rem;
-  border-bottom: 2px solid rgba(139, 90, 43, 0.3);
+  border-bottom: 3px solid var(--color-gold-dark);
 }
 
 .booking-header .neon-title,
 .booking-page .neon-title {
-  font-family: 'Playfair Display', serif !important;
-  color: #d4a574 !important;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;
+  font-family: var(--font-display) !important;
+  color: var(--color-gold-light) !important;
+  text-shadow: var(--shadow-md), 0 0 20px rgba(212, 165, 116, 0.4) !important;
   letter-spacing: 3px !important;
   -webkit-text-stroke: 0 !important;
 }
@@ -27,100 +28,99 @@
   padding: 0 1rem;
 }
 
-/* Booking page specific card overrides - override graffiti theme */
+/* Booking page specific card overrides */
 .booking-page .step-container .card,
 .booking-page .card-grid .card,
 .booking-page .card {
-  background: linear-gradient(135deg, rgba(30, 30, 60, 0.9), rgba(50, 20, 60, 0.9)) !important;
-  border: 2px solid rgba(100, 100, 150, 0.3) !important;
-  border-radius: 15px !important;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+  background: var(--gradient-brown) !important;
+  border: 3px solid var(--color-brown-leather) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
 }
 
 .booking-page .step-container .card:hover,
 .booking-page .card-grid .card:hover,
 .booking-page .card:hover {
-  border-color: #8d6e63 !important;
-  box-shadow: 0 15px 35px rgba(141, 110, 99, 0.3),
-              0 0 30px rgba(109, 76, 65, 0.3) !important;
-  transform: translateY(-10px) scale(1.03) !important;
+  border-color: var(--color-gold-dark) !important;
+  box-shadow: var(--shadow-xl), 0 0 30px rgba(212, 165, 116, 0.3) !important;
+  transform: translateY(-8px) scale(1.02) !important;
 }
 
 .booking-page .step-container .card.selected,
 .booking-page .card-grid .card.selected,
 .booking-page .card.selected {
-  border-color: #8d6e63 !important;
-  background: linear-gradient(135deg, rgba(141, 110, 99, 0.2), rgba(109, 76, 65, 0.2)) !important;
-  box-shadow: 0 0 30px rgba(141, 110, 99, 0.6),
-              inset 0 0 20px rgba(109, 76, 65, 0.3) !important;
+  border-color: var(--color-gold-medium) !important;
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(184, 134, 11, 0.2)) !important;
+  box-shadow: 0 0 30px rgba(212, 165, 116, 0.6),
+              inset 0 0 20px rgba(184, 134, 11, 0.3) !important;
   transform: scale(1.05) !important;
 }
 
 .booking-page .btn-primary {
-  background: linear-gradient(135deg, #8d6e63, #6d4c41) !important;
-  border: 2px solid #a1887f !important;
-  box-shadow: 0 5px 20px rgba(141, 110, 99, 0.5) !important;
-  color: white !important;
+  background: var(--gradient-gold) !important;
+  border: 2px solid var(--color-gold-dark) !important;
+  box-shadow: var(--shadow-md), var(--shadow-gold) !important;
+  color: var(--color-brown-darkest) !important;
+  font-weight: 700 !important;
 }
 
 .booking-page .btn-primary:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(141, 110, 99, 0.7),
-              0 0 30px rgba(109, 76, 65, 0.5) !important;
+  box-shadow: var(--shadow-lg), 0 0 35px rgba(212, 165, 116, 0.6) !important;
 }
 
 .booking-page .btn-secondary {
-  background: rgba(50, 50, 80, 0.8) !important;
-  color: #8d6e63 !important;
-  border: 2px solid #8d6e63 !important;
+  background: transparent !important;
+  color: var(--color-gold-light) !important;
+  border: 2px solid var(--color-gold-dark) !important;
 }
 
 .booking-page .step-container h2,
 .booking-page h2 {
-  color: #d4a574 !important;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;
+  color: var(--color-gold-light) !important;
+  text-shadow: var(--shadow-md) !important;
   font-weight: 700 !important;
-  font-family: 'Playfair Display', serif !important;
+  font-family: var(--font-display) !important;
   -webkit-text-stroke: 0 !important;
 }
 
 .booking-page .checkmark,
 .booking-page .card .checkmark {
-  background: linear-gradient(135deg, #8d6e63, #6d4c41) !important;
+  background: var(--gradient-gold) !important;
   border: none !important;
-  box-shadow: 0 0 20px rgba(141, 110, 99, 0.8) !important;
+  box-shadow: 0 0 20px rgba(212, 165, 116, 0.8) !important;
 }
 
-/* Override graffiti card::before pseudo-element */
+/* Card shimmer effect */
 .booking-page .card::before {
-  background: linear-gradient(90deg, transparent, rgba(141, 110, 99, 0.2), transparent) !important;
-  border-radius: 15px !important;
+  background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.2), transparent) !important;
+  border-radius: var(--radius-lg) !important;
 }
 
-/* Override graffiti price colors */
+/* Price styling */
 .booking-page .price,
 .booking-page .card .price {
-  color: #8d6e63 !important;
-  text-shadow: 0 0 10px rgba(141, 110, 99, 0.8),
-               2px 2px 0px transparent !important;
+  color: var(--color-gold-medium) !important;
+  text-shadow: 0 0 10px rgba(212, 165, 116, 0.6) !important;
+  font-weight: 700 !important;
 }
 
-/* Override graffiti duration colors */
+/* Duration styling */
 .booking-page .duration,
 .booking-page .card .duration {
-  color: #6d4c41 !important;
+  color: var(--color-gold-pale) !important;
 }
 
-/* Override graffiti description colors */
+/* Description styling */
 .booking-page .description,
 .booking-page .card .description {
-  color: #b8b8ff !important;
+  color: var(--color-gold-pale) !important;
 }
 
-/* Override card title colors */
+/* Card title styling */
 .booking-page .card h3 {
-  color: #ffffff !important;
-  text-shadow: 0 0 10px rgba(141, 110, 99, 0.5) !important;
+  color: var(--color-gold-light) !important;
+  text-shadow: 0 0 10px rgba(212, 165, 116, 0.5) !important;
 }
 
 /* Progress Summary Bar */
@@ -131,10 +131,10 @@
   padding: 1.5rem;
   margin: 0 auto 1.5rem;
   max-width: 1200px;
-  background: linear-gradient(135deg, rgba(52, 31, 18, 0.8), rgba(70, 42, 25, 0.8));
-  border: 2px solid rgba(184, 134, 11, 0.5);
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  background: var(--gradient-brown);
+  border: 3px solid var(--color-gold-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
 }
 
 .progress-item {
@@ -142,28 +142,28 @@
   min-width: 150px;
   padding: 0.75rem 1rem;
   background: rgba(26, 15, 10, 0.5);
-  border-radius: 6px;
-  border: 1px solid rgba(184, 134, 11, 0.4);
-  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-gold-dark);
+  transition: all var(--transition-base);
 }
 
 .progress-item:hover {
   background: rgba(139, 90, 43, 0.3);
-  border-color: rgba(184, 134, 11, 0.6);
+  border-color: var(--color-gold-medium);
   transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.3);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
 }
 
 .progress-item.total {
   background: linear-gradient(135deg, rgba(184, 134, 11, 0.3), rgba(212, 165, 116, 0.2));
-  border-color: #d4a574;
-  box-shadow: 0 0 15px rgba(184, 134, 11, 0.4);
+  border-color: var(--color-gold-light);
+  box-shadow: var(--shadow-gold);
 }
 
 .progress-label {
   display: block;
   font-size: 0.85rem;
-  color: #c19a6b;
+  color: var(--color-gold-pale);
   margin-bottom: 0.25rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -173,16 +173,16 @@
 .progress-value {
   display: block;
   font-size: 1rem;
-  color: #f5e6d3;
+  color: var(--color-gold-light);
   font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-sm);
 }
 
 .progress-item.total .progress-value {
   font-size: 1.3rem;
-  color: #d4a574;
-  font-family: 'Playfair Display', serif;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  color: var(--color-gold-light);
+  font-family: var(--font-display);
+  text-shadow: var(--shadow-md);
 }
 
 /* Enhanced Avatar Styling */

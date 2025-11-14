@@ -8,7 +8,7 @@ const { sendBookingConfirmationSMS, sendBookingCancellationSMS } = require('../.
 const createBooking = async (req, res) => {
   const client = await pool.connect();
   try {
-    const { serviceIds, barberId, bookingDate, bookingTime, notes, hairstyleImage } = req.body;
+    const { serviceIds, barberId, bookingDate, bookingTime, notes } = req.body;
     const userId = req.user.id;
 
     if (!serviceIds || serviceIds.length === 0 || !bookingDate || !bookingTime) {
@@ -58,10 +58,10 @@ const createBooking = async (req, res) => {
 
     // Create booking (using first service as primary)
     const bookingResult = await client.query(
-      `INSERT INTO bookings (user_id, service_id, barber_id, booking_date, booking_time, total_price, notes, hairstyle_image, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO bookings (user_id, service_id, barber_id, booking_date, booking_time, total_price, notes, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id`,
-      [userId, serviceIds[0], barberId, bookingDate, bookingTime, totalPrice, notes, hairstyleImage, 'pending']
+      [userId, serviceIds[0], barberId, bookingDate, bookingTime, totalPrice, notes, 'pending']
     );
 
     const bookingId = bookingResult.rows[0].id;
@@ -127,7 +127,7 @@ const createBooking = async (req, res) => {
 const getMyBookings = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT b.id, b.booking_date, b.booking_time, b.total_price, b.status, b.notes, b.hairstyle_image,
+      `SELECT b.id, b.booking_date, b.booking_time, b.total_price, b.status, b.notes,
               s.name as service_name, s.duration,
               COALESCE(u.first_name, 'Any Available') as barber_first_name, 
               u.last_name as barber_last_name,
@@ -302,6 +302,37 @@ const cancelBooking = async (req, res) => {
   }
 };
 
+// @desc    Get all barbers
+// @route   GET /api/bookings/barbers
+// @access  Public
+const getAllBarbers = async (req, res) => {
+  try {
+    // Get all active barbers including "Any Available"
+    const result = await pool.query(
+      `SELECT b.id, u.first_name, u.last_name, b.specialty, b.rating
+       FROM barbers b
+       LEFT JOIN users u ON b.user_id = u.id
+       WHERE b.is_available = true
+       ORDER BY 
+         CASE WHEN b.user_id IS NULL THEN 0 ELSE 1 END,
+         b.rating DESC NULLS LAST`
+    );
+
+    res.json({
+      success: true,
+      data: {
+        barbers: result.rows
+      }
+    });
+  } catch (error) {
+    console.error('Get all barbers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching barbers'
+    });
+  }
+};
+
 // @desc    Get available barbers for date/time
 // @route   GET /api/bookings/available-barbers
 // @access  Public
@@ -320,16 +351,18 @@ const getAvailableBarbers = async (req, res) => {
     const result = await pool.query(
       `SELECT b.id, u.first_name, u.last_name, b.specialty, b.rating
        FROM barbers b
-       JOIN users u ON b.user_id = u.id
+       LEFT JOIN users u ON b.user_id = u.id
        WHERE b.is_available = true
-       AND b.id NOT IN (
+       AND (b.user_id IS NULL OR b.id NOT IN (
          SELECT barber_id FROM bookings
          WHERE booking_date = $1 
          AND booking_time = $2 
          AND status != 'cancelled'
          AND barber_id IS NOT NULL
-       )
-       ORDER BY b.rating DESC`,
+       ))
+       ORDER BY 
+         CASE WHEN b.user_id IS NULL THEN 0 ELSE 1 END,
+         b.rating DESC NULLS LAST`,
       [date, time]
     );
 
@@ -344,6 +377,54 @@ const getAvailableBarbers = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error fetching available barbers'
+    });
+  }
+};
+
+// @desc    Get services by barber
+// @route   GET /api/bookings/barber-services/:barberId
+// @access  Public
+const getBarberServices = async (req, res) => {
+  try {
+    const { barberId } = req.params;
+
+    // If barberId is null or 'null' (Any Available), return all services
+    if (!barberId || barberId === 'null') {
+      const result = await pool.query(
+        `SELECT id, name, description, price, duration
+         FROM services
+         WHERE is_active = true
+         ORDER BY price DESC`
+      );
+      return res.json({
+        success: true,
+        data: {
+          services: result.rows
+        }
+      });
+    }
+
+    // Get services for specific barber
+    const result = await pool.query(
+      `SELECT s.id, s.name, s.description, s.price, s.duration
+       FROM services s
+       JOIN barber_services bs ON s.id = bs.service_id
+       WHERE bs.barber_id = $1 AND s.is_active = true
+       ORDER BY s.price DESC`,
+      [barberId]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        services: result.rows
+      }
+    });
+  } catch (error) {
+    console.error('Get barber services error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching barber services'
     });
   }
 };
@@ -402,5 +483,7 @@ module.exports = {
   updateBookingStatus,
   cancelBooking,
   getAvailableSlots,
-  getAvailableBarbers
+  getAvailableBarbers,
+  getAllBarbers,
+  getBarberServices
 };

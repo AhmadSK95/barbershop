@@ -32,14 +32,19 @@ function HomePage() {
 
       <section className="info-section">
         <div className="info-card">
-          <div className="info-icon">🕒</div>
+          <div className="info-icon clock-character">
+            🕐
+          </div>
           <h3>Hours</h3>
           <p>Monday–Friday: 10am–7pm</p>
           <p>Saturday-Sunday: 9am-4pm</p>
         </div>
 
         <div className="info-card">
-          <div className="info-icon">📍</div>
+          <div className="info-icon map-character">
+            <div className="map-icon">🗺️</div>
+            <div className="map-pin">📍</div>
+          </div>
           <h3>Our Location</h3>
           <p>332 Barrow St</p>
           <p>Jersey City, NJ 07302</p>
@@ -47,41 +52,13 @@ function HomePage() {
         </div>
 
         <div className="info-card">
-          <div className="info-icon">✨</div>
+          <div className="info-icon barber-character">
+            🧔
+          </div>
           <h3>Services</h3>
           <p>Professional Cuts</p>
           <p>Hot Towel Shaves</p>
           <p>Straight Edge Razor Line-ups</p>
-        </div>
-      </section>
-
-      <section className="virtual-tryon-promo">
-        <div className="promo-content">
-          <div className="promo-badge">✨ NEW FEATURE</div>
-          <h2>Try Before You Book</h2>
-          <p>Use our AI-powered Virtual Try-On to see how different hairstyles look on you!</p>
-          <div className="promo-buttons">
-            <button className="cta-button primary" onClick={() => navigate('/virtual-tryon')}>
-              📸 Try Virtual Styles
-            </button>
-            <button className="cta-button secondary" onClick={() => navigate('/booking')}>
-              Book Appointment
-            </button>
-          </div>
-        </div>
-        <div className="promo-features">
-          <div className="promo-feature">
-            <span className="feature-icon">🤖</span>
-            <span>AI Face Analysis</span>
-          </div>
-          <div className="promo-feature">
-            <span className="feature-icon">💁</span>
-            <span>Personalized Recommendations</span>
-          </div>
-          <div className="promo-feature">
-            <span className="feature-icon">⚡</span>
-            <span>Instant Results</span>
-          </div>
         </div>
       </section>
 

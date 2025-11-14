@@ -1,6 +1,6 @@
 .profile-page {
   min-height: calc(100vh - 70px);
-  background: linear-gradient(135deg, #2a1810 0%, #1a0f0a 100%);
+  background: var(--color-brown-dark);
   padding: 40px 20px;
 }
 
@@ -10,67 +10,67 @@
 }
 
 .profile-header {
-  background: linear-gradient(145deg, #e8d4ba 0%, #d4c0a8 100%);
-  border-radius: 8px;
+  background: var(--gradient-brown);
+  border-radius: var(--radius-lg);
   padding: 30px;
   margin-bottom: 30px;
   display: flex;
   align-items: center;
   gap: 25px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-  border: 3px solid #8b5a2b;
+  box-shadow: var(--shadow-lg);
+  border: 3px solid var(--color-gold-dark);
 }
 
 .profile-avatar {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
+  background: var(--gradient-gold);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 36px;
   font-weight: bold;
-  color: #f5e6d3;
+  color: var(--color-brown-darkest);
   text-transform: uppercase;
-  border: 3px solid #d4a574;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border: 3px solid var(--color-gold-light);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
 }
 
 .profile-info h1 {
   margin: 0 0 10px 0;
-  color: #2a1810;
+  color: var(--color-gold-light);
   font-size: 28px;
   font-weight: 800;
-  font-family: 'Playfair Display', serif;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+  font-family: var(--font-display);
+  text-shadow: var(--shadow-sm);
 }
 
 .profile-email,
 .profile-phone {
   margin: 5px 0;
-  color: #6d4c41;
+  color: var(--color-gold-pale);
   font-size: 16px;
   font-weight: 600;
 }
 
 .order-history {
-  background: linear-gradient(145deg, #e8d4ba 0%, #d4c0a8 100%);
-  border-radius: 8px;
+  background: var(--gradient-brown);
+  border-radius: var(--radius-lg);
   padding: 30px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-  border: 3px solid #8b5a2b;
+  box-shadow: var(--shadow-lg);
+  border: 3px solid var(--color-gold-dark);
 }
 
 .order-history h2 {
   margin: 0 0 25px 0;
-  color: #2a1810;
+  color: var(--color-gold-light);
   font-size: 24px;
-  border-bottom: 3px solid #b8860b;
+  border-bottom: 3px solid var(--color-gold-medium);
   padding-bottom: 15px;
   font-weight: 800;
-  font-family: 'Playfair Display', serif;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+  font-family: var(--font-display);
+  text-shadow: var(--shadow-sm);
 }
 
 .loading-message,
@@ -91,28 +91,29 @@
 
 .no-bookings p {
   font-size: 18px;
-  color: #666;
+  color: var(--color-gold-pale);
   margin-bottom: 20px;
 }
 
 .book-now-btn {
   display: inline-block;
   padding: 12px 30px;
-  background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
-  color: white;
+  background: var(--gradient-gold);
+  color: var(--color-brown-darkest);
   text-decoration: none;
   border-radius: 25px;
   font-weight: 700;
-  transition: transform 0.2s;
-  border: 2px solid #d4a574;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  font-family: 'Crimson Text', serif;
+  transition: all var(--transition-base);
+  border: 2px solid var(--color-gold-dark);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .book-now-btn:hover {
   transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(212, 165, 116, 0.5);
 }
 
 .bookings-list {
@@ -122,19 +123,19 @@
 }
 
 .booking-card {
-  background: rgba(245, 230, 211, 0.7);
-  border: 2px solid #b8860b;
-  border-radius: 8px;
+  background: rgba(58, 36, 23, 0.8);
+  border: 3px solid var(--color-gold-dark);
+  border-radius: var(--radius-lg);
   padding: 20px;
-  transition: all 0.3s;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
 }
 
 .booking-card:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
-  background: rgba(245, 230, 211, 0.9);
-  border-color: #d4a574;
+  box-shadow: var(--shadow-lg), 0 0 25px rgba(212, 165, 116, 0.3);
+  transform: translateY(-4px);
+  background: rgba(58, 36, 23, 0.95);
+  border-color: var(--color-gold-medium);
 }
 
 .booking-header {
@@ -143,7 +144,7 @@
   align-items: center;
   margin-bottom: 15px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #c19a6b;
+  border-bottom: 2px solid var(--color-gold-dark);
 }
 
 .booking-hairstyle-image {
@@ -180,8 +181,8 @@
   gap: 8px;
   font-size: 16px;
   font-weight: 700;
-  color: #2a1810;
-  font-family: 'Playfair Display', serif;
+  color: var(--color-gold-light);
+  font-family: var(--font-display);
 }
 
 .date-icon {

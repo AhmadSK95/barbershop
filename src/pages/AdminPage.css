@@ -1,7 +1,7 @@
 .admin-page {
   min-height: calc(100vh - 70px);
   padding: 40px 20px;
-  background: linear-gradient(135deg, #2a1810 0%, #1a0f0a 100%);
+  background: var(--color-brown-dark);
 }
 
 .admin-container {
@@ -16,27 +16,27 @@
 
 .admin-title {
   font-size: 2.5rem;
-  color: #d4a574;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  color: var(--color-gold-light);
+  text-shadow: var(--shadow-md);
   margin-bottom: 10px;
   font-weight: 800;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
 }
 
 .admin-subtitle {
-  color: #c8b698;
+  color: var(--color-gold-pale);
   font-size: 1.1rem;
   font-weight: 600;
 }
 
 /* Revenue Banner */
 .revenue-banner {
-  background: linear-gradient(135deg, #d4a574 0%, #b8860b 50%, #d4a574 100%);
-  border: 3px solid #8b5a2b;
-  border-radius: 8px;
+  background: var(--gradient-gold);
+  border: 3px solid var(--color-gold-dark);
+  border-radius: var(--radius-lg);
   padding: 30px;
   margin-bottom: 30px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-xl), var(--shadow-gold);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -68,26 +68,26 @@
 .revenue-label {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #2a1810;
+  color: var(--color-brown-darkest);
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-bottom: 5px;
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-body);
 }
 
 .revenue-amount {
   font-size: 3.5rem;
   font-weight: 900;
-  color: #1a0f0a;
-  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+  color: var(--color-brown-darkest);
+  text-shadow: var(--shadow-sm);
   line-height: 1;
   margin-bottom: 8px;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
 }
 
 .revenue-details {
   font-size: 1rem;
-  color: #3e2723;
+  color: var(--color-brown-darkest);
   font-weight: 600;
 }
 
@@ -99,28 +99,28 @@
 .revenue-stat {
   background: rgba(26, 15, 10, 0.4);
   padding: 20px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   min-width: 150px;
   text-align: center;
-  border: 2px solid rgba(139, 90, 43, 0.5);
+  border: 2px solid var(--color-brown-darkest);
 }
 
 .revenue-stat-label {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #2a1810;
+  color: var(--color-brown-darkest);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 8px;
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-body);
 }
 
 .revenue-stat-value {
   font-size: 2rem;
   font-weight: 900;
-  color: #1a0f0a;
-  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.2);
-  font-family: 'Playfair Display', serif;
+  color: var(--color-brown-darkest);
+  text-shadow: var(--shadow-sm);
+  font-family: var(--font-display);
 }
 
 .revenue-stat-value.pending-color {
@@ -129,12 +129,12 @@
 
 /* Stats Chart Container */
 .stats-chart-container {
-  background: linear-gradient(145deg, rgba(52, 31, 18, 0.8), rgba(70, 42, 25, 0.8));
-  border: 3px solid #8b5a2b;
-  border-radius: 8px;
+  background: var(--gradient-brown);
+  border: 3px solid var(--color-gold-dark);
+  border-radius: var(--radius-lg);
   padding: 30px;
   margin-bottom: 40px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-lg);
 }
 
 .chart-header {
@@ -147,42 +147,42 @@
 }
 
 .chart-header h2 {
-  color: #d4a574;
+  color: var(--color-gold-light);
   font-size: 1.8rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  text-shadow: var(--shadow-md);
   font-weight: 800;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   margin: 0;
 }
 
 .chart-total-revenue {
-  background: linear-gradient(135deg, #b8860b, #d4a574);
-  border: 2px solid #8b5a2b;
+  background: var(--gradient-gold);
+  border: 2px solid var(--color-gold-dark);
   padding: 12px 20px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1a0f0a;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
-  font-family: 'Crimson Text', serif;
+  color: var(--color-brown-darkest);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+  font-family: var(--font-body);
 }
 
 .chart-total-revenue span {
   font-size: 1.4rem;
   font-weight: 900;
   margin-left: 5px;
-  color: #f5e6d3;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  font-family: 'Playfair Display', serif;
+  color: var(--color-brown-darkest);
+  text-shadow: var(--shadow-sm);
+  font-family: var(--font-display);
 }
 
 .stats-chart-container h2 {
-  color: #d4a574;
+  color: var(--color-gold-light);
   font-size: 1.8rem;
   margin-bottom: 25px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  text-shadow: var(--shadow-md);
   font-weight: 800;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   text-align: center;
 }
 
@@ -195,9 +195,9 @@
 }
 
 .stat-card {
-  background: linear-gradient(145deg, rgba(52, 31, 18, 0.7), rgba(70, 42, 25, 0.7));
-  border: 3px solid #8b5a2b;
-  border-radius: 8px;
+  background: var(--gradient-brown);
+  border: 3px solid var(--color-gold-dark);
+  border-radius: var(--radius-lg);
   padding: 30px 20px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);

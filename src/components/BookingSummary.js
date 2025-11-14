@@ -11,19 +11,13 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
       setLoading(true);
 
       // Format the booking data for API
-      const hairstyleImage = sessionStorage.getItem('selectedHairstyleImage');
       const bookingData = {
         serviceIds: booking.services.map(service => service.id),
         barberId: booking.barber.id,
         bookingDate: booking.date,
         bookingTime: booking.time,
-        notes: '',
-        hairstyleImage: hairstyleImage || null
+        notes: ''
       };
-      
-      // Clear the sessionStorage after using it
-      sessionStorage.removeItem('selectedHairstyleImage');
-      sessionStorage.removeItem('selectedHairstyleName');
 
       console.log('Creating booking:', bookingData); // Debug log
       const response = await bookingAPI.create(bookingData);

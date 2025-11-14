@@ -72,7 +72,9 @@ export const bookingAPI = {
   getById: (id) => api.get(`/bookings/${id}`),
   update: (id, data) => api.put(`/bookings/${id}`, data),
   cancel: (id) => api.put(`/bookings/${id}/cancel`),
+  getAllBarbers: () => api.get('/bookings/barbers'),
   getAvailableBarbers: (date, time) => api.get('/bookings/available-barbers', { params: { date, time } }),
+  getBarberServices: (barberId) => api.get(`/bookings/barber-services/${barberId}`),
 };
 
 export default api;
