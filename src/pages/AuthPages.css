@@ -69,6 +69,10 @@
   gap: 1rem;
 }
 
+.form-row .form-group {
+  min-width: 0;
+}
+
 /* Firefox-specific fallback */
 @supports not (gap: 1rem) {
   .form-row {
