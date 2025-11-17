@@ -79,13 +79,13 @@ set -e
 cd $REMOTE_DIR
 
 echo "Stopping containers..."
-docker-compose down
+docker compose down
 
 echo "Rebuilding containers..."
-docker-compose build --no-cache
+docker compose build --no-cache
 
 echo "Starting containers..."
-docker-compose up -d
+docker compose up -d
 
 echo "✓ Containers restarted"
 ENDSSH
@@ -97,7 +97,7 @@ echo -e "\n${YELLOW}[5/6] Checking container health...${NC}"
 sleep 5  # Wait for containers to start
 ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" bash << ENDSSH
 cd $REMOTE_DIR
-docker-compose ps
+docker compose ps
 ENDSSH
 
 # Step 6: Test backend health endpoint
