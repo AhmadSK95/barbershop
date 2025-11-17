@@ -28,7 +28,13 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost')) {
+    // Check if origin matches allowed origins or starts with localhost
+    // Also allow any origin from the same host as FRONTEND_URL (for production)
+    const frontendHost = process.env.FRONTEND_URL ? new URL(process.env.FRONTEND_URL).hostname : null;
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || 
+        origin.startsWith('http://localhost') ||
+        (frontendHost && origin.includes(frontendHost))) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
