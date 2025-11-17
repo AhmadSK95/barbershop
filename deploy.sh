@@ -54,23 +54,29 @@ echo -e "${GREEN}✓ Pushed to GitHub${NC}"
 
 # Step 3: SSH to AWS and pull latest
 echo -e "\n${YELLOW}[3/6] Connecting to AWS server...${NC}"
-ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" << 'ENDSSH'
+ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" bash << ENDSSH
 set -e
-cd '"$REMOTE_DIR"'
 
-echo "Pulling latest changes..."
-git pull origin '"$BRANCH"'
-
-echo "✓ Code updated on server"
+if [ ! -d "$REMOTE_DIR" ]; then
+    echo "Directory $REMOTE_DIR doesn't exist. Cloning repository..."
+    git clone https://github.com/AhmadSK95/barbershop.git $REMOTE_DIR
+    cd $REMOTE_DIR
+    echo "✓ Repository cloned"
+else
+    echo "Pulling latest changes..."
+    cd $REMOTE_DIR
+    git pull origin $BRANCH
+    echo "✓ Code updated on server"
+fi
 ENDSSH
 
 echo -e "${GREEN}✓ Latest code pulled on AWS${NC}"
 
 # Step 4: Rebuild and restart Docker containers
 echo -e "\n${YELLOW}[4/6] Rebuilding Docker containers...${NC}"
-ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" << 'ENDSSH'
+ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" bash << ENDSSH
 set -e
-cd '"$REMOTE_DIR"'
+cd $REMOTE_DIR
 
 echo "Stopping containers..."
 docker-compose down
@@ -89,8 +95,8 @@ echo -e "${GREEN}✓ Docker containers rebuilt and started${NC}"
 # Step 5: Check container health
 echo -e "\n${YELLOW}[5/6] Checking container health...${NC}"
 sleep 5  # Wait for containers to start
-ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" << 'ENDSSH'
-cd '"$REMOTE_DIR"'
+ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" bash << ENDSSH
+cd $REMOTE_DIR
 docker-compose ps
 ENDSSH
 
