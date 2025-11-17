@@ -133,8 +133,8 @@
 
 /* Profile page graffiti styling */
 .profile-header, .order-history {
-  background: linear-gradient(145deg, #2c3e50 0%, #1a252f 100%) !important;
-  border: 3px solid #26c6da !important;
+  background: linear-gradient(145deg, #5d4037 0%, #3e2723 100%) !important;
+  border: 3px solid #d4a574 !important;
   box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -148,8 +148,8 @@
 }
 
 .order-history h2 {
-  color: #4dd0e1 !important;
-  border-bottom: 3px solid #26c6da !important;
+  color: #d4a574 !important;
+  border-bottom: 3px solid #b8860b !important;
   text-shadow: 2px 2px 0px #000 !important;
 }
 
@@ -370,19 +370,19 @@
 }
 
 .detail-label {
-  color: #80deea !important;
+  color: #d4a574 !important;
 }
 
 .detail-value {
-  color: #e0f7fa !important;
+  color: #f0d9b5 !important;
 }
 
 .detail-value.price {
-  color: #4dd0e1 !important;
+  color: #d4a574 !important;
 }
 
 .booking-date {
-  color: #e0f7fa !important;
+  color: #f0d9b5 !important;
 }
 
 /* Auth subtitle */
@@ -413,7 +413,7 @@
 }
 
 .no-bookings p {
-  color: #b2ebf2 !important;
+  color: #d4a574 !important;
 }
 
 /* Auth link */
