@@ -82,7 +82,7 @@ echo "Stopping containers..."
 docker compose down
 
 echo "Rebuilding containers..."
-docker compose build --no-cache
+docker compose build
 
 echo "Starting containers..."
 docker compose up -d
