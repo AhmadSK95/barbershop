@@ -1,10 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookingAPI } from '../services/api';
 
 function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack }) {
   const [loading, setLoading] = useState(false);
+  const [previewBarber, setPreviewBarber] = useState(null);
+  const [loadingBarber, setLoadingBarber] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch preview barber if "Any Available" is selected
+  useEffect(() => {
+    const fetchPreviewBarber = async () => {
+      if (booking.barber?.name === 'Any Available' && booking.date && booking.time) {
+        try {
+          setLoadingBarber(true);
+          const response = await bookingAPI.previewAssignedBarber(booking.date, booking.time);
+          setPreviewBarber(response.data.data.barber);
+        } catch (error) {
+          console.error('Failed to preview barber:', error);
+        } finally {
+          setLoadingBarber(false);
+        }
+      }
+    };
+
+    fetchPreviewBarber();
+  }, [booking.barber, booking.date, booking.time]);
 
   const handleConfirm = async () => {
     try {
@@ -17,7 +38,9 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
       
       const bookingData = {
         serviceIds: booking.services.map(service => service.id),
-        barberId: booking.barber?.id || null,
+        // Use preview barber ID if available, otherwise send null for random assignment
+        barberId: previewBarber ? previewBarber.id : 
+                  (booking.barber?.name === 'Any Available' || !booking.barber?.id) ? null : booking.barber.id,
         bookingDate: booking.date,
         bookingTime: booking.time,
         notes: ''
@@ -27,7 +50,16 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
       const response = await bookingAPI.create(bookingData);
       console.log('Booking created:', response.data); // Debug log
       
-      alert('Booking confirmed! ✅\n\nYou will receive a confirmation email shortly.');
+      // Get assigned barber info from response
+      const assignedBarber = response.data.data?.assignedBarber;
+      
+      // Show confirmation with assigned barber
+      let confirmationMessage = 'Booking confirmed! ✅\n\nYou will receive a confirmation email shortly.';
+      if (assignedBarber && booking.barber?.name === 'Any Available') {
+        confirmationMessage = `Booking confirmed! ✅\n\nYour barber: ${assignedBarber.name}\n\nYou will receive a confirmation email shortly.`;
+      }
+      
+      alert(confirmationMessage);
       
       // Reset booking state
       onConfirm();
@@ -68,8 +100,24 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
         <div className="summary-section">
           <h3>Barber</h3>
           <div className="summary-item">
-            <span>{booking.barber?.name}</span>
-            <span>{booking.barber?.specialty}</span>
+            {loadingBarber ? (
+              <span style={{ fontStyle: 'italic', color: '#c19a6b' }}>Finding available barber...</span>
+            ) : previewBarber ? (
+              <>
+                <span>{previewBarber.name}</span>
+                <span>{previewBarber.specialty}</span>
+              </>
+            ) : booking.barber?.name === 'Any Available' ? (
+              <>
+                <span>Random Available Barber</span>
+                <span style={{ fontStyle: 'italic', color: '#c19a6b' }}>Will be assigned upon confirmation</span>
+              </>
+            ) : (
+              <>
+                <span>{booking.barber?.name}</span>
+                <span>{booking.barber?.specialty}</span>
+              </>
+            )}
           </div>
         </div>
 

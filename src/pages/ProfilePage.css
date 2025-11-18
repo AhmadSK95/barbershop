@@ -246,13 +246,13 @@
 }
 
 .detail-label {
-  color: #6d4c41;
+  color: var(--color-gold-medium);
   font-size: 15px;
   font-weight: 700;
 }
 
 .detail-value {
-  color: #2a1810;
+  color: var(--color-gold-light);
   font-size: 15px;
   font-weight: 600;
 }
@@ -273,13 +273,13 @@
 }
 
 .notes-label {
-  color: #6d4c41;
+  color: var(--color-gold-medium);
   font-size: 14px;
   font-weight: 700;
 }
 
 .notes-text {
-  color: #2a1810;
+  color: var(--color-gold-pale);
   font-size: 14px;
   font-style: italic;
 }

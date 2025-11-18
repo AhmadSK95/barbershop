@@ -9,7 +9,8 @@ const {
   getAvailableSlots,
   getAvailableBarbers,
   getAllBarbers,
-  getBarberServices
+  getBarberServices,
+  previewAssignedBarber
 } = require('../controllers/bookingController');
 const { protect, adminOnly, verifiedOnly } = require('../middleware/auth');
 
@@ -18,6 +19,7 @@ router.get('/available-slots', getAvailableSlots);
 router.get('/available-barbers', getAvailableBarbers);
 router.get('/barbers', getAllBarbers);
 router.get('/barber-services/:barberId', getBarberServices);
+router.get('/preview-barber', previewAssignedBarber);
 
 // Protected routes
 router.post('/', protect, createBooking);

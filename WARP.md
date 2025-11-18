@@ -225,13 +225,63 @@ docker exec -it barbershop_postgres psql -U barbershop_user -d barbershop_db \
   -c "SELECT id, booking_date, booking_time, status FROM bookings WHERE status='pending';"
 ```
 
+## Security
+
+### Password Requirements
+**Enforced since 2025-11-17:**
+- Minimum 8 characters
+- At least 1 uppercase letter (A-Z)
+- At least 1 lowercase letter (a-z)
+- At least 1 number (0-9)
+- At least 1 special character (!@#$%^&*...)
+
+Validation applied to:
+- User registration (`/api/auth/register`)
+- Password reset (`/api/auth/reset-password/:token`)
+- Password change (`/api/users/change-password`)
+
+### Input Validation
+- Email format validation (RFC 5322 compliant)
+- Phone number validation (10-15 digits)
+- Name validation (2-50 chars, letters/spaces/hyphens only)
+- All text inputs sanitized (trimmed, length-limited)
+
+### Security Features
+- ✅ SQL injection prevention (parameterized queries)
+- ✅ XSS protection (React auto-escaping)
+- ✅ Password hashing (bcrypt, 10 salt rounds)
+- ✅ JWT access + refresh tokens
+- ✅ Rate limiting (API, auth, password reset)
+- ✅ CORS restrictions (specific origins only)
+- ✅ Request body size limits (10kb)
+- ✅ Security headers (Helmet.js)
+- ✅ Role-based access control
+
+### Security Maintenance
+See `SECURITY-AUDIT.md` and `SECURITY-MAINTENANCE.md` for:
+- Full security audit results
+- Refresh token cleanup procedures
+- Production deployment checklist
+- Security monitoring queries
+- Emergency procedures
+
+**Run token cleanup:**
+```bash
+cd backend
+node src/utils/cleanupRefreshTokens.js
+```
+
 ## Important Files
 
 - `SETUP.md` - Quick start guide for local development
 - `DEPLOYMENT.md` - Production deployment to VPS with Docker
 - `README.md` - Feature overview and tech stack
+- `SECURITY-AUDIT.md` - Security audit report (2025-11-17)
+- `SECURITY-MAINTENANCE.md` - Security operations guide
 - `docker-compose.yml` - Multi-container orchestration
 - `backend/src/config/migrate.js` - Database schema and seed data
+- `backend/src/utils/validation.js` - Input validation utilities
+- `backend/src/utils/cleanupRefreshTokens.js` - Token cleanup script
 - `src/context/AuthContext.js` - Authentication state management
 - `backend/src/middleware/auth.js` - JWT verification logic
 
