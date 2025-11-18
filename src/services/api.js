@@ -75,6 +75,7 @@ export const bookingAPI = {
   getAllBarbers: () => api.get('/bookings/barbers'),
   getAvailableBarbers: (date, time) => api.get('/bookings/available-barbers', { params: { date, time } }),
   getBarberServices: (barberId) => api.get(`/bookings/barber-services/${barberId}`),
+  previewAssignedBarber: (date, time) => api.get('/bookings/preview-barber', { params: { date, time } }),
 };
 
 export default api;

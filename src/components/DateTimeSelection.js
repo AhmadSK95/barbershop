@@ -33,7 +33,11 @@ function DateTimeSelection({ selectedDate, selectedTime, selectedBarber, selecte
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentYear, currentMonth, day);
-      const dateString = date.toISOString().split('T')[0];
+      // Format date string without timezone conversion
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(date.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${dayStr}`;
       const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
       days.push({ day, dateString, isPast });
     }
@@ -97,7 +101,9 @@ function DateTimeSelection({ selectedDate, selectedTime, selectedBarber, selecte
               }
 
               const isSelected = selectedDate === dayObj.dateString;
-              const isToday = dayObj.dateString === today.toISOString().split('T')[0];
+              // Compare with today using local date
+              const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+              const isToday = dayObj.dateString === todayString;
 
               return (
                 <div

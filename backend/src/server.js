@@ -22,28 +22,42 @@ app.use(cors({
       'http://localhost',
       'http://localhost:80',
       'http://localhost:3000',
+      'http://localhost:3001', // Allow common dev ports
       process.env.FRONTEND_URL
     ].filter(Boolean);
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Check if origin matches allowed origins or starts with localhost
-    // Also allow any origin from the same host as FRONTEND_URL (for production)
-    const frontendHost = process.env.FRONTEND_URL ? new URL(process.env.FRONTEND_URL).hostname : null;
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || 
-        origin.startsWith('http://localhost') ||
-        (frontendHost && origin.includes(frontendHost))) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Check if origin matches allowed origins
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
     }
+    
+    // In development, allow localhost with specific ports only (3000-3010)
+    if (process.env.NODE_ENV !== 'production') {
+      const localhostMatch = origin.match(/^http:\/\/localhost:(\d+)$/);
+      if (localhostMatch) {
+        const port = parseInt(localhostMatch[1]);
+        if (port >= 3000 && port <= 3010) {
+          return callback(null, true);
+        }
+      }
+    }
+    
+    // For production, also allow any origin from the same host as FRONTEND_URL
+    const frontendHost = process.env.FRONTEND_URL ? new URL(process.env.FRONTEND_URL).hostname : null;
+    if (frontendHost && origin.includes(frontendHost)) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Request body size limits (prevent DoS)
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(morgan('dev')); // Logging
 
 // Apply rate limiting to all API routes

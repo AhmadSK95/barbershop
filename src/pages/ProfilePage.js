@@ -91,7 +91,19 @@ function ProfilePage() {
 
   const formatDate = (dateString) => {
     try {
-      return format(new Date(dateString), 'MMM dd, yyyy');
+      // Handle full ISO timestamps (2025-11-25T00:00:00.000Z) or date strings (2025-11-25)
+      if (dateString.includes('T')) {
+        // Extract just the date portion from timestamp
+        const datePart = dateString.split('T')[0];
+        const [year, month, day] = datePart.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return format(date, 'MMM dd, yyyy');
+      } else {
+        // Parse date string as local date to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return format(date, 'MMM dd, yyyy');
+      }
     } catch (err) {
       return dateString;
     }

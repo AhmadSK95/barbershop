@@ -28,6 +28,7 @@ const createBooking = async (req, res) => {
       const availableBarbers = await client.query(
         `SELECT b.id FROM barbers b
          WHERE b.is_available = true
+         AND b.user_id IS NOT NULL
          AND NOT EXISTS (
            SELECT 1 FROM bookings bk
            WHERE bk.barber_id = b.id
@@ -103,15 +104,18 @@ const createBooking = async (req, res) => {
 
     await client.query('COMMIT');
 
+    // Get assigned barber details
+    const barberResult = await client.query(
+      'SELECT b.id, u.first_name, u.last_name, b.specialty FROM barbers b JOIN users u ON b.user_id = u.id WHERE b.id = $1',
+      [barberId]
+    );
+    const assignedBarber = barberResult.rows[0];
+    const barberName = assignedBarber
+      ? `${assignedBarber.first_name} ${assignedBarber.last_name}`
+      : 'Any Available';
+
     // Send confirmation email and SMS
     try {
-      const barberResult = await client.query(
-        'SELECT u.first_name, u.last_name FROM barbers b JOIN users u ON b.user_id = u.id WHERE b.id = $1',
-        [barberId]
-      );
-      const barberName = barberResult.rows.length > 0 
-        ? `${barberResult.rows[0].first_name} ${barberResult.rows[0].last_name}`
-        : 'Any Available';
       
       console.log(`👨‍💼 Barber for email - ID: ${barberId}, Name: ${barberName}`);
 
@@ -139,7 +143,14 @@ const createBooking = async (req, res) => {
       success: true,
       message: 'Booking created successfully',
       data: {
-        bookingId
+        bookingId,
+        assignedBarber: assignedBarber ? {
+          id: assignedBarber.id,
+          firstName: assignedBarber.first_name,
+          lastName: assignedBarber.last_name,
+          name: `${assignedBarber.first_name} ${assignedBarber.last_name}`,
+          specialty: assignedBarber.specialty
+        } : null
       }
     });
   } catch (error) {
@@ -510,6 +521,69 @@ const getAvailableSlots = async (req, res) => {
   }
 };
 
+// @desc    Preview assigned barber for Any Available option
+// @route   GET /api/bookings/preview-barber
+// @access  Public
+const previewAssignedBarber = async (req, res) => {
+  try {
+    const { date, time } = req.query;
+
+    if (!date || !time) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide date and time'
+      });
+    }
+
+    // Get a random available barber (same logic as booking creation)
+    const result = await pool.query(
+      `SELECT b.id, u.first_name, u.last_name, b.specialty, b.rating
+       FROM barbers b
+       JOIN users u ON b.user_id = u.id
+       WHERE b.is_available = true
+       AND b.user_id IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM bookings bk
+         WHERE bk.barber_id = b.id
+         AND bk.booking_date = $1
+         AND bk.booking_time = $2
+         AND bk.status != 'cancelled'
+       )
+       ORDER BY RANDOM()
+       LIMIT 1`,
+      [date, time]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No barbers available for the selected time slot'
+      });
+    }
+
+    const barber = result.rows[0];
+    res.json({
+      success: true,
+      data: {
+        barber: {
+          id: barber.id,
+          firstName: barber.first_name,
+          lastName: barber.last_name,
+          name: `${barber.first_name} ${barber.last_name}`,
+          specialty: barber.specialty,
+          rating: barber.rating
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Preview barber error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error previewing barber assignment'
+    });
+  }
+};
+
 module.exports = {
   createBooking,
   getMyBookings,
@@ -519,5 +593,6 @@ module.exports = {
   getAvailableSlots,
   getAvailableBarbers,
   getAllBarbers,
-  getBarberServices
+  getBarberServices,
+  previewAssignedBarber
 };

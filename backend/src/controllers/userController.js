@@ -1,5 +1,6 @@
 const pool = require('../config/database');
 const { hashPassword } = require('../utils/auth');
+const { validatePassword } = require('../utils/validation');
 
 // @desc    Get all users (Admin)
 // @route   GET /api/users
@@ -190,6 +191,15 @@ const changePassword = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Please provide current and new password'
+      });
+    }
+
+    // Validate new password strength
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      return res.status(400).json({
+        success: false,
+        message: passwordError
       });
     }
 

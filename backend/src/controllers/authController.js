@@ -8,6 +8,13 @@ const {
   generateRandomToken,
   hashToken
 } = require('../utils/auth');
+const {
+  validatePassword,
+  validateEmail,
+  validatePhone,
+  validateName,
+  sanitizeString
+} = require('../utils/validation');
 // Use AWS SES for email sending
 const {
   sendVerificationEmail,
@@ -21,7 +28,7 @@ const {
 const register = async (req, res) => {
   const client = await pool.connect();
   try {
-    const { email, password, firstName, lastName, phone } = req.body;
+    let { email, password, firstName, lastName, phone } = req.body;
 
     // Validate input
     if (!email || !password || !firstName || !lastName) {
@@ -30,6 +37,58 @@ const register = async (req, res) => {
         message: 'Please provide all required fields'
       });
     }
+
+    // Validate email format
+    const emailError = validateEmail(email);
+    if (emailError) {
+      return res.status(400).json({
+        success: false,
+        message: emailError
+      });
+    }
+
+    // Validate password strength
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return res.status(400).json({
+        success: false,
+        message: passwordError
+      });
+    }
+
+    // Validate names
+    const firstNameError = validateName(firstName, 'First name');
+    if (firstNameError) {
+      return res.status(400).json({
+        success: false,
+        message: firstNameError
+      });
+    }
+
+    const lastNameError = validateName(lastName, 'Last name');
+    if (lastNameError) {
+      return res.status(400).json({
+        success: false,
+        message: lastNameError
+      });
+    }
+
+    // Validate phone if provided
+    if (phone) {
+      const phoneError = validatePhone(phone);
+      if (phoneError) {
+        return res.status(400).json({
+          success: false,
+          message: phoneError
+        });
+      }
+    }
+
+    // Sanitize inputs
+    email = sanitizeString(email, 255).toLowerCase();
+    firstName = sanitizeString(firstName, 50);
+    lastName = sanitizeString(lastName, 50);
+    if (phone) phone = sanitizeString(phone, 20);
 
     // Check if user exists
     const userExists = await client.query(
@@ -316,6 +375,15 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Please provide new password'
+      });
+    }
+
+    // Validate password strength
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return res.status(400).json({
+        success: false,
+        message: passwordError
       });
     }
 
