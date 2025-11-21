@@ -46,6 +46,134 @@
   text-shadow: var(--shadow-sm);
 }
 
+/* Profile Tabs */
+.profile-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 3px solid var(--color-gold-dark);
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-gold-pale);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -3px;
+  font-family: var(--font-display);
+}
+
+.tab-btn:hover {
+  color: var(--color-gold-light);
+  background: rgba(212, 165, 116, 0.1);
+}
+
+.tab-btn.active {
+  color: var(--color-gold-light);
+  border-bottom-color: var(--color-gold-medium);
+  background: rgba(212, 165, 116, 0.15);
+}
+
+/* Profile and Password Forms */
+.profile-form-section,
+.password-form-section {
+  background: var(--gradient-brown);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  border: 3px solid var(--color-gold-dark);
+}
+
+.profile-form-section h2,
+.password-form-section h2 {
+  margin: 0 0 10px 0;
+  color: var(--color-gold-light);
+  font-size: 24px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  text-shadow: var(--shadow-sm);
+}
+
+.password-requirements {
+  color: var(--color-gold-pale);
+  font-size: 14px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(212, 165, 116, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-gold-medium);
+}
+
+.profile-form,
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 500px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: var(--color-gold-light);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  background: rgba(58, 36, 23, 0.8);
+  border: 2px solid var(--color-gold-dark);
+  border-radius: 8px;
+  color: var(--color-gold-pale);
+  font-size: 16px;
+  font-family: var(--font-body);
+  transition: all var(--transition-base);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-gold-medium);
+  background: rgba(58, 36, 23, 1);
+  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+}
+
+.form-group input::placeholder {
+  color: rgba(212, 165, 116, 0.4);
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  border: 2px solid;
+}
+
+.message.success {
+  background: rgba(46, 204, 113, 0.15);
+  border-color: #2ecc71;
+  color: #2ecc71;
+}
+
+.message.error {
+  background: rgba(231, 76, 60, 0.15);
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
 .profile-email,
 .profile-phone {
   margin: 5px 0;

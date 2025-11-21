@@ -1,23 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { bookingAPI } from '../services/api';
+import { bookingAPI, userAPI } from '../services/api';
 import { format } from 'date-fns';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { services } from '../data';
 import './ProfilePage.css';
 
 function ProfilePage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('orders'); // 'profile', 'password', 'orders'
+  
+  // Profile form state
+  const [profileForm, setProfileForm] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    phone: user?.phone || ''
+  });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+  
+  // Password form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    fetchBookings();
-  }, [location]); // Refresh when navigation changes
+    if (activeTab === 'orders') {
+      fetchBookings();
+    }
+  }, [location, activeTab]); // Refresh when navigation changes or tab switches to orders
+  
+  useEffect(() => {
+    // Update profile form when user changes
+    if (user) {
+      setProfileForm({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || ''
+      });
+    }
+  }, [user]);
 
   const fetchBookings = async (isManualRefresh = false) => {
     try {
@@ -150,6 +182,76 @@ function ProfilePage() {
       navigate('/booking');
     }
   };
+  
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setProfileLoading(true);
+    setProfileMessage({ type: '', text: '' });
+    
+    try {
+      const response = await userAPI.updateProfile(profileForm);
+      
+      if (response.data.success) {
+        // Update user in context
+        const updatedUser = response.data.data.user;
+        setUser({
+          ...user,
+          firstName: updatedUser.first_name,
+          lastName: updatedUser.last_name,
+          phone: updatedUser.phone
+        });
+        
+        setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
+        setTimeout(() => setProfileMessage({ type: '', text: '' }), 3000);
+      }
+    } catch (err) {
+      console.error('Profile update error:', err);
+      setProfileMessage({ 
+        type: 'error', 
+        text: err.response?.data?.message || 'Failed to update profile. Please try again.' 
+      });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+  
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPasswordLoading(true);
+    setPasswordMessage({ type: '', text: '' });
+    
+    // Validate passwords match
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'New passwords do not match' });
+      setPasswordLoading(false);
+      return;
+    }
+    
+    try {
+      const response = await userAPI.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      
+      if (response.data.success) {
+        setPasswordMessage({ type: 'success', text: 'Password changed successfully!' });
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        setTimeout(() => setPasswordMessage({ type: '', text: '' }), 3000);
+      }
+    } catch (err) {
+      console.error('Password change error:', err);
+      setPasswordMessage({ 
+        type: 'error', 
+        text: err.response?.data?.message || 'Failed to change password. Please try again.' 
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   return (
     <div className="profile-page">
@@ -161,10 +263,153 @@ function ProfilePage() {
           <div className="profile-info">
             <h1>{user?.firstName} {user?.lastName}</h1>
             <p className="profile-email">{user?.email}</p>
-            <p className="profile-phone">{user?.phone}</p>
+            {user?.phone && <p className="profile-phone">{user?.phone}</p>}
           </div>
         </div>
+        
+        <div className="profile-tabs">
+          <button 
+            className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
+            onClick={() => setActiveTab('profile')}
+          >
+            👤 Profile
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'password' ? 'active' : ''}`}
+            onClick={() => setActiveTab('password')}
+          >
+            🔒 Password
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            📋 Orders
+          </button>
+        </div>
 
+        {activeTab === 'profile' && (
+          <div className="profile-form-section">
+            <h2>Update Profile</h2>
+            
+            {profileMessage.text && (
+              <div className={`message ${profileMessage.type}`}>
+                {profileMessage.text}
+              </div>
+            )}
+            
+            <form onSubmit={handleProfileUpdate} className="profile-form">
+              <div className="form-group">
+                <label htmlFor="firstName">First Name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  value={profileForm.firstName}
+                  onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                  required
+                  minLength={2}
+                  maxLength={50}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="lastName">Last Name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  value={profileForm.lastName}
+                  onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                  required
+                  minLength={2}
+                  maxLength={50}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={profileForm.phone}
+                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                  placeholder="(123) 456-7890"
+                  minLength={10}
+                  maxLength={15}
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn btn-primary"
+                disabled={profileLoading}
+              >
+                {profileLoading ? 'Updating...' : 'Update Profile'}
+              </button>
+            </form>
+          </div>
+        )}
+        
+        {activeTab === 'password' && (
+          <div className="password-form-section">
+            <h2>Change Password</h2>
+            <p className="password-requirements">
+              Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+            </p>
+            
+            {passwordMessage.text && (
+              <div className={`message ${passwordMessage.type}`}>
+                {passwordMessage.text}
+              </div>
+            )}
+            
+            <form onSubmit={handlePasswordChange} className="password-form">
+              <div className="form-group">
+                <label htmlFor="currentPassword">Current Password</label>
+                <input
+                  type="password"
+                  id="currentPassword"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="newPassword">New Password</label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  required
+                  minLength={8}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm New Password</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  required
+                  minLength={8}
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn btn-primary"
+                disabled={passwordLoading}
+              >
+                {passwordLoading ? 'Changing Password...' : 'Change Password'}
+              </button>
+            </form>
+          </div>
+        )}
+        
+        {activeTab === 'orders' && (
         <div className="order-history">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2>Order History</h2>
@@ -253,6 +498,7 @@ function ProfilePage() {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );

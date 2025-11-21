@@ -90,9 +90,14 @@ function LoginPage() {
                 required
                 placeholder="Enter your password"
               />
+              <div style={{ textAlign: 'right', marginTop: '5px' }}>
+                <Link to="/forgot-password" className="forgot-password-link">
+                  Forgot Password?
+                </Link>
+              </div>
             </div>
 
-            <button 
+            <button
               type="submit" 
               className="auth-button"
               disabled={loading}
