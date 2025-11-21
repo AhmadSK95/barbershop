@@ -32,8 +32,8 @@ function HomePage() {
 
       <section className="info-section">
         <div className="info-card">
-          <div className="info-icon clock-character">
-            🕐
+          <div className="info-icon">
+            <img src="/images/hours-icon.png" alt="Hours" />
           </div>
           <h3>Hours</h3>
           <p>Monday–Friday: 10am–7pm</p>
@@ -41,9 +41,8 @@ function HomePage() {
         </div>
 
         <div className="info-card">
-          <div className="info-icon map-character">
-            <div className="map-icon">🗺️</div>
-            <div className="map-pin">📍</div>
+          <div className="info-icon">
+            <img src="/images/location-icon.png" alt="Our Location" />
           </div>
           <h3>Our Location</h3>
           <p>332 Barrow St</p>
@@ -52,8 +51,8 @@ function HomePage() {
         </div>
 
         <div className="info-card">
-          <div className="info-icon barber-character">
-            🧔
+          <div className="info-icon">
+            <img src="/images/services-icon.png" alt="Services" />
           </div>
           <h3>Services</h3>
           <p>Professional Cuts</p>
