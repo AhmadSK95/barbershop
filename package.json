@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@tensorflow-models/face-detection": "^1.0.2",
+    "@tensorflow-models/face-landmarks-detection": "^1.0.5",
+    "@tensorflow/tfjs": "^4.10.0",
     "axios": "^1.6.2",
     "date-fns": "^2.30.0",
+    "html2canvas": "^1.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.9.5",
     "react-scripts": "5.0.1",
-    "recharts": "^3.3.0",
-    "@tensorflow/tfjs": "^4.10.0",
-    "@tensorflow-models/face-landmarks-detection": "^1.0.5",
-    "@tensorflow-models/face-detection": "^1.0.2",
-    "html2canvas": "^1.4.1",
-    "react-webcam": "^7.1.1"
+    "react-webcam": "^7.1.1",
+    "recharts": "^3.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -39,5 +39,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1"
   }
 }

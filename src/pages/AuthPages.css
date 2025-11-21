@@ -163,6 +163,19 @@
   text-decoration: underline;
 }
 
+.forgot-password-link {
+  color: var(--color-gold-medium);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  font-weight: 600;
+}
+
+.forgot-password-link:hover {
+  color: var(--color-gold-light);
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .auth-card {
     padding: 2rem;

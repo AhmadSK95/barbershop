@@ -15,12 +15,12 @@ const {
   validateName,
   sanitizeString
 } = require('../utils/validation');
-// Use AWS SES for email sending
+// Use configured email service (AWS SES or SMTP/Gmail)
 const {
   sendVerificationEmail,
   sendPasswordResetEmail,
   verifyEmailIdentity
-} = require('../utils/sesEmail');
+} = require('../utils/emailService');
 
 // @desc    Register user
 // @route   POST /api/auth/register

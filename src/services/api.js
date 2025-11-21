@@ -65,6 +65,12 @@ export const authAPI = {
   resetPassword: (token, password) => api.post(`/auth/reset-password/${token}`, { password }),
 };
 
+// User API calls
+export const userAPI = {
+  updateProfile: (profileData) => api.put('/users/profile', profileData),
+  changePassword: (passwordData) => api.put('/users/change-password', passwordData),
+};
+
 // Booking API calls
 export const bookingAPI = {
   create: (bookingData) => api.post('/bookings', bookingData),
