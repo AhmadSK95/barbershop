@@ -87,7 +87,17 @@ function AdminPage() {
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
-      await fetch(`${API_URL}/bookings/${bookingId}/status`, {
+      // Optimistically update the status in state immediately
+      setBookings(prevBookings => 
+        prevBookings.map(booking => 
+          booking.id === bookingId 
+            ? { ...booking, status: newStatus }
+            : booking
+        )
+      );
+
+      // Send update to server
+      const response = await fetch(`${API_URL}/bookings/${bookingId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -96,11 +106,17 @@ function AdminPage() {
         body: JSON.stringify({ status: newStatus })
       });
       
-      alert('✅ Booking status updated successfully');
-      fetchAllBookings();
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+      
+      // Show success message without blocking alert
+      console.log('✅ Booking status updated successfully');
     } catch (err) {
       console.error('Error updating status:', err);
       alert('❌ Failed to update status');
+      // Revert the optimistic update on error
+      fetchAllBookings();
     }
   };
 
@@ -155,8 +171,15 @@ function AdminPage() {
   });
 
   // Calculate revenue statistics
+  // Normalize date for comparison (extract YYYY-MM-DD portion)
+  const normalizeDate = (dateString) => {
+    if (!dateString) return '';
+    // Handle both "2025-11-20" and "2025-11-20T00:00:00.000Z" formats
+    return dateString.split('T')[0];
+  };
+  
   const today = new Date().toISOString().split('T')[0];
-  const todayBookings = bookings.filter(b => b.date === today);
+  const todayBookings = bookings.filter(b => normalizeDate(b.date) === today);
   const completedBookings = bookings.filter(b => b.status === 'completed');
   
   const revenue = {

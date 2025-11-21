@@ -103,8 +103,9 @@ ENDSSH
 # Step 6: Test backend health endpoint
 echo -e "\n${YELLOW}[6/6] Testing backend health...${NC}"
 HEALTH_CHECK=$(ssh -i "$AWS_KEY" "$AWS_USER@$AWS_HOST" "curl -s http://localhost:5001/health || echo 'FAILED'")
-if [[ $HEALTH_CHECK == *"healthy"* ]]; then
+if [[ $HEALTH_CHECK == *'"status":"ok"'* ]]; then
     echo -e "${GREEN}✓ Backend is healthy${NC}"
+    echo "$HEALTH_CHECK"
 else
     echo -e "${RED}✗ Backend health check failed${NC}"
     echo "$HEALTH_CHECK"

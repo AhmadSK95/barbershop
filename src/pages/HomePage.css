@@ -171,22 +171,36 @@
   font-size: 3.5rem;
   margin-bottom: 1.5rem;
   display: inline-block;
-  padding: 1rem;
-  background: var(--gradient-gold);
-  border-radius: 50%;
-  width: 120px;
-  height: 120px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  width: 150px;
+  height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-md), var(--shadow-gold);
   transition: all var(--transition-base);
   position: relative;
 }
 
+.info-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 4px 8px rgba(212, 165, 116, 0.5)) brightness(1.15);
+  transition: all var(--transition-base);
+}
+
 .info-card:hover .info-icon {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: var(--shadow-lg), 0 0 30px rgba(212, 165, 116, 0.5);
+  transform: scale(1.1);
+}
+
+.info-card:hover .info-icon img {
+  filter: drop-shadow(0 6px 16px rgba(212, 165, 116, 0.7)) 
+          drop-shadow(0 0 30px rgba(212, 165, 116, 0.6)) 
+          brightness(1.4);
+  transform: scale(1.05);
 }
 
 .info-card h3 {
@@ -394,76 +408,3 @@
   }
 }
 
-/* ===================================
-   ANIMATED CHARACTER ICONS
-   =================================== */
-
-/* Digital Clock Character */
-.clock-character {
-  font-size: 4rem;
-  animation: clockPulse 2s ease-in-out infinite;
-}
-
-@keyframes clockPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.9; }
-}
-
-/* Map GPS Character */
-.map-character {
-  background: transparent !important;
-  overflow: visible;
-}
-
-.map-icon {
-  font-size: 3.5rem;
-  animation: mapPulse 2s ease-in-out infinite;
-}
-
-.map-pin {
-  font-size: 2rem;
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: pinDrop 2s ease-in-out infinite;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-@keyframes mapPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-@keyframes pinDrop {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-8px); }
-}
-
-/* Barber Character - Bearded Man */
-.barber-character {
-  font-size: 4rem;
-  animation: barberNod 2s ease-in-out infinite;
-}
-
-@keyframes barberNod {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-5px) scale(1.05); }
-}
-
-/* Hover effects for animated characters */
-.info-card:hover .clock-character {
-  animation: clockPulse 1s ease-in-out infinite;
-}
-
-.info-card:hover .map-icon {
-  animation: mapPulse 1s ease-in-out infinite;
-}
-
-.info-card:hover .map-pin {
-  animation: pinDrop 1s ease-in-out infinite;
-}
-
-.info-card:hover .barber-character {
-  animation: barberNod 1s ease-in-out infinite;
-}
