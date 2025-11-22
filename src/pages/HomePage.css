@@ -351,6 +351,31 @@
   font-family: 'Crimson Text', serif;
   text-transform: uppercase;
   letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  opacity: 0;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+
+/* Ensure keyframes are available if not global */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .booking-button:hover {
@@ -405,6 +430,141 @@
 
   .promo-buttons .cta-button {
     width: 100%;
+  }
+}
+
+/* Footer */
+.home-footer {
+  background: linear-gradient(135deg, #1a0f0a 0%, #2d1f18 100%);
+  color: #c8b698;
+  padding: 3rem 2rem 1rem;
+  border-top: 3px solid var(--color-gold-dark);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.footer-section h3 {
+  color: #d4a574;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-family: 'Playfair Display', serif;
+}
+
+.footer-section h4 {
+  color: #d4a574;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.footer-section p {
+  margin: 0.5rem 0;
+  color: #c8b698;
+  line-height: 1.6;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin: 0.5rem 0;
+}
+
+.footer-section ul li button {
+  background: none;
+  border: none;
+  color: #c8b698;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: left;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.footer-section ul li button:hover {
+  color: #d4a574;
+}
+
+/* Hiring Section in Footer */
+.hiring-section {
+  text-align: center;
+  background: rgba(212, 165, 116, 0.1);
+  border: 2px solid rgba(212, 165, 116, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.hiring-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.hiring-section p {
+  margin: 0.75rem 0;
+  color: #d4a574;
+  font-size: 1rem;
+}
+
+.hiring-button {
+  background: linear-gradient(135deg, #D4A574 0%, #B8956A 100%);
+  color: #1a0f0a;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #8B6F47;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hiring-button:hover {
+  background: linear-gradient(135deg, #B8956A 0%, #D4A574 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212, 165, 116, 0.5);
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 2rem;
+}
+
+.footer-bottom p {
+  color: #8B6F47;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .hiring-section {
+    order: -1;
   }
 }
 
