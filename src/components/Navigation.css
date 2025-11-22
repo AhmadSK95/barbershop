@@ -19,6 +19,9 @@
 }
 
 .nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.5rem;
   font-weight: 700;
   font-family: 'Playfair Display', serif;
@@ -29,6 +32,11 @@
   text-decoration: none;
   transition: all 0.3s ease;
   letter-spacing: 1px;
+}
+
+.nav-logo svg {
+  stroke: #d4a574; /* Fallback color if text-fill-color affects svg */
+  -webkit-text-fill-color: initial; /* Reset for SVG */
 }
 
 .nav-logo:hover {
@@ -42,6 +50,9 @@
 }
 
 .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: var(--color-gold-light);
   text-decoration: none;
   font-size: 1.05rem;
@@ -109,6 +120,9 @@
 }
 
 .nav-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   background: transparent;
   border: 2px solid var(--color-gold-dark);
   color: var(--color-gold-light);

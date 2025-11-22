@@ -10,6 +10,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const userRoutes = require('./routes/userRoutes');
 const configRoutes = require('./routes/configRoutes');
 const smsRoutes = require('./routes/smsRoutes');
+const careersRoutes = require('./routes/careersRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -74,6 +75,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/sms', smsRoutes);
+app.use('/api/careers', careersRoutes);
 
 // 404 handler
 app.use((req, res) => {

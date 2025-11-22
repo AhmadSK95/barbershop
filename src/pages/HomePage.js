@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Clock, MapPin, Scissors, Calendar } from 'lucide-react';
 import './HomePage.css';
 
 function HomePage() {
@@ -7,7 +8,7 @@ function HomePage() {
 
   return (
     <div className="home-page">
-      <section className="hero-section">
+      <section className="hero-section fade-in-up">
         <div className="hero-content">
           <h1 className="hero-title">Balkan Barber</h1>
           <p className="hero-subtitle">Downtown Jersey City Barber</p>
@@ -31,18 +32,18 @@ function HomePage() {
       </section>
 
       <section className="info-section">
-        <div className="info-card">
+        <div className="info-card fade-in-up delay-100">
           <div className="info-icon">
-            <img src="/images/hours-icon.png" alt="Hours" />
+            <Clock size={64} color="#d4a574" strokeWidth={1.5} />
           </div>
           <h3>Hours</h3>
           <p>Monday–Friday: 10am–7pm</p>
           <p>Saturday-Sunday: 9am-4pm</p>
         </div>
 
-        <div className="info-card">
+        <div className="info-card fade-in-up delay-200">
           <div className="info-icon">
-            <img src="/images/location-icon.png" alt="Our Location" />
+            <MapPin size={64} color="#d4a574" strokeWidth={1.5} />
           </div>
           <h3>Our Location</h3>
           <p>332 Barrow St</p>
@@ -50,9 +51,9 @@ function HomePage() {
           <p>Call: (201) 433-2870</p>
         </div>
 
-        <div className="info-card">
+        <div className="info-card fade-in-up delay-300">
           <div className="info-icon">
-            <img src="/images/services-icon.png" alt="Services" />
+            <Scissors size={64} color="#d4a574" strokeWidth={1.5} />
           </div>
           <h3>Services</h3>
           <p>Professional Cuts</p>
@@ -61,12 +62,50 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="quick-booking">
+      <section className="quick-booking fade-in-up delay-300">
         <h2>Ready for a Fresh Look?</h2>
         <button className="booking-button" onClick={() => navigate('/booking')}>
+          <Calendar className="btn-icon" size={24} style={{marginRight: '10px'}}/>
           Book Now
         </button>
       </section>
+
+      <footer className="home-footer">
+        <div className="footer-content">
+          <div className="footer-section">
+            <h3>Balkan Barbers</h3>
+            <p>Downtown Jersey City's Premier Barber Shop</p>
+          </div>
+          
+          <div className="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><button onClick={() => navigate('/')}>Home</button></li>
+              <li><button onClick={() => navigate('/about')}>About</button></li>
+              <li><button onClick={() => navigate('/booking')}>Book Appointment</button></li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Contact</h4>
+            <p>332 Barrow St</p>
+            <p>Jersey City, NJ 07302</p>
+            <p>(201) 433-2870</p>
+          </div>
+
+          <div className="footer-section hiring-section">
+            <div className="hiring-badge">✂️ We're Hiring!</div>
+            <p>Join our talented team</p>
+            <button className="hiring-button" onClick={() => navigate('/careers')}>
+              View Open Positions
+            </button>
+          </div>
+        </div>
+        
+        <div className="footer-bottom">
+          <p>&copy; {new Date().getFullYear()} Balkan Barbers. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
