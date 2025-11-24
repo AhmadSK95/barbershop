@@ -235,7 +235,11 @@ function RescheduleModal({ booking, onClose, onSuccess }) {
             <div className="new-appointment-summary">
               <h4>New Appointment:</h4>
               <p>
-                {format(new Date(selectedDate), 'EEEE, MMMM d, yyyy')} at {selectedTime}
+                {(() => {
+                  const [year, month, day] = selectedDate.split('-').map(Number);
+                  const date = new Date(year, month - 1, day);
+                  return format(date, 'EEEE, MMMM d, yyyy');
+                })()} at {selectedTime}
               </p>
             </div>
           )}
