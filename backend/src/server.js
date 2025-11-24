@@ -24,6 +24,7 @@ const smsRoutes = require('./routes/smsRoutes');
 const careersRoutes = require('./routes/careersRoutes');
 const barberRoutes = require('./routes/barberRoutes');
 const adminAnalyticsRoutes = require('./routes/adminAnalyticsRoutes');
+const ratingRoutes = require('./routes/ratingRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -91,6 +92,7 @@ app.use('/api/sms', smsRoutes);
 app.use('/api/careers', careersRoutes);
 app.use('/api/barbers', barberRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 // 404 handler
 app.use((req, res) => {

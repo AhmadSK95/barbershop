@@ -618,6 +618,26 @@
   box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2);
 }
 
+/* Rating Display in Booking Cards */
+.detail-row.rating {
+  background: rgba(212, 165, 116, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid var(--color-gold-dark);
+  margin: 10px 0;
+}
+
+.rating-stars-display {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.rating-number {
+  color: var(--color-gold-medium);
+  font-weight: 700;
+  font-size: 16px;
+}
+
 .reorder-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);

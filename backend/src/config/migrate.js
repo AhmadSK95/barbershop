@@ -164,6 +164,19 @@ ALTER TABLE bookings ADD COLUMN IF NOT EXISTS no_show BOOLEAN DEFAULT false;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_24h_sent BOOLEAN DEFAULT false;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_2h_sent BOOLEAN DEFAULT false;
 
+-- Ratings table
+CREATE TABLE IF NOT EXISTS ratings (
+  id SERIAL PRIMARY KEY,
+  booking_id INTEGER REFERENCES bookings(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  barber_id INTEGER REFERENCES barbers(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(booking_id)
+);
+
 -- Create additional indexes
 CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(setting_key);
 CREATE INDEX IF NOT EXISTS idx_barber_availability_barber ON barber_availability(barber_id);
@@ -172,6 +185,8 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_blackout_dates_date ON blackout_dates(date);
+CREATE INDEX IF NOT EXISTS idx_ratings_booking ON ratings(booking_id);
+CREATE INDEX IF NOT EXISTS idx_ratings_barber ON ratings(barber_id);
 `;
 
 const seedData = async () => {
