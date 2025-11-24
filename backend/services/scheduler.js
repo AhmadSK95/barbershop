@@ -1,247 +1,229 @@
 const cron = require('node-cron');
 const pool = require('../src/config/database');
-const { sendBookingReminderEmail } = require('./email');
-const { sendBookingReminderSMS } = require('./sms');
+const { sendBookingReminderEmail } = require('../src/utils/emailService');
 
-// Get settings from database
-const getSettings = async () => {
-  try {
-    const result = await pool.query(`
-      SELECT setting_key, setting_value
-      FROM settings
-      WHERE setting_key IN (
-        'reminders_enabled',
-        'reminder_24h_enabled',
-        'reminder_2h_enabled',
-        'reminder_email_enabled',
-        'reminder_sms_enabled'
-      )
-    `);
-    
-    const settings = {};
-    result.rows.forEach(row => {
-      settings[row.setting_key] = row.setting_value === 'true';
-    });
-    
-    return settings;
-  } catch (error) {
-    console.error('Error fetching reminder settings:', error);
-    // Default to safe settings
-    return {
-      reminders_enabled: true,
-      reminder_24h_enabled: true,
-      reminder_2h_enabled: false,
-      reminder_email_enabled: true,
-      reminder_sms_enabled: false
-    };
-  }
+// Track sent reminders to prevent duplicates
+const sentReminders = new Set();
+
+// Format date for display
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+// Format time for display
+const formatTime = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':');
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
 };
 
 // Send 24-hour reminders
 const send24HourReminders = async () => {
   try {
-    const settings = await getSettings();
+    // Check if 24h reminders are enabled
+    const settingsResult = await pool.query(
+      `SELECT setting_value FROM settings 
+       WHERE setting_key IN ('reminders_enabled', 'reminder_24h_enabled', 'reminder_email_enabled')
+       AND setting_value = 'true'`
+    );
     
-    if (!settings.reminders_enabled || !settings.reminder_24h_enabled) {
+    // If any required setting is disabled, skip
+    if (settingsResult.rows.length < 3) {
+      console.log('⏭️  24h reminders disabled in settings');
       return;
     }
-    
-    // Find bookings 24 hours from now that haven't received reminder
+
+    // Get tomorrow's date
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowDateStr = tomorrow.toISOString().split('T')[0];
-    
-    const bookingsResult = await pool.query(`
+    const tomorrowDate = tomorrow.toISOString().split('T')[0];
+
+    // Query bookings for tomorrow that haven't been sent a 24h reminder
+    const result = await pool.query(`
       SELECT 
         b.id,
         b.booking_date,
         b.booking_time,
-        b.total_price,
         u.email,
         u.first_name,
-        u.last_name,
-        u.phone,
         s.name as service_name,
-        barber_user.first_name as barber_first_name,
-        barber_user.last_name as barber_last_name
+        COALESCE(bu.first_name || ' ' || bu.last_name, 'Any Available') as barber_name
       FROM bookings b
       JOIN users u ON b.user_id = u.id
       LEFT JOIN services s ON b.service_id = s.id
-      LEFT JOIN barbers barber ON b.barber_id = barber.id
-      LEFT JOIN users barber_user ON barber.user_id = barber_user.id
+      LEFT JOIN barbers br ON b.barber_id = br.id
+      LEFT JOIN users bu ON br.user_id = bu.id
       WHERE b.booking_date = $1
         AND b.status IN ('pending', 'confirmed')
-        AND b.reminder_24h_sent = false
+        AND b.reminder_24h_sent IS NOT TRUE
       ORDER BY b.booking_time
-    `, [tomorrowDateStr]);
-    
-    let sentCount = 0;
-    let errorCount = 0;
-    
-    for (const booking of bookingsResult.rows) {
+    `, [tomorrowDate]);
+
+    console.log(`📅 Found ${result.rows.length} bookings for 24h reminders`);
+
+    for (const booking of result.rows) {
+      const reminderKey = `24h-${booking.id}`;
+      
+      // Skip if already sent (in-memory check)
+      if (sentReminders.has(reminderKey)) {
+        continue;
+      }
+
       try {
-        const barberName = booking.barber_first_name 
-          ? `${booking.barber_first_name} ${booking.barber_last_name || ''}`
-          : 'Any Available Barber';
-        
-        const bookingDetails = {
-          customerName: booking.first_name,
-          date: new Date(booking.booking_date).toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }),
-          time: booking.booking_time.substring(0, 5),
-          barberName,
-          services: booking.service_name || 'Service',
-          totalPrice: booking.total_price
-        };
-        
-        // Send email reminder
-        if (settings.reminder_email_enabled && booking.email) {
-          await sendBookingReminderEmail(booking.email, bookingDetails);
-        }
-        
-        // Send SMS reminder
-        if (settings.reminder_sms_enabled && booking.phone) {
-          await sendBookingReminderSMS(booking.phone, bookingDetails);
-        }
-        
-        // Mark reminder as sent
+        await sendBookingReminderEmail(
+          booking.email,
+          booking.first_name,
+          {
+            service: booking.service_name,
+            barber: booking.barber_name,
+            date: formatDate(booking.booking_date),
+            time: formatTime(booking.booking_time)
+          },
+          24
+        );
+
+        // Mark as sent in database
         await pool.query(
-          'UPDATE bookings SET reminder_24h_sent = true WHERE id = $1',
+          'UPDATE bookings SET reminder_24h_sent = TRUE WHERE id = $1',
           [booking.id]
         );
+
+        // Track in memory
+        sentReminders.add(reminderKey);
         
-        sentCount++;
+        console.log(`✅ 24h reminder sent for booking #${booking.id} to ${booking.email}`);
       } catch (error) {
-        console.error(`Error sending 24h reminder for booking ${booking.id}:`, error);
-        errorCount++;
+        console.error(`❌ Failed to send 24h reminder for booking #${booking.id}:`, error.message);
       }
     }
-    
-    if (sentCount > 0 || errorCount > 0) {
-      console.log(`✅ 24-hour reminders: ${sentCount} sent, ${errorCount} errors`);
-    }
   } catch (error) {
-    console.error('Error in 24-hour reminder job:', error);
+    console.error('❌ Error in 24h reminder job:', error);
   }
 };
 
 // Send 2-hour reminders
 const send2HourReminders = async () => {
   try {
-    const settings = await getSettings();
+    // Check if 2h reminders are enabled
+    const settingsResult = await pool.query(
+      `SELECT setting_value FROM settings 
+       WHERE setting_key IN ('reminders_enabled', 'reminder_2h_enabled', 'reminder_email_enabled')
+       AND setting_value = 'true'`
+    );
     
-    if (!settings.reminders_enabled || !settings.reminder_2h_enabled) {
+    // If any required setting is disabled, skip
+    if (settingsResult.rows.length < 3) {
+      console.log('⏭️  2h reminders disabled in settings');
       return;
     }
-    
-    // Find bookings 2 hours from now
+
+    // Get current time + 2 hours window (1.5h to 2.5h from now)
     const now = new Date();
     const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-    const todayDateStr = now.toISOString().split('T')[0];
+    const twoAndHalfHoursLater = new Date(now.getTime() + 2.5 * 60 * 60 * 1000);
     
-    const bookingsResult = await pool.query(`
+    const todayDate = now.toISOString().split('T')[0];
+    const startTime = twoHoursLater.toTimeString().slice(0, 8);
+    const endTime = twoAndHalfHoursLater.toTimeString().slice(0, 8);
+
+    // Query bookings in the next 2-2.5 hours that haven't been sent a 2h reminder
+    const result = await pool.query(`
       SELECT 
         b.id,
         b.booking_date,
         b.booking_time,
-        b.total_price,
         u.email,
         u.first_name,
-        u.last_name,
-        u.phone,
         s.name as service_name,
-        barber_user.first_name as barber_first_name,
-        barber_user.last_name as barber_last_name
+        COALESCE(bu.first_name || ' ' || bu.last_name, 'Any Available') as barber_name
       FROM bookings b
       JOIN users u ON b.user_id = u.id
       LEFT JOIN services s ON b.service_id = s.id
-      LEFT JOIN barbers barber ON b.barber_id = barber.id
-      LEFT JOIN users barber_user ON barber.user_id = barber_user.id
+      LEFT JOIN barbers br ON b.barber_id = br.id
+      LEFT JOIN users bu ON br.user_id = bu.id
       WHERE b.booking_date = $1
+        AND b.booking_time >= $2
+        AND b.booking_time <= $3
         AND b.status IN ('pending', 'confirmed')
-        AND b.reminder_2h_sent = false
-        AND b.booking_time BETWEEN $2 AND $3
-    `, [
-      todayDateStr,
-      twoHoursLater.toTimeString().substring(0, 8),
-      new Date(twoHoursLater.getTime() + 15 * 60 * 1000).toTimeString().substring(0, 8)
-    ]);
-    
-    let sentCount = 0;
-    let errorCount = 0;
-    
-    for (const booking of bookingsResult.rows) {
+        AND b.reminder_2h_sent IS NOT TRUE
+      ORDER BY b.booking_time
+    `, [todayDate, startTime, endTime]);
+
+    console.log(`⏰ Found ${result.rows.length} bookings for 2h reminders`);
+
+    for (const booking of result.rows) {
+      const reminderKey = `2h-${booking.id}`;
+      
+      // Skip if already sent (in-memory check)
+      if (sentReminders.has(reminderKey)) {
+        continue;
+      }
+
       try {
-        const barberName = booking.barber_first_name 
-          ? `${booking.barber_first_name} ${booking.barber_last_name || ''}`
-          : 'Any Available Barber';
-        
-        const bookingDetails = {
-          customerName: booking.first_name,
-          date: 'Today',
-          time: booking.booking_time.substring(0, 5),
-          barberName,
-          services: booking.service_name || 'Service',
-          totalPrice: booking.total_price
-        };
-        
-        // Send email reminder
-        if (settings.reminder_email_enabled && booking.email) {
-          await sendBookingReminderEmail(booking.email, bookingDetails);
-        }
-        
-        // Send SMS reminder
-        if (settings.reminder_sms_enabled && booking.phone) {
-          await sendBookingReminderSMS(booking.phone, bookingDetails);
-        }
-        
-        // Mark reminder as sent
+        await sendBookingReminderEmail(
+          booking.email,
+          booking.first_name,
+          {
+            service: booking.service_name,
+            barber: booking.barber_name,
+            date: formatDate(booking.booking_date),
+            time: formatTime(booking.booking_time)
+          },
+          2
+        );
+
+        // Mark as sent in database
         await pool.query(
-          'UPDATE bookings SET reminder_2h_sent = true WHERE id = $1',
+          'UPDATE bookings SET reminder_2h_sent = TRUE WHERE id = $1',
           [booking.id]
         );
+
+        // Track in memory
+        sentReminders.add(reminderKey);
         
-        sentCount++;
+        console.log(`✅ 2h reminder sent for booking #${booking.id} to ${booking.email}`);
       } catch (error) {
-        console.error(`Error sending 2h reminder for booking ${booking.id}:`, error);
-        errorCount++;
+        console.error(`❌ Failed to send 2h reminder for booking #${booking.id}:`, error.message);
       }
     }
-    
-    if (sentCount > 0 || errorCount > 0) {
-      console.log(`✅ 2-hour reminders: ${sentCount} sent, ${errorCount} errors`);
-    }
   } catch (error) {
-    console.error('Error in 2-hour reminder job:', error);
+    console.error('❌ Error in 2h reminder job:', error);
   }
 };
 
 // Initialize scheduler
-const initializeScheduler = () => {
-  console.log('📅 Initializing reminder scheduler...');
-  
-  // Run 24-hour reminders every hour at :05 minutes
-  cron.schedule('5 * * * *', () => {
-    console.log('🔔 Running 24-hour reminder check...');
+const startReminderScheduler = () => {
+  console.log('🔔 Starting reminder scheduler...');
+
+  // Run 24h reminders every day at 10 AM
+  cron.schedule('0 10 * * *', () => {
+    console.log('⏰ Running 24h reminder job...');
     send24HourReminders();
   });
-  
-  // Run 2-hour reminders every 15 minutes
+
+  // Run 2h reminders every 15 minutes
   cron.schedule('*/15 * * * *', () => {
+    console.log('⏰ Running 2h reminder job...');
     send2HourReminders();
   });
+
+  console.log('✅ Reminder scheduler started');
+  console.log('   - 24h reminders: Daily at 10:00 AM');
+  console.log('   - 2h reminders: Every 15 minutes');
   
-  console.log('✅ Reminder scheduler initialized');
-  console.log('   • 24-hour reminders: Every hour at :05');
-  console.log('   • 2-hour reminders: Every 15 minutes');
+  // Run immediately on startup for testing
+  setTimeout(() => {
+    console.log('🚀 Running initial reminder check...');
+    send24HourReminders();
+    send2HourReminders();
+  }, 5000);
 };
 
 module.exports = {
-  initializeScheduler,
+  startReminderScheduler,
   send24HourReminders,
   send2HourReminders
 };
