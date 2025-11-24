@@ -101,14 +101,18 @@ function RescheduleModal({ booking, onClose, onSuccess }) {
       const data = await response.json();
       
       if (data.success) {
+        alert('✅ Booking rescheduled successfully!');
         onSuccess();
         onClose();
       } else {
         setError(data.message);
+        alert('❌ Failed to reschedule: ' + data.message);
       }
     } catch (err) {
       console.error('Error rescheduling:', err);
-      setError('Failed to reschedule booking');
+      const errorMsg = err.message || 'Failed to reschedule booking';
+      setError(errorMsg);
+      alert('❌ Error: ' + errorMsg);
     } finally {
       setLoading(false);
     }
