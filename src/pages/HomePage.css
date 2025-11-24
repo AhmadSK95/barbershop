@@ -30,7 +30,7 @@
 }
 
 .hero-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   color: #d4a574;
   margin-bottom: 1.5rem;
   font-weight: 600;
@@ -38,7 +38,7 @@
 }
 
 .hero-description {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   color: #c8b698;
   line-height: 1.8;
   margin-bottom: 2rem;
@@ -49,8 +49,8 @@
   background: var(--gradient-gold);
   color: var(--color-brown-darkest);
   border: 3px solid var(--color-gold-dark);
-  padding: 1.125rem 3rem;
-  font-size: 1.1rem;
+  padding: 1.25rem 3.25rem;
+  font-size: 1.25rem;
   font-weight: 700;
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -205,7 +205,7 @@
 
 .info-card h3 {
   color: #d4a574;
-  font-size: 1.5rem;
+  font-size: 1.625rem;
   margin-bottom: 1rem;
   font-family: 'Playfair Display', serif;
   font-weight: 700;
@@ -213,6 +213,7 @@
 
 .info-card p {
   color: #c8b698;
+  font-size: 1.125rem;
   margin: 0.5rem 0;
   line-height: 1.6;
 }
@@ -240,14 +241,14 @@
   padding: 0.5rem 1.5rem;
   border-radius: 30px;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 15px rgba(193, 154, 107, 0.4);
   letter-spacing: 1px;
 }
 
 .promo-content h2 {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   color: #c19a6b;
   margin-bottom: 1rem;
   font-family: 'Playfair Display', serif;
@@ -255,7 +256,7 @@
 }
 
 .promo-content p {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   color: #999;
   margin-bottom: 2rem;
   line-height: 1.6;
@@ -330,7 +331,7 @@
 }
 
 .quick-booking h2 {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   color: #d4a574;
   margin-bottom: 2rem;
   font-family: 'Playfair Display', serif;
@@ -341,8 +342,8 @@
   background: linear-gradient(135deg, #b8860b, #d4a574);
   color: #1a0f0a;
   border: 2px solid #d4a574;
-  padding: 1rem 3rem;
-  font-size: 1.3rem;
+  padding: 1.125rem 3.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   border-radius: 50px;
   cursor: pointer;
@@ -453,14 +454,14 @@
 
 .footer-section h3 {
   color: #d4a574;
-  font-size: 1.5rem;
+  font-size: 1.625rem;
   margin-bottom: 1rem;
   font-family: 'Playfair Display', serif;
 }
 
 .footer-section h4 {
   color: #d4a574;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   margin-bottom: 1rem;
   font-weight: 600;
 }
@@ -468,6 +469,7 @@
 .footer-section p {
   margin: 0.5rem 0;
   color: #c8b698;
+  font-size: 1.05rem;
   line-height: 1.6;
 }
 
@@ -486,7 +488,7 @@
   border: none;
   color: #c8b698;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.125rem;
   text-align: left;
   padding: 0;
   transition: color 0.3s ease;
@@ -512,7 +514,7 @@
   padding: 0.5rem 1.5rem;
   border-radius: 20px;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.125rem;
   margin-bottom: 0.75rem;
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
@@ -520,7 +522,7 @@
 .hiring-section p {
   margin: 0.75rem 0;
   color: #d4a574;
-  font-size: 1rem;
+  font-size: 1.125rem;
 }
 
 .hiring-button {
@@ -529,7 +531,7 @@
   padding: 0.75rem 1.5rem;
   border: 2px solid #8B6F47;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -553,7 +555,7 @@
 
 .footer-bottom p {
   color: #8B6F47;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   margin: 0;
 }
 
