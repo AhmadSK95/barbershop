@@ -361,6 +361,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: transparent;
 }
 
 .detail-row {
@@ -368,6 +369,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
+  background: transparent;
 }
 
 .detail-row.total {
@@ -423,6 +425,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  background: transparent;
 }
 
 .reschedule-btn {
