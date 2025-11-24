@@ -3,7 +3,18 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+const fs = require('fs');
+
+// Load .env files: root first (defaults), then backend (overrides)
+const rootEnvPath = path.join(__dirname, '../../.env');
+const backendEnvPath = path.join(__dirname, '../.env');
+
+if (fs.existsSync(rootEnvPath)) {
+  require('dotenv').config({ path: rootEnvPath });
+}
+if (fs.existsSync(backendEnvPath)) {
+  require('dotenv').config({ path: backendEnvPath, override: true });
+}
 
 const authRoutes = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
@@ -11,6 +22,8 @@ const userRoutes = require('./routes/userRoutes');
 const configRoutes = require('./routes/configRoutes');
 const smsRoutes = require('./routes/smsRoutes');
 const careersRoutes = require('./routes/careersRoutes');
+const barberRoutes = require('./routes/barberRoutes');
+const adminAnalyticsRoutes = require('./routes/adminAnalyticsRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -76,6 +89,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api/careers', careersRoutes);
+app.use('/api/barbers', barberRoutes);
+app.use('/api/admin/analytics', adminAnalyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -95,6 +110,12 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5002;
+
+// Initialize reminder scheduler
+if (process.env.NODE_ENV !== 'test') {
+  const { initializeScheduler } = require('../services/scheduler');
+  initializeScheduler();
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);

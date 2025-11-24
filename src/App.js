@@ -16,6 +16,7 @@ import ConfigPage from './pages/ConfigPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import CareersPage from './pages/CareersPage';
+import BarberDashboardPage from './pages/BarberDashboardPage';
 
 function App() {
   return (
@@ -60,6 +61,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ConfigPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/barber-dashboard" 
+              element={
+                <ProtectedRoute>
+                  <BarberDashboardPage />
                 </ProtectedRoute>
               } 
             />

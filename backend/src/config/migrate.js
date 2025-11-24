@@ -109,6 +109,69 @@ CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id)
 CREATE INDEX IF NOT EXISTS idx_barber_services_barber_id ON barber_services(barber_id);
 CREATE INDEX IF NOT EXISTS idx_barber_services_service_id ON barber_services(service_id);
 CREATE INDEX IF NOT EXISTS idx_sms_dnd_phone_number ON sms_dnd_numbers(phone_number);
+
+-- Settings table for system configuration
+CREATE TABLE IF NOT EXISTS settings (
+  id SERIAL PRIMARY KEY,
+  setting_key VARCHAR(100) UNIQUE NOT NULL,
+  setting_value TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Barber availability table for custom schedules and time-off
+CREATE TABLE IF NOT EXISTS barber_availability (
+  id SERIAL PRIMARY KEY,
+  barber_id INTEGER REFERENCES barbers(id) ON DELETE CASCADE,
+  day_of_week INTEGER CHECK (day_of_week BETWEEN 0 AND 6),
+  start_time TIME,
+  end_time TIME,
+  is_available BOOLEAN DEFAULT true,
+  date_override DATE,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(barber_id, day_of_week, start_time, date_override)
+);
+
+-- Audit logs for tracking critical actions
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50),
+  entity_id INTEGER,
+  details JSONB,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Blackout dates for shop-wide closures
+CREATE TABLE IF NOT EXISTS blackout_dates (
+  id SERIAL PRIMARY KEY,
+  date DATE UNIQUE NOT NULL,
+  reason VARCHAR(255),
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add new columns to existing tables
+ALTER TABLE barbers ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS no_show BOOLEAN DEFAULT false;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_24h_sent BOOLEAN DEFAULT false;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_2h_sent BOOLEAN DEFAULT false;
+
+-- Create additional indexes
+CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(setting_key);
+CREATE INDEX IF NOT EXISTS idx_barber_availability_barber ON barber_availability(barber_id);
+CREATE INDEX IF NOT EXISTS idx_barber_availability_date ON barber_availability(date_override);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_blackout_dates_date ON blackout_dates(date);
 `;
 
 const seedData = async () => {
@@ -265,6 +328,30 @@ const seedData = async () => {
           [anyAvailableBarberId, sid]
         );
       }
+    }
+
+    // Insert default settings
+    const defaultSettings = [
+      ['business_hours_start', '10:00', 'Business opening time'],
+      ['business_hours_end', '19:00', 'Business closing time'],
+      ['booking_slot_duration', '30', 'Duration of each booking slot in minutes'],
+      ['days_open', '[1,2,3,4,5,6]', 'Days of the week the business is open (0=Sunday, 6=Saturday)'],
+      ['reminders_enabled', 'true', 'Enable automated booking reminders'],
+      ['reminder_24h_enabled', 'true', 'Send reminder 24 hours before appointment'],
+      ['reminder_2h_enabled', 'false', 'Send reminder 2 hours before appointment'],
+      ['reminder_email_enabled', 'true', 'Send reminders via email'],
+      ['reminder_sms_enabled', 'false', 'Send reminders via SMS'],
+      ['reschedule_window_hours', '2', 'Minimum hours before appointment to allow rescheduling'],
+      ['cancellation_window_hours', '2', 'Minimum hours before appointment to allow cancellation']
+    ];
+
+    for (const [key, value, description] of defaultSettings) {
+      await client.query(
+        `INSERT INTO settings (setting_key, setting_value, description)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (setting_key) DO NOTHING`,
+        [key, value, description]
+      );
     }
 
     await client.query('COMMIT');

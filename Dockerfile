@@ -1,12 +1,12 @@
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install && npm ci
+# Install dependencies (use install for broader compatibility in CI/build servers)
+RUN npm install --no-audit --no-fund --legacy-peer-deps
 
 # Copy application code
 COPY . .
@@ -14,6 +14,9 @@ COPY . .
 # Set API URL for build
 ARG REACT_APP_API_URL=http://localhost:5001/api
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
+# Set Node memory limit for build (prevents OOM on small AWS instances)
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 # Build application
 RUN npm run build

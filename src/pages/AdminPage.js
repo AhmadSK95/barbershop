@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { bookingAPI } from '../services/api';
 import { format } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import RescheduleModal from '../components/RescheduleModal';
 import './AdminPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -13,6 +14,11 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all'); // all, pending, confirmed, completed, cancelled
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -45,6 +51,7 @@ function AdminPage() {
         totalPrice: booking.total_price,
         notes: booking.notes,
         createdAt: booking.created_at,
+        barber_id: booking.barber_id,
         service: {
           name: booking.service_name
         },
@@ -83,6 +90,29 @@ function AdminPage() {
       console.error('Error cancelling booking:', err);
       alert('❌ Failed to cancel booking: ' + (err.response?.data?.message || err.message));
     }
+  };
+  
+  const handleReschedule = (booking) => {
+    // Transform admin booking format to match what RescheduleModal expects
+    const transformedBooking = {
+      _id: booking.id,
+      date: booking.date,
+      time: booking.time,
+      status: booking.status,
+      service: booking.service,
+      barber: {
+        id: booking.barber_id,
+        name: booking.barber.name
+      }
+    };
+    setSelectedBooking(transformedBooking);
+    setRescheduleModalOpen(true);
+  };
+  
+  const handleRescheduleSuccess = () => {
+    setRescheduleModalOpen(false);
+    setSelectedBooking(null);
+    fetchAllBookings();
   };
 
   const handleStatusChange = async (bookingId, newStatus) => {
@@ -165,19 +195,83 @@ function AdminPage() {
     );
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    if (filter === 'all') return true;
-    return booking.status === filter;
-  });
+  const handleExportCSV = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (filter !== 'all') params.append('status', filter);
+      
+      const url = `${API_URL}/admin/analytics/bookings/export?${params.toString()}`;
+      
+      // Download the CSV file
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Export error:', errorText);
+        throw new Error(`Export failed: ${response.status} ${response.statusText}`);
+      }
+      
+      // Check if response is actually CSV
+      const contentType = response.headers.get('content-type');
+      if (!contentType || (!contentType.includes('csv') && !contentType.includes('text/plain'))) {
+        const text = await response.text();
+        console.error('Unexpected response:', text);
+        throw new Error('Server did not return CSV data');
+      }
+      
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `bookings_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      console.log('✅ CSV exported successfully');
+    } catch (err) {
+      console.error('Error exporting CSV:', err);
+      alert(`Failed to export bookings: ${err.message}`);
+    }
+  };
 
-  // Calculate revenue statistics
   // Normalize date for comparison (extract YYYY-MM-DD portion)
   const normalizeDate = (dateString) => {
     if (!dateString) return '';
     // Handle both "2025-11-20" and "2025-11-20T00:00:00.000Z" formats
     return dateString.split('T')[0];
   };
-  
+
+  const filteredBookings = bookings.filter(booking => {
+    // Filter by status
+    if (filter !== 'all' && booking.status !== filter) return false;
+    
+    // Filter by date range
+    if (startDate && normalizeDate(booking.date) < startDate) return false;
+    if (endDate && normalizeDate(booking.date) > endDate) return false;
+    
+    // Filter by search term (customer name, email, or barber)
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      const customerMatch = booking.customer.name.toLowerCase().includes(term) ||
+                           booking.customer.email.toLowerCase().includes(term);
+      const barberMatch = booking.barber.name.toLowerCase().includes(term);
+      const serviceMatch = booking.service?.name?.toLowerCase().includes(term);
+      
+      if (!customerMatch && !barberMatch && !serviceMatch) return false;
+    }
+    
+    return true;
+  });
+
+  // Calculate revenue statistics
   const today = new Date().toISOString().split('T')[0];
   const todayBookings = bookings.filter(b => normalizeDate(b.date) === today);
   const completedBookings = bookings.filter(b => b.status === 'completed');
@@ -266,6 +360,52 @@ function AdminPage() {
               <Bar dataKey="count" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="admin-filters">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="🔍 Search by customer, barber, or service..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          
+          <div className="date-filters">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              placeholder="Start Date"
+              className="date-input"
+            />
+            <span className="date-separator">to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              placeholder="End Date"
+              className="date-input"
+            />
+            <button 
+              onClick={() => { setStartDate(''); setEndDate(''); setSearchTerm(''); }}
+              className="clear-filters-btn"
+            >
+              Clear Filters
+            </button>
+          </div>
+          
+          <div className="export-actions">
+            <button onClick={handleExportCSV} className="export-csv-btn">
+              📥 Export CSV
+            </button>
+            <div className="results-count">
+              Showing {filteredBookings.length} of {bookings.length} bookings
+            </div>
+          </div>
         </div>
 
         {/* Filter Buttons */}
@@ -369,6 +509,13 @@ function AdminPage() {
                                 <option value="completed">Completed</option>
                               </select>
                               <button 
+                                className="reschedule-btn-admin"
+                                onClick={() => handleReschedule(booking)}
+                                title="Reschedule booking"
+                              >
+                                📅
+                              </button>
+                              <button 
                                 className="cancel-btn"
                                 onClick={() => handleCancelBooking(booking.id)}
                               >
@@ -389,6 +536,17 @@ function AdminPage() {
           )}
         </div>
       </div>
+      
+      {rescheduleModalOpen && selectedBooking && (
+        <RescheduleModal
+          booking={selectedBooking}
+          onClose={() => {
+            setRescheduleModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          onSuccess={handleRescheduleSuccess}
+        />
+      )}
     </div>
   );
 }
