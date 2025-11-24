@@ -18,5 +18,6 @@ module.exports = {
   sendVerificationEmail: emailProvider.sendVerificationEmail,
   sendPasswordResetEmail: emailProvider.sendPasswordResetEmail,
   sendBookingConfirmationEmail: emailProvider.sendBookingConfirmationEmail,
+  sendBookingReminderEmail: emailProvider.sendBookingReminderEmail,
   verifyEmailIdentity: emailProvider.verifyEmailIdentity || (() => Promise.resolve()),
 };

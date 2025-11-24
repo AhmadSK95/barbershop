@@ -125,8 +125,47 @@ const sendBookingConfirmationEmail = async (email, firstName, bookingDetails) =>
   }
 };
 
+// Send booking reminder email
+const sendBookingReminderEmail = async (email, firstName, bookingDetails, hoursUntil) => {
+  const transporter = createTransporter();
+  const reminderType = hoursUntil >= 24 ? '24-hour' : '2-hour';
+  const urgencyColor = hoursUntil >= 24 ? '#2196F3' : '#ff9800';
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: email,
+    subject: `⏰ Reminder: Your appointment ${hoursUntil >= 24 ? 'tomorrow' : 'is in 2 hours'}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: ${urgencyColor};">${reminderType.toUpperCase()} REMINDER</h2>
+        <p>Hi ${firstName},</p>
+        <p>This is a friendly reminder about your upcoming appointment ${hoursUntil >= 24 ? 'tomorrow' : 'in 2 hours'}.</p>
+        <div style="background-color: #f5f5f5; padding: 20px; border-radius: 4px; margin: 20px 0;">
+          <p><strong>Service:</strong> ${bookingDetails.service}</p>
+          <p><strong>Barber:</strong> ${bookingDetails.barber}</p>
+          <p><strong>Date:</strong> ${bookingDetails.date}</p>
+          <p><strong>Time:</strong> ${bookingDetails.time}</p>
+        </div>
+        <p><strong>Location:</strong> Balkan Barbers, 123 Main Street, City, State 12345</p>
+        <p><strong>Please arrive 5 minutes early.</strong></p>
+        <p>Need to cancel or reschedule? Please contact us as soon as possible.</p>
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="color: #999; font-size: 12px;">Balkan Barbers</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`${reminderType} reminder sent to ${email}`);
+  } catch (error) {
+    console.error(`Error sending ${reminderType} reminder:`, error);
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
-  sendBookingConfirmationEmail
+  sendBookingConfirmationEmail,
+  sendBookingReminderEmail
 };
