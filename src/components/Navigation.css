@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   font-family: 'Playfair Display', serif;
   background: linear-gradient(45deg, #b8860b, #d4a574);
@@ -55,7 +55,7 @@
   gap: 0.5rem;
   color: var(--color-gold-light);
   text-decoration: none;
-  font-size: 1.05rem;
+  font-size: 1.125rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -91,10 +91,11 @@
 .nav-link-booking {
   background: var(--gradient-gold);
   color: var(--color-brown-darkest) !important;
-  padding: 0.6rem 1.5rem;
+  padding: 0.7rem 1.75rem;
   border-radius: 25px;
   box-shadow: var(--shadow-md), var(--shadow-gold);
   border: 2px solid var(--color-gold-dark);
+  font-size: 1.125rem;
   font-weight: 700;
 }
 
@@ -115,6 +116,7 @@
 
 .nav-user {
   color: var(--color-gold-light);
+  font-size: 1.125rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
 }
@@ -130,6 +132,7 @@
   transition: all 0.3s ease;
   border-radius: 4px;
   padding: 0.5rem 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
 }
 

@@ -82,6 +82,7 @@ body {
   background-image: var(--gradient-dark);
   color: var(--color-gold-light);
   font-family: var(--font-body);
+  font-size: 18px;
   min-height: 100vh;
 }
 
@@ -116,9 +117,9 @@ a:hover {
 
 .btn-premium {
   position: relative;
-  padding: 0.875rem 2rem;
+  padding: 1rem 2.25rem;
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -229,13 +230,13 @@ a:hover {
 
 .input-premium {
   width: 100%;
-  padding: 0.875rem 1.25rem;
+  padding: 1rem 1.5rem;
   background: rgba(26, 15, 10, 0.6);
   border: 2px solid var(--color-brown-leather);
   border-radius: var(--radius-md);
   color: var(--color-cream);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
   transition: all var(--transition-base);
 }
@@ -257,7 +258,7 @@ a:hover {
   margin-bottom: var(--spacing-sm);
   color: var(--color-gold-light);
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -373,7 +374,7 @@ a:hover {
 .text-premium {
   font-family: var(--font-body);
   color: var(--color-cream);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   line-height: 1.8;
   font-weight: 400;
 }
