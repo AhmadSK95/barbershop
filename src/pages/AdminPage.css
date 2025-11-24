@@ -414,6 +414,7 @@
   font-family: 'Playfair Display', serif;
   border-bottom: 3px solid #b8860b;
   padding-bottom: 15px;
+  background: transparent;
 }
 
 /* Table */
