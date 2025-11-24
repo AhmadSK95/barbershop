@@ -115,7 +115,7 @@ const PORT = process.env.PORT || 5002;
 
 // Initialize reminder scheduler
 if (process.env.NODE_ENV !== 'test') {
-  const { startReminderScheduler } = require('../services/reminderScheduler');
+  const { startReminderScheduler } = require('../services/scheduler');
   startReminderScheduler();
 }
 
