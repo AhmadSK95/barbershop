@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { bookingAPI, userAPI } from '../services/api';
+import { bookingAPI, userAPI, ratingAPI } from '../services/api';
 import { format } from 'date-fns';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { services } from '../data';
@@ -42,6 +42,7 @@ function ProfilePage() {
   const [ratingBooking, setRatingBooking] = useState(null);
   const [rating, setRating] = useState(0);
   const [ratingComment, setRatingComment] = useState('');
+  const [bookingRatings, setBookingRatings] = useState({}); // Store ratings by booking ID
 
   useEffect(() => {
     if (activeTab === 'orders') {
@@ -107,6 +108,9 @@ function ProfilePage() {
       
       setBookings(transformedBookings);
       setError(null);
+      
+      // Fetch ratings for completed bookings
+      fetchRatingsForBookings(transformedBookings);
     } catch (err) {
       console.error('Error fetching bookings:', err);
       setError('Failed to load order history');
@@ -114,6 +118,24 @@ function ProfilePage() {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+  
+  const fetchRatingsForBookings = async (bookings) => {
+    const completedBookings = bookings.filter(b => b.status === 'completed');
+    const ratingsData = {};
+    
+    for (const booking of completedBookings) {
+      try {
+        const response = await ratingAPI.getBookingRating(booking._id);
+        if (response.data.success && response.data.data.rating) {
+          ratingsData[booking._id] = response.data.data.rating;
+        }
+      } catch (err) {
+        console.error(`Error fetching rating for booking ${booking._id}:`, err);
+      }
+    }
+    
+    setBookingRatings(ratingsData);
   };
 
   const getStatusBadge = (status) => {
@@ -310,8 +332,15 @@ function ProfilePage() {
   
   const handleRate = (booking) => {
     setRatingBooking(booking);
-    setRating(0);
-    setRatingComment('');
+    // Pre-fill existing rating if available
+    const existingRating = bookingRatings[booking._id];
+    if (existingRating) {
+      setRating(existingRating.rating);
+      setRatingComment(existingRating.comment || '');
+    } else {
+      setRating(0);
+      setRatingComment('');
+    }
     setRatingModalOpen(true);
   };
   
@@ -322,16 +351,28 @@ function ProfilePage() {
     }
     
     try {
-      // TODO: Implement rating API endpoint
-      console.log('Rating submitted:', { bookingId: ratingBooking._id, rating, comment: ratingComment });
-      alert(`Thank you for rating ${rating} stars!`);
-      setRatingModalOpen(false);
-      setRatingBooking(null);
-      setRating(0);
-      setRatingComment('');
+      const response = await ratingAPI.submitRating(ratingBooking._id, {
+        rating,
+        comment: ratingComment
+      });
+      
+      if (response.data.success) {
+        alert(`Thank you for rating ${rating} stars!`);
+        
+        // Update local ratings state
+        setBookingRatings({
+          ...bookingRatings,
+          [ratingBooking._id]: { rating, comment: ratingComment }
+        });
+        
+        setRatingModalOpen(false);
+        setRatingBooking(null);
+        setRating(0);
+        setRatingComment('');
+      }
     } catch (err) {
       console.error('Error submitting rating:', err);
-      alert('Failed to submit rating. Please try again.');
+      alert(err.response?.data?.message || 'Failed to submit rating. Please try again.');
     }
   };
 
@@ -558,12 +599,31 @@ function ProfilePage() {
                       <span className="detail-label">Total:</span>
                       <span className="detail-value price">${booking.totalPrice}</span>
                     </div>
+                    
+                    {bookingRatings[booking._id] && (
+                      <div className="detail-row rating">
+                        <span className="detail-label">Your Rating:</span>
+                        <span className="detail-value">
+                          <span className="rating-stars-display">
+                            {'⭐'.repeat(bookingRatings[booking._id].rating)}
+                          </span>
+                          <span className="rating-number">{bookingRatings[booking._id].rating}/5</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
                   
                   {booking.notes && (
                     <div className="booking-notes">
                       <span className="notes-label">Notes:</span>
                       <span className="notes-text">{booking.notes}</span>
+                    </div>
+                  )}
+                  
+                  {bookingRatings[booking._id]?.comment && (
+                    <div className="booking-notes">
+                      <span className="notes-label">Review:</span>
+                      <span className="notes-text">{bookingRatings[booking._id].comment}</span>
                     </div>
                   )}
                   

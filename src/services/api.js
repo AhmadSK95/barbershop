@@ -84,4 +84,10 @@ export const bookingAPI = {
   previewAssignedBarber: (date, time) => api.get('/bookings/preview-barber', { params: { date, time } }),
 };
 
+// Rating API calls
+export const ratingAPI = {
+  submitRating: (bookingId, ratingData) => api.post(`/ratings/${bookingId}`, ratingData),
+  getBookingRating: (bookingId) => api.get(`/ratings/${bookingId}`),
+};
+
 export default api;
