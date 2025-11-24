@@ -542,10 +542,152 @@ const sendJobApplicationEmail = async (applicationDetails) => {
   }
 };
 
+// Send booking reminder email (24h or 2h before appointment)
+const sendBookingReminderEmail = async (email, firstName, bookingDetails, hoursUntil) => {
+  const senderEmail = process.env.EMAIL_FROM || process.env.AWS_SES_FROM_EMAIL || 'noreply@balkanbarbers.com';
+  const reminderType = hoursUntil >= 24 ? '24-hour' : '2-hour';
+  const urgencyColor = hoursUntil >= 24 ? '#2196F3' : '#ff9800';
+
+  const params = {
+    Source: senderEmail,
+    Destination: {
+      ToAddresses: [email],
+    },
+    Message: {
+      Subject: {
+        Data: `⏰ Reminder: Your appointment ${hoursUntil >= 24 ? 'tomorrow' : 'is in 2 hours'}`,
+        Charset: 'UTF-8',
+      },
+      Body: {
+        Html: {
+          Data: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+                <tr>
+                  <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                      <!-- Header -->
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); padding: 40px 20px; text-align: center;">
+                          <h1 style="margin: 0; color: #D4A574; font-size: 32px; font-weight: bold;">✂️ Balkan Barbers</h1>
+                        </td>
+                      </tr>
+                      
+                      <!-- Reminder Badge -->
+                      <tr>
+                        <td style="padding: 30px 30px 0 30px; text-align: center;">
+                          <div style="display: inline-block; background-color: ${urgencyColor}; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold; font-size: 16px;">
+                            ⏰ ${reminderType.toUpperCase()} REMINDER
+                          </div>
+                        </td>
+                      </tr>
+                      
+                      <!-- Content -->
+                      <tr>
+                        <td style="padding: 30px;">
+                          <h2 style="margin: 0 0 20px 0; color: #333; font-size: 24px;">Hi ${firstName},</h2>
+                          <p style="margin: 0 0 20px 0; color: #666; font-size: 16px; line-height: 1.6;">
+                            This is a friendly reminder about your upcoming appointment ${hoursUntil >= 24 ? 'tomorrow' : 'in 2 hours'}.
+                          </p>
+                          
+                          <!-- Booking Details Card -->
+                          <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1a0f0a 0%, #2d1f18 100%); border-radius: 8px; overflow: hidden; margin: 20px 0;">
+                            <tr>
+                              <td style="padding: 25px;">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                  <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid rgba(212, 165, 116, 0.2);">
+                                      <span style="color: #D4A574; font-size: 14px; font-weight: bold;">SERVICE</span><br/>
+                                      <span style="color: #fff; font-size: 16px;">${bookingDetails.service || 'Haircut'}</span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid rgba(212, 165, 116, 0.2);">
+                                      <span style="color: #D4A574; font-size: 14px; font-weight: bold;">BARBER</span><br/>
+                                      <span style="color: #fff; font-size: 16px;">${bookingDetails.barber || 'Any Available'}</span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid rgba(212, 165, 116, 0.2);">
+                                      <span style="color: #D4A574; font-size: 14px; font-weight: bold;">📅 DATE</span><br/>
+                                      <span style="color: #fff; font-size: 18px; font-weight: bold;">${bookingDetails.date}</span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 10px 0;">
+                                      <span style="color: #D4A574; font-size: 14px; font-weight: bold;">🕐 TIME</span><br/>
+                                      <span style="color: #fff; font-size: 18px; font-weight: bold;">${bookingDetails.time}</span>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          
+                          <div style="background-color: #fff8e1; border-left: 4px solid #D4A574; padding: 15px; margin: 20px 0;">
+                            <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.6;">
+                              <strong>📍 Location:</strong> Balkan Barbers<br/>
+                              <span style="color: #888; font-size: 13px;">123 Main Street, City, State 12345</span><br/>
+                              <strong>⏱️ Please arrive 5 minutes early</strong>
+                            </p>
+                          </div>
+                          
+                          <p style="margin: 20px 0 0 0; color: #999; font-size: 14px; line-height: 1.6;">
+                            Need to cancel or reschedule? Please contact us as soon as possible.
+                          </p>
+                        </td>
+                      </tr>
+                      
+                      <!-- Footer -->
+                      <tr>
+                        <td style="background-color: #f9f9f9; padding: 30px; text-align: center; border-top: 1px solid #eee;">
+                          <p style="margin: 0 0 10px 0; color: #999; font-size: 14px;">
+                            Balkan Barbers - Premium Grooming Services
+                          </p>
+                          <p style="margin: 0; color: #ccc; font-size: 12px;">
+                            © ${new Date().getFullYear()} Balkan Barbers. All rights reserved.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+          `,
+          Charset: 'UTF-8',
+        },
+        Text: {
+          Data: `Appointment Reminder (${reminderType})\n\nHi ${firstName},\n\nThis is a reminder about your appointment ${hoursUntil >= 24 ? 'tomorrow' : 'in 2 hours'}:\n\nService: ${bookingDetails.service}\nBarber: ${bookingDetails.barber}\nDate: ${bookingDetails.date}\nTime: ${bookingDetails.time}\n\nLocation: Balkan Barbers\n123 Main Street, City, State 12345\n\nPlease arrive 5 minutes early.\n\n--\nBalkan Barbers`,
+          Charset: 'UTF-8',
+        },
+      },
+    },
+  };
+
+  try {
+    const command = new SendEmailCommand(params);
+    const response = await sesClient.send(command);
+    console.log(`✅ ${reminderType} reminder sent to ${email} via AWS SES (MessageId: ${response.MessageId})`);
+    return response;
+  } catch (error) {
+    console.error(`❌ Error sending ${reminderType} reminder via AWS SES:`, error);
+    throw new Error(`Failed to send reminder: ${error.message}`);
+  }
+};
+
 module.exports = {
   verifyEmailIdentity,
   sendVerificationEmail,
   sendBookingConfirmationEmail,
   sendPasswordResetEmail,
   sendJobApplicationEmail,
+  sendBookingReminderEmail,
 };
