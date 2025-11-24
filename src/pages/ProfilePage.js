@@ -4,6 +4,7 @@ import { bookingAPI, userAPI } from '../services/api';
 import { format } from 'date-fns';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { services } from '../data';
+import RescheduleModal from '../components/RescheduleModal';
 import './ProfilePage.css';
 
 function ProfilePage() {
@@ -33,6 +34,14 @@ function ProfilePage() {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
+  
+  // Reschedule modal state
+  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [ratingBooking, setRatingBooking] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [ratingComment, setRatingComment] = useState('');
 
   useEffect(() => {
     if (activeTab === 'orders') {
@@ -252,6 +261,79 @@ function ProfilePage() {
       setPasswordLoading(false);
     }
   };
+  
+  const handleReschedule = (booking) => {
+    setSelectedBooking(booking);
+    setRescheduleModalOpen(true);
+  };
+  
+  const handleRescheduleSuccess = () => {
+    setRescheduleModalOpen(false);
+    setSelectedBooking(null);
+    // Refresh bookings to show updated data
+    fetchBookings();
+  };
+  
+  const canReschedule = (booking) => {
+    // Can only reschedule pending or confirmed bookings
+    return ['pending', 'confirmed'].includes(booking.status);
+  };
+  
+  const handleCancel = async (booking) => {
+    if (!window.confirm('Are you sure you want to cancel this appointment?')) {
+      return;
+    }
+    
+    try {
+      const response = await bookingAPI.cancelBooking(booking._id);
+      
+      if (response.data.success) {
+        // Refresh bookings to show updated status
+        fetchBookings();
+        alert('Appointment cancelled successfully');
+      }
+    } catch (err) {
+      console.error('Error cancelling booking:', err);
+      alert(err.response?.data?.message || 'Failed to cancel booking. Please try again.');
+    }
+  };
+  
+  const canCancel = (booking) => {
+    // Can only cancel pending or confirmed bookings
+    return ['pending', 'confirmed'].includes(booking.status);
+  };
+  
+  const canRate = (booking) => {
+    // Can only rate completed bookings
+    return booking.status === 'completed';
+  };
+  
+  const handleRate = (booking) => {
+    setRatingBooking(booking);
+    setRating(0);
+    setRatingComment('');
+    setRatingModalOpen(true);
+  };
+  
+  const submitRating = async () => {
+    if (rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+    
+    try {
+      // TODO: Implement rating API endpoint
+      console.log('Rating submitted:', { bookingId: ratingBooking._id, rating, comment: ratingComment });
+      alert(`Thank you for rating ${rating} stars!`);
+      setRatingModalOpen(false);
+      setRatingBooking(null);
+      setRating(0);
+      setRatingComment('');
+    } catch (err) {
+      console.error('Error submitting rating:', err);
+      alert('Failed to submit rating. Please try again.');
+    }
+  };
 
   return (
     <div className="profile-page">
@@ -444,7 +526,7 @@ function ProfilePage() {
                 <div key={booking._id || booking.id} className="booking-card">
                   <div className="booking-header">
                     <div className="booking-date">
-                      <span className="date-icon">📅</span>
+                      <span className="date-icon">🗓️</span>
                       <span>{formatDate(booking.date)}</span>
                       <span className="time-separator">•</span>
                       <span>{formatTime(booking.time)}</span>
@@ -486,12 +568,30 @@ function ProfilePage() {
                   )}
                   
                   <div className="booking-actions">
-                    <button 
-                      className="btn btn-primary reorder-btn"
-                      onClick={() => handleReorder(booking)}
-                    >
-                      🔄 Reorder
-                    </button>
+                    {canReschedule(booking) && (
+                      <button 
+                        className="btn btn-secondary reschedule-btn"
+                        onClick={() => handleReschedule(booking)}
+                      >
+                        🗓️ Reschedule
+                      </button>
+                    )}
+                    {canCancel(booking) && (
+                      <button 
+                        className="cancel-btn"
+                        onClick={() => handleCancel(booking)}
+                      >
+                        ❌ Cancel
+                      </button>
+                    )}
+                    {canRate(booking) && (
+                      <button 
+                        className="btn btn-primary rate-btn"
+                        onClick={() => handleRate(booking)}
+                      >
+                        ⭐ Rate Service
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -500,6 +600,70 @@ function ProfilePage() {
         </div>
         )}
       </div>
+      
+      {rescheduleModalOpen && selectedBooking && (
+        <RescheduleModal
+          booking={selectedBooking}
+          onClose={() => {
+            setRescheduleModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          onSuccess={handleRescheduleSuccess}
+        />
+      )}
+      
+      {ratingModalOpen && ratingBooking && (
+        <div className="modal-overlay" onClick={() => setRatingModalOpen(false)}>
+          <div className="modal-content rating-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>⭐ Rate Your Experience</h2>
+              <button className="modal-close" onClick={() => setRatingModalOpen(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="rating-info">
+                <p><strong>Service:</strong> {ratingBooking.service?.name}</p>
+                <p><strong>Barber:</strong> {ratingBooking.barber?.name}</p>
+                <p><strong>Date:</strong> {formatDate(ratingBooking.date)}</p>
+              </div>
+              
+              <div className="rating-stars">
+                <p className="rating-label">How would you rate this service?</p>
+                <div className="stars">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      className={`star-btn ${star <= rating ? 'selected' : ''}`}
+                      onClick={() => setRating(star)}
+                    >
+                      {star <= rating ? '⭐' : '☆'}
+                    </button>
+                  ))}
+                </div>
+                {rating > 0 && <p className="rating-value">{rating} out of 5 stars</p>}
+              </div>
+              
+              <div className="rating-comment">
+                <label htmlFor="comment">Additional Comments (Optional)</label>
+                <textarea
+                  id="comment"
+                  value={ratingComment}
+                  onChange={(e) => setRatingComment(e.target.value)}
+                  placeholder="Tell us about your experience..."
+                  rows="4"
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setRatingModalOpen(false)}>
+                Cancel
+              </button>
+              <button className="btn-primary" onClick={submitRating}>
+                Submit Rating
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

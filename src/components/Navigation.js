@@ -83,6 +83,16 @@ function Navigation() {
                   </Link>
                 </>
               )}
+              {user?.role === 'barber' && (
+                <Link 
+                  to="/barber-dashboard" 
+                  className={`nav-link ${location.pathname === '/barber-dashboard' ? 'active' : ''}`}
+                  onClick={closeMobileMenu}
+                >
+                  <LayoutDashboard size={18} className="nav-icon" />
+                  <span>My Schedule</span>
+                </Link>
+              )}
               <Link 
                 to="/profile" 
                 className={`nav-link nav-user ${location.pathname === '/profile' ? 'active' : ''}`}

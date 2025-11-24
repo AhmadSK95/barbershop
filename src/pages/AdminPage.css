@@ -176,6 +176,123 @@
   font-family: var(--font-display);
 }
 
+/* Admin Filters */
+.admin-filters {
+  background: var(--gradient-brown);
+  border: 3px solid var(--color-gold-dark);
+  border-radius: var(--radius-lg);
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: var(--shadow-lg);
+}
+
+.search-box {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  border: 2px solid var(--color-gold-dark);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-brown-darkest);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-gold-light);
+  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.3);
+}
+
+.date-filters {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.date-input {
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: 2px solid var(--color-gold-dark);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-brown-darkest);
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 150px;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--color-gold-light);
+  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.3);
+}
+
+.date-separator {
+  color: var(--color-gold-light);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.clear-filters-btn {
+  padding: 12px 24px;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.clear-filters-btn:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.export-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.export-csv-btn {
+  padding: 14px 28px;
+  background: var(--gradient-gold);
+  color: var(--color-brown-darkest);
+  border: 2px solid var(--color-gold-dark);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+}
+
+.export-csv-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
+}
+
+.results-count {
+  color: var(--color-gold-light);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 20px;
+  background: rgba(26, 15, 10, 0.6);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-gold-dark);
+}
+
 .stats-chart-container h2 {
   color: var(--color-gold-light);
   font-size: 1.8rem;
@@ -416,6 +533,26 @@
   box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2);
 }
 
+.reschedule-btn-admin {
+  background: linear-gradient(135deg, #b8860b, #8b6914);
+  color: #f5e6d3;
+  border: 2px solid #d4a574;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s;
+  line-height: 1;
+}
+
+.reschedule-btn-admin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.5);
+  background: linear-gradient(135deg, #d4a574, #b8860b);
+}
+
 .cancel-btn {
   background: linear-gradient(135deg, #8b5a2b, #6d4c41);
   color: #f5e6d3;
@@ -551,6 +688,7 @@
   }
   
   .status-select,
+  .reschedule-btn-admin,
   .cancel-btn {
     width: 100%;
   }

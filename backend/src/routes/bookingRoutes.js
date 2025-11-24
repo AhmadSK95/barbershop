@@ -1,4 +1,5 @@
 const express = require('express');
+const { rescheduleBooking, getAvailableSlots: getAvailableSlotsForReschedule } = require('../controllers/rescheduleController');
 const router = express.Router();
 const {
   createBooking,
@@ -25,6 +26,10 @@ router.get('/preview-barber', previewAssignedBarber);
 router.post('/', protect, createBooking);
 router.get('/', protect, getMyBookings);
 router.put('/:id/cancel', protect, cancelBooking);
+
+// Reschedule routes
+router.post('/:id/reschedule', protect, rescheduleBooking);
+router.get('/reschedule/available-slots', getAvailableSlotsForReschedule);
 
 // Admin routes
 router.get('/all', protect, adminOnly, getAllBookings);

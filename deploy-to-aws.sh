@@ -75,7 +75,8 @@ echo -e "${BLUE}Step 5: Stopping existing containers...${NC}"
 ssh -i "$SSH_KEY" "$SSH_USER@$REMOTE_HOST" "cd $REMOTE_DIR && docker compose down || true"
 
 echo -e "${BLUE}Step 6: Rebuilding Docker images...${NC}"
-ssh -i "$SSH_KEY" "$SSH_USER@$REMOTE_HOST" "cd $REMOTE_DIR && docker compose build --no-cache"
+echo "Note: This may take 5-10 minutes on small instances. Please be patient..."
+ssh -i "$SSH_KEY" "$SSH_USER@$REMOTE_HOST" "cd $REMOTE_DIR && DOCKER_BUILDKIT=1 docker compose build"
 
 echo -e "${BLUE}Step 7: Starting containers...${NC}"
 ssh -i "$SSH_KEY" "$SSH_USER@$REMOTE_HOST" "cd $REMOTE_DIR && docker compose up -d"
