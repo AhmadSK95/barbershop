@@ -591,7 +591,11 @@ function ConfigPage() {
                         <>
                           <div className="item-info">
                             <h3>{barber.first_name} {barber.last_name}</h3>
-                            <p className="item-detail">{barber.email}</p>
+                            <p className="item-detail">👤 Username: {barber.username || barber.email}</p>
+                            <p className="item-detail">📧 Login Email: {barber.email}</p>
+                            {barber.contact_email && (
+                              <p className="item-detail">📬 Contact Email: {barber.contact_email}</p>
+                            )}
                             <p className="item-detail">{barber.specialty}</p>
                             <p className="item-detail">⭐ {barber.rating}</p>
                             {barber.image_url && <p className="item-detail">🖼️ {barber.image_url}</p>}
