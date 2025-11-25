@@ -50,19 +50,27 @@ const sendSMS = async (phoneNumber, message) => {
       return { success: false, skipped: true, reason: 'dnd' };
     }
     
+    // Note: Sender ID is not supported in the US, Canada, and some other countries
+    // We only include it for regions where it's supported
+    const messageAttributes = {
+      'AWS.SNS.SMS.SMSType': {
+        DataType: 'String',
+        StringValue: 'Transactional',
+      },
+    };
+
+    // Only add Sender ID for non-US numbers (Sender ID not supported in US/Canada)
+    if (process.env.AWS_SNS_SENDER_ID && !normalizedPhone.startsWith('+1')) {
+      messageAttributes['AWS.SNS.SMS.SenderID'] = {
+        DataType: 'String',
+        StringValue: process.env.AWS_SNS_SENDER_ID,
+      };
+    }
+    
     const params = {
       Message: message,
       PhoneNumber: normalizedPhone,
-      MessageAttributes: {
-        'AWS.SNS.SMS.SenderID': {
-          DataType: 'String',
-          StringValue: process.env.AWS_SNS_SENDER_ID || 'BalkanBarber',
-        },
-        'AWS.SNS.SMS.SMSType': {
-          DataType: 'String',
-          StringValue: 'Transactional', // or 'Promotional'
-        },
-      },
+      MessageAttributes: messageAttributes,
     };
 
     const command = new PublishCommand(params);
