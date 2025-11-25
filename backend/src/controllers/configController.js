@@ -46,12 +46,12 @@ const getAllBarbers = async (req, res) => {
 
 // Create a new barber
 const createBarber = async (req, res) => {
-  const { firstName, lastName, email, password, specialty, rating, serviceIds } = req.body;
+  const { username, firstName, lastName, email, password, specialty, rating, serviceIds } = req.body;
   
-  if (!firstName || !lastName || !email || !password) {
+  if (!username || !firstName || !lastName || !email || !password) {
     return res.status(400).json({
       success: false,
-      message: 'First name, last name, email, and password are required'
+      message: 'Username, first name, last name, email, and password are required'
     });
   }
 
@@ -64,10 +64,10 @@ const createBarber = async (req, res) => {
     
     // Create user
     const userResult = await client.query(`
-      INSERT INTO users (first_name, last_name, email, password, role, is_verified)
-      VALUES ($1, $2, $3, $4, 'barber', true)
+      INSERT INTO users (username, first_name, last_name, email, password, role, is_verified)
+      VALUES ($1, $2, $3, $4, $5, 'barber', true)
       RETURNING id
-    `, [firstName, lastName, email, hashedPassword]);
+    `, [username.toLowerCase(), firstName, lastName, email, hashedPassword]);
     
     const userId = userResult.rows[0].id;
     

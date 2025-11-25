@@ -5,6 +5,7 @@ import './AuthPages.css';
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
+    username: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -104,6 +105,24 @@ function RegisterPage() {
             </div>
 
             <div className="form-group">
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                placeholder="Choose a unique username"
+                minLength="3"
+                maxLength="50"
+                pattern="[a-zA-Z0-9._-]+"
+                title="Username can only contain letters, numbers, dots, underscores, and hyphens"
+              />
+              <small style={{color: '#999', fontSize: '0.85rem'}}>This will be used for login</small>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="email">Email</label>
               <input
                 type="email"
@@ -114,6 +133,7 @@ function RegisterPage() {
                 required
                 placeholder="your.email@example.com"
               />
+              <small style={{color: '#999', fontSize: '0.85rem'}}>Used for notifications only</small>
             </div>
 
             <div className="form-group">

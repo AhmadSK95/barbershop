@@ -19,6 +19,7 @@ function ConfigPage() {
   const [barbers, setBarbers] = useState([]);
   const [editingBarber, setEditingBarber] = useState(null);
   const [newBarber, setNewBarber] = useState({
+    username: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -158,7 +159,7 @@ function ConfigPage() {
       const data = await response.json();
       if (data.success) {
         showSuccess('Barber created successfully');
-        setNewBarber({ firstName: '', lastName: '', email: '', password: '', specialty: '', rating: 5.0, serviceIds: [], imageFile: null });
+        setNewBarber({ username: '', firstName: '', lastName: '', email: '', password: '', specialty: '', rating: 5.0, serviceIds: [], imageFile: null });
         fetchBarbers();
       } else {
         setError(data.message);
@@ -458,14 +459,28 @@ function ConfigPage() {
                   </div>
                   <div className="form-row">
                     <div className="form-group">
+                      <label>Username *</label>
+                      <input
+                        type="text"
+                        value={newBarber.username}
+                        onChange={(e) => setNewBarber({ ...newBarber, username: e.target.value })}
+                        required
+                        placeholder="Unique username for login"
+                        pattern="[a-zA-Z0-9._-]+"
+                      />
+                    </div>
+                    <div className="form-group">
                       <label>Email *</label>
                       <input
                         type="email"
                         value={newBarber.email}
                         onChange={(e) => setNewBarber({ ...newBarber, email: e.target.value })}
                         required
+                        placeholder="For notifications"
                       />
                     </div>
+                  </div>
+                  <div className="form-row">
                     <div className="form-group">
                       <label>Password *</label>
                       <input
@@ -473,6 +488,7 @@ function ConfigPage() {
                         value={newBarber.password}
                         onChange={(e) => setNewBarber({ ...newBarber, password: e.target.value })}
                         required
+                        minLength="8"
                       />
                     </div>
                   </div>
