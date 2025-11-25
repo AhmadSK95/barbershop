@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { sendBarberBookingNotificationSMS } = require('../../services/sms');
+const { sendBarberBookingNotificationSMS } = require('../../services/twilio-sms');
 
 // Get barber dashboard overview - today's schedule and stats
 const getDashboard = async (req, res) => {
