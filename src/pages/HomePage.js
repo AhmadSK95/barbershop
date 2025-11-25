@@ -38,7 +38,7 @@ function HomePage() {
         </div>
       </section>
 
-      
+      <section className="quick-booking fade-in-up delay-300">
         <h2>Ready for a Fresh Look?</h2>
         <button className="booking-button" onClick={() => navigate('/booking')}>
           <Calendar className="btn-icon" size={24} style={{marginRight: '10px'}}/>
