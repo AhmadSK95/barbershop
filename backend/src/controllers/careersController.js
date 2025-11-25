@@ -23,26 +23,32 @@ const submitApplication = async (req, res) => {
     }
 
     // Validate email format
-    if (!validateEmail(email)) {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      console.log('Email validation failed:', emailError);
       return res.status(400).json({
         success: false,
-        message: 'Please provide a valid email address'
+        message: emailError
       });
     }
 
     // Validate phone format
-    if (!validatePhone(phone)) {
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      console.log('Phone validation failed:', phoneError);
       return res.status(400).json({
         success: false,
-        message: 'Please provide a valid phone number (10-15 digits)'
+        message: phoneError
       });
     }
 
     // Validate name
-    if (!validateName(name)) {
+    const nameError = validateName(name);
+    if (nameError) {
+      console.log('Name validation failed:', nameError);
       return res.status(400).json({
         success: false,
-        message: 'Name must be 2-50 characters and contain only letters, spaces, and hyphens'
+        message: nameError
       });
     }
 
