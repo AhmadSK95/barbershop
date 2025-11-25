@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { bookingAPI } from '../services/api';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -55,12 +56,11 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
       const assignedBarber = response.data.data?.assignedBarber;
       
       // Show confirmation with assigned barber
-      let confirmationMessage = 'Booking confirmed! ✅\n\nYou will receive a confirmation email shortly.';
       if (assignedBarber && booking.barber?.name === 'Any Available') {
-        confirmationMessage = `Booking confirmed! ✅\n\nYour barber: ${assignedBarber.name}\n\nYou will receive a confirmation email shortly.`;
+        toast.success(`Booking confirmed! Your barber: ${assignedBarber.name}. You will receive a confirmation email shortly.`);
+      } else {
+        toast.success('Booking confirmed! You will receive a confirmation email shortly.');
       }
-      
-      alert(confirmationMessage);
       
       // Reset booking state
       onConfirm();
@@ -70,7 +70,7 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
     } catch (err) {
       console.error('Booking error:', err);
       const errorMessage = err.response?.data?.message || 'Failed to create booking. Please try again.';
-      alert('❌ ' + errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

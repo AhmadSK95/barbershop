@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { SkeletonCard } from '../components/SkeletonLoader';
 import './BarberDashboardPage.css';
@@ -59,12 +60,13 @@ function BarberDashboardPage() {
       if (data.success) {
         // Refresh dashboard
         fetchDashboard();
+        toast.success('Status updated successfully');
       } else {
-        alert(data.message);
+        toast.error(data.message);
       }
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('Failed to update status');
+      toast.error('Failed to update status');
     }
   };
 

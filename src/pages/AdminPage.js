@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { bookingAPI } from '../services/api';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import RescheduleModal from '../components/RescheduleModal';
 import { SkeletonTable } from '../components/SkeletonLoader';
@@ -84,12 +85,12 @@ function AdminPage() {
 
     try {
       await bookingAPI.cancel(bookingId);
-      alert('✅ Booking cancelled successfully');
+      toast.success('Booking cancelled successfully');
       // Refresh the bookings list
       fetchAllBookings();
     } catch (err) {
       console.error('Error cancelling booking:', err);
-      alert('❌ Failed to cancel booking: ' + (err.response?.data?.message || err.message));
+      toast.error('Failed to cancel booking: ' + (err.response?.data?.message || err.message));
     }
   };
   
@@ -141,11 +142,11 @@ function AdminPage() {
         throw new Error('Failed to update status');
       }
       
-      // Show success message without blocking alert
-      console.log('✅ Booking status updated successfully');
+      // Show success message
+      toast.success('Booking status updated successfully');
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('❌ Failed to update status');
+      toast.error('Failed to update status');
       // Revert the optimistic update on error
       fetchAllBookings();
     }
@@ -236,10 +237,10 @@ function AdminPage() {
       a.remove();
       window.URL.revokeObjectURL(downloadUrl);
       
-      console.log('✅ CSV exported successfully');
+      toast.success('CSV exported successfully');
     } catch (err) {
       console.error('Error exporting CSV:', err);
-      alert(`Failed to export bookings: ${err.message}`);
+      toast.error(`Failed to export bookings: ${err.message}`);
     }
   };
 
