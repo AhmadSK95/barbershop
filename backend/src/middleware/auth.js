@@ -28,7 +28,7 @@ const protect = async (req, res, next) => {
 
     // Get user from database
     const result = await pool.query(
-      'SELECT id, email, first_name, last_name, role, is_verified FROM users WHERE id = $1',
+      'SELECT id, email, first_name, last_name, phone, role, is_verified FROM users WHERE id = $1',
       [decoded.id]
     );
 
@@ -39,7 +39,17 @@ const protect = async (req, res, next) => {
       });
     }
 
-    req.user = result.rows[0];
+    // Transform snake_case to camelCase for frontend
+    const user = result.rows[0];
+    req.user = {
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      phone: user.phone,
+      role: user.role,
+      isVerified: user.is_verified
+    };
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);

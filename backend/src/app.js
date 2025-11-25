@@ -85,8 +85,19 @@ app.use(cors({
 }));
 
 // Request body size limits (prevent DoS)
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+// Skip body parsing for multipart/form-data (handled by multer in careers route)
+app.use((req, res, next) => {
+  if (req.path === '/api/careers/apply') {
+    return next();
+  }
+  express.json({ limit: '10kb' })(req, res, next);
+});
+app.use((req, res, next) => {
+  if (req.path === '/api/careers/apply') {
+    return next();
+  }
+  express.urlencoded({ extended: true, limit: '10kb' })(req, res, next);
+});
 
 // Logging (skip in test mode)
 if (process.env.NODE_ENV !== 'test') {
