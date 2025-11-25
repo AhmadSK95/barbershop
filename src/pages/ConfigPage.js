@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import LoadingSpinner from '../components/LoadingSpinner';
 import './ConfigPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -126,6 +128,7 @@ function ConfigPage() {
   };
 
   const showSuccess = (message) => {
+    toast.success(message);
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), 3000);
   };

@@ -4,6 +4,7 @@ import { bookingAPI, userAPI, ratingAPI } from '../services/api';
 import { format } from 'date-fns';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { services } from '../data';
+import { toast } from 'react-toastify';
 import RescheduleModal from '../components/RescheduleModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { SkeletonBooking } from '../components/SkeletonLoader';
@@ -314,11 +315,11 @@ function ProfilePage() {
       if (response.data.success) {
         // Refresh bookings to show updated status
         fetchBookings();
-        alert('Appointment cancelled successfully');
+        toast.success('Appointment cancelled successfully');
       }
     } catch (err) {
       console.error('Error cancelling booking:', err);
-      alert(err.response?.data?.message || 'Failed to cancel booking. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to cancel booking. Please try again.');
     }
   };
   
@@ -348,7 +349,7 @@ function ProfilePage() {
   
   const submitRating = async () => {
     if (rating === 0) {
-      alert('Please select a rating');
+      toast.warning('Please select a rating');
       return;
     }
     
@@ -359,7 +360,7 @@ function ProfilePage() {
       });
       
       if (response.data.success) {
-        alert(`Thank you for rating ${rating} stars!`);
+        toast.success(`Thank you for rating ${rating} stars!`);
         
         // Update local ratings state
         setBookingRatings({
@@ -374,7 +375,7 @@ function ProfilePage() {
       }
     } catch (err) {
       console.error('Error submitting rating:', err);
-      alert(err.response?.data?.message || 'Failed to submit rating. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to submit rating. Please try again.');
     }
   };
 

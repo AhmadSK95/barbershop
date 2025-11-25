@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
 import LoadingSpinner from './LoadingSpinner';
 import './RescheduleModal.css';
 
@@ -102,18 +103,18 @@ function RescheduleModal({ booking, onClose, onSuccess }) {
       const data = await response.json();
       
       if (data.success) {
-        alert('✅ Booking rescheduled successfully!');
+        toast.success('Booking rescheduled successfully!');
         onSuccess();
         onClose();
       } else {
         setError(data.message);
-        alert('❌ Failed to reschedule: ' + data.message);
+        toast.error('Failed to reschedule: ' + data.message);
       }
     } catch (err) {
       console.error('Error rescheduling:', err);
       const errorMsg = err.message || 'Failed to reschedule booking';
       setError(errorMsg);
-      alert('❌ Error: ' + errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
