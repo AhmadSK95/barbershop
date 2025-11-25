@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookingAPI } from '../services/api';
+import LoadingSpinner from './LoadingSpinner';
 
 function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack }) {
   const [loading, setLoading] = useState(false);
@@ -101,7 +102,9 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
           <h3>Barber</h3>
           <div className="summary-item">
             {loadingBarber ? (
-              <span style={{ fontStyle: 'italic', color: '#c19a6b' }}>Finding available barber...</span>
+              <span style={{ fontStyle: 'italic', color: '#c19a6b' }}>
+                <LoadingSpinner size="small" /> Finding available barber...
+              </span>
             ) : previewBarber ? (
               <>
                 <span>{previewBarber.name}</span>
@@ -138,7 +141,11 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
           Back
         </button>
         <button className="btn btn-confirm" onClick={handleConfirm} disabled={loading}>
-          {loading ? 'Creating Booking...' : 'Confirm Booking'}
+          {loading ? (
+            <>
+              <LoadingSpinner size="small" /> Creating Booking...
+            </>
+          ) : 'Confirm Booking'}
         </button>
       </div>
     </div>

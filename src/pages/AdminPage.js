@@ -4,6 +4,7 @@ import { bookingAPI } from '../services/api';
 import { format } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import RescheduleModal from '../components/RescheduleModal';
+import { SkeletonTable } from '../components/SkeletonLoader';
 import './AdminPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -447,7 +448,7 @@ function AdminPage() {
           <h2>Bookings List</h2>
           
           {loading && (
-            <div className="loading-message">Loading bookings...</div>
+            <SkeletonTable rows={8} columns={8} />
           )}
           
           {error && (

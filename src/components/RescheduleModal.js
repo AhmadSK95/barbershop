@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import LoadingSpinner from './LoadingSpinner';
 import './RescheduleModal.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -204,7 +205,9 @@ function RescheduleModal({ booking, onClose, onSuccess }) {
             <div className="form-group">
               <label>Select New Time</label>
               {loadingSlots ? (
-                <div className="loading-slots">Loading available times...</div>
+                <div className="loading-slots">
+                  <LoadingSpinner size="small" message="Loading available times..." />
+                </div>
               ) : availableSlots.length > 0 ? (
                 <div className="time-slots-grid">
                   {availableSlots.map((slot) => (
@@ -258,7 +261,11 @@ function RescheduleModal({ booking, onClose, onSuccess }) {
             onClick={handleReschedule}
             disabled={loading || !selectedDate || !selectedTime}
           >
-            {loading ? 'Rescheduling...' : 'Confirm Reschedule'}
+            {loading ? (
+              <>
+                <LoadingSpinner size="small" /> Rescheduling...
+              </>
+            ) : 'Confirm Reschedule'}
           </button>
         </div>
       </div>
