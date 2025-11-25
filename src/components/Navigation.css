@@ -47,6 +47,29 @@
   display: flex;
   gap: 2rem;
   align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold-dark) var(--color-brown-dark);
+}
+
+/* Custom scrollbar for webkit browsers */
+.nav-links::-webkit-scrollbar {
+  height: 6px;
+}
+
+.nav-links::-webkit-scrollbar-track {
+  background: var(--color-brown-dark);
+  border-radius: 3px;
+}
+
+.nav-links::-webkit-scrollbar-thumb {
+  background: var(--color-gold-dark);
+  border-radius: 3px;
+}
+
+.nav-links::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-medium);
 }
 
 .nav-link {

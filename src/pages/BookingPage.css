@@ -355,6 +355,24 @@
   border-top: 12px solid rgba(101, 67, 33, 0.98);
 }
 
+/* Time Period Sections (AM/PM) */
+.time-period-section {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.time-period-label {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-gold-light);
+  text-shadow: var(--shadow-md);
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 4px solid var(--color-gold-medium);
+  font-family: var(--font-display);
+  letter-spacing: 2px;
+}
+
 /* Barber Avatar Image Styles */
 .barber-avatar {
   width: 120px;

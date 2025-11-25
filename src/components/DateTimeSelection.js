@@ -7,6 +7,26 @@ function DateTimeSelection({ selectedDate, selectedTime, selectedBarber, selecte
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
   const timeSlots = selectedDate ? generateTimeSlots(selectedDate) : [];
+  
+  // Convert 24-hour time to 12-hour format
+  const convertTo12Hour = (time24) => {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${hour12}:${minutes}`;
+  };
+  
+  // Split time slots into AM and PM
+  const amSlots = timeSlots.filter(slot => {
+    const hour = parseInt(slot.split(':')[0]);
+    return hour < 12;
+  });
+  
+  const pmSlots = timeSlots.filter(slot => {
+    const hour = parseInt(slot.split(':')[0]);
+    return hour >= 12;
+  });
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 
                   'July', 'August', 'September', 'October', 'November', 'December'];
@@ -125,18 +145,44 @@ function DateTimeSelection({ selectedDate, selectedTime, selectedBarber, selecte
       {selectedDate && (
         <div className="section time-section">
           <h3>⚡ Select Time Slot</h3>
-          <div className="time-grid">
-            {timeSlots.map((slot, idx) => (
-              <div
-                key={idx}
-                className={`time-slot ${selectedTime === slot ? 'selected' : ''}`}
-                onClick={() => onTimeSelect(slot)}
-              >
-                <span className="time-icon">🕐</span>
-                {slot}
+          
+          {/* AM Slots */}
+          {amSlots.length > 0 && (
+            <div className="time-period-section">
+              <div className="time-period-label">AM</div>
+              <div className="time-grid">
+                {amSlots.map((slot, idx) => (
+                  <div
+                    key={idx}
+                    className={`time-slot ${selectedTime === slot ? 'selected' : ''}`}
+                    onClick={() => onTimeSelect(slot)}
+                  >
+                    <span className="time-icon">🕐</span>
+                    {convertTo12Hour(slot)}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+          
+          {/* PM Slots */}
+          {pmSlots.length > 0 && (
+            <div className="time-period-section">
+              <div className="time-period-label">PM</div>
+              <div className="time-grid">
+                {pmSlots.map((slot, idx) => (
+                  <div
+                    key={idx}
+                    className={`time-slot ${selectedTime === slot ? 'selected' : ''}`}
+                    onClick={() => onTimeSelect(slot)}
+                  >
+                    <span className="time-icon">🕐</span>
+                    {convertTo12Hour(slot)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
