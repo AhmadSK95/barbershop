@@ -12,6 +12,7 @@ function RegisterPage() {
     password: '',
     confirmPassword: '',
     phone: '',
+    smsConsent: false,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -21,9 +22,10 @@ function RegisterPage() {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     });
     setError('');
   };
@@ -41,6 +43,12 @@ function RegisterPage() {
     // Validate password strength
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    // Validate SMS consent if phone number provided
+    if (formData.phone && !formData.smsConsent) {
+      setError('Please consent to receive SMS notifications to use this phone number');
       return;
     }
 
@@ -137,17 +145,37 @@ function RegisterPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone">Phone Number</label>
+              <label htmlFor="phone">Phone Number (Optional)</label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                required
-                placeholder="+1234567890"
+                placeholder="+1 (123) 456-7890"
               />
+              <small style={{color: '#999', fontSize: '0.85rem'}}>For booking confirmations and reminders</small>
             </div>
+
+            {formData.phone && (
+              <div className="form-group" style={{marginTop: '1rem'}}>
+                <label style={{display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.95rem'}}>
+                  <input
+                    type="checkbox"
+                    name="smsConsent"
+                    checked={formData.smsConsent}
+                    onChange={handleChange}
+                    required
+                    style={{marginRight: '0.75rem', marginTop: '0.25rem', cursor: 'pointer'}}
+                  />
+                  <span style={{lineHeight: '1.5', color: '#ddd'}}>
+                    I agree to receive transactional SMS messages including booking confirmations, 
+                    appointment reminders, and service updates. Message frequency varies. 
+                    Reply STOP to opt-out anytime. Standard message and data rates may apply.
+                  </span>
+                </label>
+              </div>
+            )}
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
