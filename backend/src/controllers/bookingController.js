@@ -1,7 +1,7 @@
 const pool = require('../config/database');
 // Use AWS SES for email sending
 const { sendBookingConfirmationEmail } = require('../utils/sesEmail');
-const { sendBookingConfirmationSMS, sendBookingCancellationSMS } = require('../../services/sms');
+const { sendBookingConfirmationSMS, sendBookingCancellationSMS, sendBarberBookingNotificationSMS } = require('../../services/sms');
 
 // @desc    Create new booking
 // @route   POST /api/bookings
@@ -89,12 +89,12 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Create booking (using first service as primary)
+    // Create booking (auto-confirmed)
     const bookingResult = await client.query(
       `INSERT INTO bookings (user_id, service_id, barber_id, booking_date, booking_time, total_price, notes, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id`,
-      [userId, serviceIds[0], barberId, bookingDate, bookingTime, totalPrice, notes, 'pending']
+      [userId, serviceIds[0], barberId, bookingDate, bookingTime, totalPrice, notes, 'confirmed']
     );
 
     const bookingId = bookingResult.rows[0].id;
@@ -104,15 +104,16 @@ const createBooking = async (req, res) => {
 
     await client.query('COMMIT');
 
-    // Get assigned barber details
+    // Get assigned barber details including phone
     const barberResult = await client.query(
-      'SELECT b.id, u.first_name, u.last_name, b.specialty FROM barbers b JOIN users u ON b.user_id = u.id WHERE b.id = $1',
+      'SELECT b.id, u.first_name, u.last_name, u.phone, b.specialty FROM barbers b JOIN users u ON b.user_id = u.id WHERE b.id = $1',
       [barberId]
     );
     const assignedBarber = barberResult.rows[0];
     const barberName = assignedBarber
       ? `${assignedBarber.first_name} ${assignedBarber.last_name}`
       : 'Any Available';
+    const barberPhone = assignedBarber?.phone;
 
     // Send confirmation email and SMS
     try {
@@ -127,12 +128,27 @@ const createBooking = async (req, res) => {
         price: totalPrice.toFixed(2)
       };
 
-      // Send email
+      // Send email to customer
       await sendBookingConfirmationEmail(req.user.email, req.user.first_name, bookingDetails);
       
-      // Send SMS if phone number exists
+      // Send SMS to customer if phone number exists
       if (req.user.phone_number) {
         await sendBookingConfirmationSMS(req.user.phone_number, bookingDetails);
+      }
+      
+      // Send SMS to barber
+      if (barberPhone) {
+        const barberSMSDetails = {
+          customerName: `${req.user.first_name} ${req.user.last_name || ''}`.trim(),
+          service: servicesString,
+          date: bookingDate,
+          time: bookingTime,
+          price: totalPrice.toFixed(2)
+        };
+        await sendBarberBookingNotificationSMS(barberPhone, barberSMSDetails);
+        console.log(`📱 SMS sent to barber at ${barberPhone}`);
+      } else {
+        console.log('⚠️  Barber has no phone number - SMS not sent');
       }
     } catch (notificationError) {
       console.error('Failed to send notifications:', notificationError);
