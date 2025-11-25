@@ -6,10 +6,16 @@ const { validateEmail, validatePhone, validateName } = require('../utils/validat
 // @access  Public
 const submitApplication = async (req, res) => {
   try {
+    console.log('Careers application received:', {
+      body: req.body,
+      file: req.file ? { name: req.file.originalname, size: req.file.size, type: req.file.mimetype } : null
+    });
+    
     const { name, email, phone, position, message } = req.body;
 
     // Validate required fields
     if (!name || !email || !phone || !position) {
+      console.log('Missing required fields:', { name: !!name, email: !!email, phone: !!phone, position: !!position });
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields: name, email, phone, and position'
