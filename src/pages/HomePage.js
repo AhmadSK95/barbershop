@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, MapPin, Scissors, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import SEO, { getLocalBusinessSchema, getWebsiteSchema } from '../components/SEO';
 import './HomePage.css';
 
@@ -38,38 +38,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="info-section">
-        <div className="info-card fade-in-up delay-100">
-          <div className="info-icon">
-            <Clock size={64} color="#d4a574" strokeWidth={1.5} />
-          </div>
-          <h3>Hours</h3>
-          <p>Monday–Friday: 10am–7pm</p>
-          <p>Saturday-Sunday: 9am-4pm</p>
-        </div>
-
-        <div className="info-card fade-in-up delay-200">
-          <div className="info-icon">
-            <MapPin size={64} color="#d4a574" strokeWidth={1.5} />
-          </div>
-          <h3>Our Location</h3>
-          <p>332 Barrow St</p>
-          <p>Jersey City, NJ 07302</p>
-          <p>Call: (201) 433-2870</p>
-        </div>
-
-        <div className="info-card fade-in-up delay-300">
-          <div className="info-icon">
-            <Scissors size={64} color="#d4a574" strokeWidth={1.5} />
-          </div>
-          <h3>Services</h3>
-          <p>Professional Cuts</p>
-          <p>Hot Towel Shaves</p>
-          <p>Straight Edge Razor Line-ups</p>
-        </div>
-      </section>
-
-      <section className="quick-booking fade-in-up delay-300">
+      
         <h2>Ready for a Fresh Look?</h2>
         <button className="booking-button" onClick={() => navigate('/booking')}>
           <Calendar className="btn-icon" size={24} style={{marginRight: '10px'}}/>
