@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { SkeletonCard } from '../components/SkeletonLoader';
 import './BarberDashboardPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -116,7 +118,15 @@ function BarberDashboardPage() {
     return (
       <div className="barber-dashboard-page">
         <div className="barber-container">
-          <div className="loading-message">Loading dashboard...</div>
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">✂️ Barber Dashboard</h1>
+            <LoadingSpinner message="Loading your schedule..." />
+          </div>
+          <div className="stats-cards">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
         </div>
       </div>
     );

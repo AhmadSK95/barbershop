@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { services } from '../data';
 import RescheduleModal from '../components/RescheduleModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { SkeletonBooking } from '../components/SkeletonLoader';
 import './ProfilePage.css';
 
 function ProfilePage() {
@@ -466,7 +468,11 @@ function ProfilePage() {
                 className="btn btn-primary"
                 disabled={profileLoading}
               >
-                {profileLoading ? 'Updating...' : 'Update Profile'}
+                {profileLoading ? (
+                  <>
+                    <LoadingSpinner size="small" /> Updating...
+                  </>
+                ) : 'Update Profile'}
               </button>
             </form>
           </div>
@@ -526,7 +532,11 @@ function ProfilePage() {
                 className="btn btn-primary"
                 disabled={passwordLoading}
               >
-                {passwordLoading ? 'Changing Password...' : 'Change Password'}
+                {passwordLoading ? (
+                  <>
+                    <LoadingSpinner size="small" /> Changing Password...
+                  </>
+                ) : 'Change Password'}
               </button>
             </form>
           </div>
@@ -547,7 +557,11 @@ function ProfilePage() {
           </div>
           
           {loading && !refreshing && (
-            <div className="loading-message">Loading your bookings...</div>
+            <div className="bookings-list">
+              <SkeletonBooking />
+              <SkeletonBooking />
+              <SkeletonBooking />
+            </div>
           )}
           
           {error && (
