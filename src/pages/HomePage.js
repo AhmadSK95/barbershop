@@ -1,14 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, MapPin, Scissors, Calendar } from 'lucide-react';
+import SEO, { getLocalBusinessSchema, getWebsiteSchema } from '../components/SEO';
 import './HomePage.css';
 
 function HomePage() {
   const navigate = useNavigate();
 
   return (
-    <div className="home-page">
-      <section className="hero-section fade-in-up">
+    <>
+      <SEO 
+        title="Home"
+        description="Premium barbershop in Downtown Jersey City at 332 Barrow St. Expert barbers specializing in scissors-focused cuts, straight edge razor shaves, and personalized grooming. Book your appointment online today!"
+        schema={[getLocalBusinessSchema(), getWebsiteSchema()]}
+      />
+      <div className="home-page">
+        <section className="hero-section fade-in-up">
         <div className="hero-content">
           <h1 className="hero-title">Balkan Barber</h1>
           <p className="hero-subtitle">Downtown Jersey City Barber</p>
@@ -107,6 +114,7 @@ function HomePage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }
 
