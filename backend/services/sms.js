@@ -112,9 +112,15 @@ const sendBookingCancellationSMS = async (phoneNumber, bookingDetails) => {
   return sendSMS(phoneNumber, message);
 };
 
+const sendBarberBookingNotificationSMS = async (phoneNumber, bookingDetails) => {
+  const message = `New booking confirmed! Customer: ${bookingDetails.customerName}, Service: ${bookingDetails.service}, Date: ${bookingDetails.date} at ${bookingDetails.time}. Total: $${bookingDetails.price}`;
+  return sendSMS(phoneNumber, message);
+};
+
 module.exports = {
   sendSMS,
   sendBookingConfirmationSMS,
   sendBookingReminderSMS,
   sendBookingCancellationSMS,
+  sendBarberBookingNotificationSMS,
 };

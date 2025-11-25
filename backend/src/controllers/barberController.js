@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { sendBarberBookingNotificationSMS } = require('../../services/sms');
 
 // Get barber dashboard overview - today's schedule and stats
 const getDashboard = async (req, res) => {
@@ -252,6 +253,49 @@ const updateBookingStatus = async (req, res) => {
       `UPDATE bookings SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramIndex}`,
       params
     );
+    
+    // Send SMS notification to barber if status is confirmed
+    if (status === 'confirmed') {
+      try {
+        // Get booking details, customer info, and barber phone
+        const bookingDetails = await pool.query(
+          `SELECT b.booking_date, b.booking_time, b.total_price,
+                  u.first_name as customer_first_name, u.last_name as customer_last_name,
+                  s.name as service_name,
+                  bu.phone as barber_phone
+           FROM bookings b
+           JOIN users u ON b.user_id = u.id
+           LEFT JOIN services s ON b.service_id = s.id
+           JOIN barbers bar ON b.barber_id = bar.id
+           JOIN users bu ON bar.user_id = bu.id
+           WHERE b.id = $1`,
+          [id]
+        );
+        
+        if (bookingDetails.rows.length > 0) {
+          const booking = bookingDetails.rows[0];
+          const barberPhone = booking.barber_phone;
+          
+          if (barberPhone) {
+            const smsDetails = {
+              customerName: `${booking.customer_first_name} ${booking.customer_last_name}`,
+              service: booking.service_name,
+              date: booking.booking_date,
+              time: booking.booking_time,
+              price: booking.total_price
+            };
+            
+            await sendBarberBookingNotificationSMS(barberPhone, smsDetails);
+            console.log(`📱 SMS sent to barber at ${barberPhone}`);
+          } else {
+            console.log('⚠️  Barber has no phone number configured');
+          }
+        }
+      } catch (smsError) {
+        console.error('Failed to send SMS to barber:', smsError);
+        // Don't fail the booking status update if SMS fails
+      }
+    }
     
     res.json({
       success: true,
