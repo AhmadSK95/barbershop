@@ -25,6 +25,7 @@ const careersRoutes = require('./routes/careersRoutes');
 const barberRoutes = require('./routes/barberRoutes');
 const adminAnalyticsRoutes = require('./routes/adminAnalyticsRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -75,6 +76,9 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(morgan('dev')); // Logging
 
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Apply rate limiting to all API routes
 app.use('/api', apiLimiter);
 
@@ -93,6 +97,7 @@ app.use('/api/careers', careersRoutes);
 app.use('/api/barbers', barberRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/ratings', ratingRoutes);
+app.use('/api/admin/audit', auditRoutes);
 
 // 404 handler
 app.use((req, res) => {
