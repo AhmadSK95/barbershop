@@ -1,10 +1,17 @@
 import React from 'react';
+import SEO, { getLocalBusinessSchema } from '../components/SEO';
 import './ContactPage.css';
 
 function ContactPage() {
   return (
-    <div className="contact-page">
-      <div className="contact-container">
+    <>
+      <SEO 
+        title="Contact Us"
+        description="Visit Balkan Barber at 332 Barrow St, Jersey City, NJ 07302. Call (201) 433-2870 or book online. Open Mon-Fri 10AM-7PM, Sat-Sun 9AM-4PM."
+        schema={getLocalBusinessSchema()}
+      />
+      <div className="contact-page">
+        <div className="contact-container">
         <div className="contact-header">
           <h1 className="contact-title">✂️ Contact Us</h1>
           <p className="contact-subtitle">We'd love to hear from you</p>
@@ -72,6 +79,7 @@ function ContactPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

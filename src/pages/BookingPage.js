@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import SEO, { getServiceSchema } from '../components/SEO';
 import './BookingPage.css';
 import ServiceSelection from '../components/ServiceSelection';
 import DateTimeSelection from '../components/DateTimeSelection';
@@ -62,8 +63,14 @@ function BookingPage() {
   };
 
   return (
-    <div className="booking-page">
-      <div className="booking-header">
+    <>
+      <SEO 
+        title="Book Appointment"
+        description="Book your barbershop appointment online at Balkan Barber. Choose your preferred barber, service, date and time. Professional haircuts, hot towel shaves, and beard trims available."
+        schema={getServiceSchema()}
+      />
+      <div className="booking-page">
+        <div className="booking-header">
         <h1 className="neon-title">✂️ BARBERSHOP QUEST ✂️</h1>
       </div>
 
@@ -142,6 +149,7 @@ function BookingPage() {
         )}
       </div>
     </div>
+    </>
   );
 }
 

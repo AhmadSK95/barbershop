@@ -1,13 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 import './AboutPage.css';
 
 function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="about-page">
-      <div className="about-hero">
+    <>
+      <SEO 
+        title="About Us"
+        description="Learn about Balkan Barber's story, philosophy, and expert barbers Johnny and Riza. Located at 332 Barrow St in Downtown Jersey City, serving quality haircuts with old-school style and new-school touch."
+      />
+      <div className="about-page">
+        <div className="about-hero">
         <h1>About Balkan Barber</h1>
         <p className="tagline">Downtown Jersey City Barber</p>
       </div>
@@ -102,6 +108,7 @@ function AboutPage() {
         </button>
       </section>
     </div>
+    </>
   );
 }
 
