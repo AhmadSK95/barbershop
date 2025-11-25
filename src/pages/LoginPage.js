@@ -5,7 +5,7 @@ import './AuthPages.css';
 
 function LoginPage() {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
   const [error, setError] = useState('');
@@ -31,7 +31,7 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      console.log('Attempting login with:', formData.email);
+      console.log('Attempting login with:', formData.username);
       const result = await login(formData);
       console.log('Login result:', result);
 
@@ -59,7 +59,8 @@ function LoginPage() {
           
           <div style={{background: 'rgba(77, 208, 225, 0.1)', padding: '12px', borderRadius: '5px', marginBottom: '15px', border: '2px solid #4dd0e1'}}>
             <p style={{margin: 0, fontSize: '0.9rem', color: '#4dd0e1'}}>
-              💡 <strong>Test Admin:</strong> admin@barbershop.com / Admin@123456
+              💡 <strong>Test Admin:</strong> admin@barbershop.com / Admin@123456<br/>
+              <small>(Use email or username to login)</small>
             </p>
           </div>
 
@@ -67,15 +68,15 @@ function LoginPage() {
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="username">Username or Email</label>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
                 required
-                placeholder="your.email@example.com"
+                placeholder="username or email"
               />
             </div>
 
