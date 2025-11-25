@@ -28,7 +28,7 @@ const {
 const register = async (req, res) => {
   const client = await pool.connect();
   try {
-    let { email, password, firstName, lastName, phone, username } = req.body;
+    let { email, password, firstName, lastName, phone, username, smsConsent } = req.body;
 
     // Validate input
     if (!email || !password || !firstName || !lastName || !username) {
@@ -112,11 +112,14 @@ const register = async (req, res) => {
     const hashedVerificationToken = hashToken(verificationToken);
 
     // Create user
+    const smsConsentValue = phone && smsConsent ? true : false;
+    const smsConsentDateValue = smsConsentValue ? new Date() : null;
+    
     const result = await client.query(
-      `INSERT INTO users (username, email, password, first_name, last_name, phone, verification_token)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO users (username, email, password, first_name, last_name, phone, verification_token, sms_consent, sms_consent_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, username, email, first_name, last_name, role, is_verified`,
-      [username.toLowerCase(), email.toLowerCase(), hashedPassword, firstName, lastName, phone, hashedVerificationToken]
+      [username.toLowerCase(), email.toLowerCase(), hashedPassword, firstName, lastName, phone, hashedVerificationToken, smsConsentValue, smsConsentDateValue]
     );
 
     const user = result.rows[0];

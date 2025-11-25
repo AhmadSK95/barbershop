@@ -39,9 +39,31 @@ const isPhoneInDnd = async (normalizedPhone) => {
   }
 };
 
+const checkSMSConsent = async (phoneNumber) => {
+  if (!phoneNumber) return false;
+  
+  try {
+    const result = await pool.query(
+      'SELECT sms_consent FROM users WHERE phone = $1 LIMIT 1',
+      [phoneNumber]
+    );
+    return result.rows.length > 0 && result.rows[0].sms_consent === true;
+  } catch (error) {
+    console.error('Error checking SMS consent:', error);
+    return false;
+  }
+};
+
 const sendSMS = async (phoneNumber, message) => {
   try {
     const normalizedPhone = normalizePhone(phoneNumber);
+
+    // Check if user has consented to SMS
+    const hasConsent = await checkSMSConsent(phoneNumber);
+    if (!hasConsent) {
+      console.log(`SMS not sent to ${normalizedPhone} (no SMS consent)`);
+      return { success: false, skipped: true, reason: 'no_consent' };
+    }
 
     // Skip sending if number is on the DND list
     if (await isPhoneInDnd(normalizedPhone)) {
