@@ -149,18 +149,31 @@ const deleteUser = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName, phone } = req.body;
+    const { firstName, lastName, phone, email } = req.body;
     const userId = req.user.id;
+
+    // Validate email format if provided
+    if (email) {
+      const { validateEmail } = require('../utils/validation');
+      const emailError = validateEmail(email);
+      if (emailError) {
+        return res.status(400).json({
+          success: false,
+          message: emailError
+        });
+      }
+    }
 
     const result = await pool.query(
       `UPDATE users 
        SET first_name = COALESCE($1, first_name),
            last_name = COALESCE($2, last_name),
            phone = COALESCE($3, phone),
+           email = COALESCE($4, email),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $4
-       RETURNING id, email, first_name, last_name, phone, role, is_verified`,
-      [firstName, lastName, phone, userId]
+       WHERE id = $5
+       RETURNING id, email, username, first_name, last_name, phone, role, is_verified`,
+      [firstName, lastName, phone, email, userId]
     );
 
     res.json({
