@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Scissors, Menu, X, Home, Info, Calendar, Briefcase, LayoutDashboard, Settings, User, LogOut, LogIn } from 'lucide-react';
+import { Scissors, Menu, X, Home, Info, Calendar, Briefcase, LayoutDashboard, Settings, User, LogOut, LogIn, Phone } from 'lucide-react';
 import './Navigation.css';
 
 function Navigation() {
@@ -46,6 +46,14 @@ function Navigation() {
             <span>About</span>
           </Link>
           <Link 
+            to="/contact" 
+            className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}
+            onClick={closeMobileMenu}
+          >
+            <Phone size={18} className="nav-icon" />
+            <span>Contact</span>
+          </Link>
+          <Link 
             to="/careers" 
             className={`nav-link ${location.pathname === '/careers' ? 'active' : ''}`}
             onClick={closeMobileMenu}
@@ -54,7 +62,7 @@ function Navigation() {
             <span>Careers</span>
           </Link>
           <Link
-            to="/booking" 
+            to="/booking"
             className={`nav-link nav-link-booking ${location.pathname === '/booking' ? 'active' : ''}`}
             onClick={closeMobileMenu}
           >

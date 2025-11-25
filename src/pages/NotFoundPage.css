@@ -1,0 +1,117 @@
+.notfound-page {
+  min-height: 100vh;
+  background: var(--gradient-brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.notfound-container {
+  max-width: 700px;
+  width: 100%;
+}
+
+.notfound-content {
+  background: rgba(26, 15, 10, 0.9);
+  border: 3px solid var(--gold);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.notfound-code {
+  font-size: 8rem;
+  font-weight: bold;
+  color: var(--gold);
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+  margin: 0;
+  line-height: 1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.notfound-title {
+  font-size: 2.25rem;
+  color: var(--gold-light);
+  margin: 1.5rem 0 1rem;
+}
+
+.notfound-message {
+  font-size: 1.25rem;
+  color: var(--cream);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.notfound-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.notfound-link {
+  display: inline-block;
+  padding: 1rem 1.5rem;
+  background: rgba(40, 30, 20, 0.6);
+  border: 2px solid var(--gold-dark);
+  border-radius: 8px;
+  color: var(--gold-light);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.notfound-link:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+}
+
+.notfound-link.primary {
+  background: var(--gold);
+  color: var(--brown-dark);
+  border-color: var(--gold);
+}
+
+.notfound-link.primary:hover {
+  background: var(--gold-light);
+  color: var(--brown-dark);
+}
+
+@media (max-width: 768px) {
+  .notfound-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .notfound-code {
+    font-size: 5rem;
+  }
+
+  .notfound-title {
+    font-size: 1.75rem;
+  }
+
+  .notfound-message {
+    font-size: 1.1rem;
+  }
+
+  .notfound-links {
+    grid-template-columns: 1fr;
+  }
+}
