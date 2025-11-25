@@ -28,13 +28,13 @@ const {
 const register = async (req, res) => {
   const client = await pool.connect();
   try {
-    let { email, password, firstName, lastName, phone } = req.body;
+    let { email, password, firstName, lastName, phone, username } = req.body;
 
     // Validate input
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !password || !firstName || !lastName || !username) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields'
+        message: 'Please provide all required fields (username, email, password, first name, last name)'
       });
     }
 
@@ -86,20 +86,21 @@ const register = async (req, res) => {
 
     // Sanitize inputs
     email = sanitizeString(email, 255).toLowerCase();
+    username = sanitizeString(username, 255).toLowerCase();
     firstName = sanitizeString(firstName, 50);
     lastName = sanitizeString(lastName, 50);
     if (phone) phone = sanitizeString(phone, 20);
 
-    // Check if user exists
-    const userExists = await client.query(
-      'SELECT id FROM users WHERE email = $1',
-      [email.toLowerCase()]
+    // Check if username exists
+    const usernameExists = await client.query(
+      'SELECT id FROM users WHERE username = $1',
+      [username.toLowerCase()]
     );
 
-    if (userExists.rows.length > 0) {
+    if (usernameExists.rows.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email'
+        message: 'Username already taken'
       });
     }
 
@@ -112,10 +113,10 @@ const register = async (req, res) => {
 
     // Create user
     const result = await client.query(
-      `INSERT INTO users (email, password, first_name, last_name, phone, verification_token)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, email, first_name, last_name, role, is_verified`,
-      [email.toLowerCase(), hashedPassword, firstName, lastName, phone, hashedVerificationToken]
+      `INSERT INTO users (username, email, password, first_name, last_name, phone, verification_token)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, username, email, first_name, last_name, role, is_verified`,
+      [username.toLowerCase(), email.toLowerCase(), hashedPassword, firstName, lastName, phone, hashedVerificationToken]
     );
 
     const user = result.rows[0];
@@ -151,6 +152,7 @@ const register = async (req, res) => {
       data: {
         user: {
           id: user.id,
+          username: user.username,
           email: user.email,
           firstName: user.first_name,
           lastName: user.last_name,
@@ -178,20 +180,20 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const client = await pool.connect();
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
     // Validate input
-    if (!email || !password) {
+    if (!username || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: 'Please provide username and password'
       });
     }
 
-    // Get user
+    // Get user (support both username and email for backward compatibility)
     const result = await client.query(
-      'SELECT id, email, password, first_name, last_name, role, is_verified FROM users WHERE email = $1',
-      [email.toLowerCase()]
+      'SELECT id, username, email, password, first_name, last_name, phone, role, is_verified FROM users WHERE username = $1 OR email = $1',
+      [username.toLowerCase()]
     );
 
     if (result.rows.length === 0) {
@@ -230,9 +232,11 @@ const login = async (req, res) => {
       data: {
         user: {
           id: user.id,
+          username: user.username,
           email: user.email,
           firstName: user.first_name,
           lastName: user.last_name,
+          phone: user.phone,
           role: user.role,
           isVerified: user.is_verified
         },

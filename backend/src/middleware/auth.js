@@ -28,7 +28,7 @@ const protect = async (req, res, next) => {
 
     // Get user from database
     const result = await pool.query(
-      'SELECT id, email, first_name, last_name, phone, role, is_verified FROM users WHERE id = $1',
+      'SELECT id, username, email, first_name, last_name, phone, role, is_verified FROM users WHERE id = $1',
       [decoded.id]
     );
 
@@ -43,6 +43,7 @@ const protect = async (req, res, next) => {
     const user = result.rows[0];
     req.user = {
       id: user.id,
+      username: user.username,
       email: user.email,
       firstName: user.first_name,
       lastName: user.last_name,
