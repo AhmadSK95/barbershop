@@ -1,0 +1,134 @@
+.contact-page {
+  min-height: 100vh;
+  background: var(--gradient-brown);
+  padding: 2rem 1rem;
+}
+
+.contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.contact-title {
+  font-size: 3rem;
+  color: var(--gold);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+.contact-subtitle {
+  font-size: 1.5rem;
+  color: var(--gold-light);
+}
+
+.contact-content {
+  display: grid;
+  gap: 3rem;
+}
+
+.contact-info-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.info-card {
+  background: rgba(26, 15, 10, 0.8);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+}
+
+.info-icon {
+  font-size: 3rem;
+  flex-shrink: 0;
+}
+
+.info-details h3 {
+  color: var(--gold);
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-details p {
+  color: var(--cream);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0.3rem 0;
+}
+
+.info-details a {
+  color: var(--gold-light);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.info-details a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.map-section {
+  background: rgba(26, 15, 10, 0.8);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.map-section h2 {
+  color: var(--gold);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.map-container {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.map-note {
+  color: var(--gold-light);
+  font-size: 1.05rem;
+  text-align: center;
+  margin: 1rem 0 0;
+}
+
+@media (max-width: 768px) {
+  .contact-title {
+    font-size: 2.25rem;
+  }
+
+  .contact-subtitle {
+    font-size: 1.25rem;
+  }
+
+  .contact-info-section {
+    grid-template-columns: 1fr;
+  }
+
+  .info-card {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .map-container iframe {
+    height: 300px;
+  }
+}
