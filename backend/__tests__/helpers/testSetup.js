@@ -25,27 +25,173 @@ const setupTestDatabase = async () => {
   const pool = getPool();
   
   try {
-    // Clear all tables
-    await pool.query('TRUNCATE TABLE bookings, barbers, users, services, refresh_tokens CASCADE');
+    // Check if tables exist, if not create them
+    const checkTables = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+      );
+    `);
+    
+    if (!checkTables.rows[0].exists) {
+      console.log('Creating test database schema...');
+      // Create schema matching production
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          password VARCHAR(255) NOT NULL,
+          first_name VARCHAR(100) NOT NULL,
+          last_name VARCHAR(100) NOT NULL,
+          phone VARCHAR(20),
+          role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'barber')),
+          is_verified BOOLEAN DEFAULT false,
+          verification_token VARCHAR(255),
+          reset_password_token VARCHAR(255),
+          reset_password_expire TIMESTAMP,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS services (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(100) UNIQUE NOT NULL,
+          description TEXT,
+          price DECIMAL(10, 2) NOT NULL,
+          duration INTEGER NOT NULL,
+          is_active BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS addons (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          price DECIMAL(10, 2) NOT NULL,
+          duration INTEGER NOT NULL,
+          is_active BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS barbers (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          specialty VARCHAR(255),
+          rating DECIMAL(3, 2) DEFAULT 0.0,
+          is_available BOOLEAN DEFAULT true,
+          image_url VARCHAR(500),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS bookings (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          service_id INTEGER REFERENCES services(id),
+          barber_id INTEGER REFERENCES barbers(id),
+          booking_date DATE NOT NULL,
+          booking_time TIME NOT NULL,
+          total_price DECIMAL(10, 2) NOT NULL,
+          status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
+          notes TEXT,
+          no_show BOOLEAN DEFAULT false,
+          reminder_24h_sent BOOLEAN DEFAULT false,
+          reminder_2h_sent BOOLEAN DEFAULT false,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(barber_id, booking_date, booking_time)
+        );
+
+        CREATE TABLE IF NOT EXISTS booking_addons (
+          id SERIAL PRIMARY KEY,
+          booking_id INTEGER REFERENCES bookings(id) ON DELETE CASCADE,
+          addon_id INTEGER REFERENCES addons(id),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS refresh_tokens (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          token VARCHAR(500) NOT NULL,
+          expires_at TIMESTAMP NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS ratings (
+          id SERIAL PRIMARY KEY,
+          booking_id INTEGER REFERENCES bookings(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          barber_id INTEGER REFERENCES barbers(id) ON DELETE CASCADE,
+          rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+          comment TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(booking_id)
+        );
+      `);
+    }
+    
+    // Ensure ratings table exists (might be missing in older test DBs)
+    const checkRatings = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'ratings'
+      );
+    `);
+    
+    if (!checkRatings.rows[0].exists) {
+      await pool.query(`
+        CREATE TABLE ratings (
+          id SERIAL PRIMARY KEY,
+          booking_id INTEGER REFERENCES bookings(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          barber_id INTEGER REFERENCES barbers(id) ON DELETE CASCADE,
+          rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+          comment TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(booking_id)
+        );
+      `);
+    }
+    
+    // Clear all tables (only if they exist)
+    const tables = ['ratings', 'bookings', 'booking_addons', 'barbers', 'users', 'services', 'addons', 'refresh_tokens'];
+    for (const table of tables) {
+      const checkResult = await pool.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = $1
+        );
+      `, [table]);
+      
+      if (checkResult.rows[0].exists) {
+        await pool.query(`TRUNCATE TABLE ${table} CASCADE`);
+      }
+    }
     
     // Create test admin user
     const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     await pool.query(
-      'INSERT INTO users (email, password, first_name, last_name, role, email_verified) VALUES ($1, $2, $3, $4, $5, $6)',
+      'INSERT INTO users (email, password, first_name, last_name, role, is_verified) VALUES ($1, $2, $3, $4, $5, $6)',
       ['admin@barbershop.com', hashedPassword, 'Admin', 'User', 'admin', true]
     );
     
     // Create test regular user
     const userPassword = await bcrypt.hash('User@123456', 10);
     await pool.query(
-      'INSERT INTO users (email, password, first_name, last_name, role, email_verified, phone) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      'INSERT INTO users (email, password, first_name, last_name, role, is_verified, phone) VALUES ($1, $2, $3, $4, $5, $6, $7)',
       ['user@test.com', userPassword, 'Test', 'User', 'user', true, '5551234567']
     );
     
     // Create test barber user
     const barberPassword = await bcrypt.hash('Barber@123456', 10);
     const barberResult = await pool.query(
-      'INSERT INTO users (email, password, first_name, last_name, role, email_verified) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      'INSERT INTO users (email, password, first_name, last_name, role, is_verified) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
       ['barber@test.com', barberPassword, 'Test', 'Barber', 'barber', true]
     );
     
@@ -76,7 +222,20 @@ const cleanupTestDatabase = async () => {
   const pool = getPool();
   
   try {
-    await pool.query('TRUNCATE TABLE bookings, barbers, users, services, refresh_tokens CASCADE');
+    const tables = ['ratings', 'bookings', 'booking_addons', 'barbers', 'users', 'services', 'addons', 'refresh_tokens'];
+    for (const table of tables) {
+      const checkResult = await pool.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = $1
+        );
+      `, [table]);
+      
+      if (checkResult.rows[0].exists) {
+        await pool.query(`TRUNCATE TABLE ${table} CASCADE`);
+      }
+    }
     console.log('✅ Test database cleanup complete');
   } catch (error) {
     console.error('❌ Test database cleanup failed:', error);

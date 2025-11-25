@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { SkeletonCard } from '../components/SkeletonLoader';
 import './ConfigPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -10,6 +11,7 @@ function ConfigPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('barbers');
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -136,6 +138,7 @@ function ConfigPage() {
   // Barber handlers
   const handleCreateBarber = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       // TODO: Handle image upload to server if imageFile exists
       const barberData = {
@@ -162,6 +165,8 @@ function ConfigPage() {
       }
     } catch (err) {
       setError('Failed to create barber');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -233,6 +238,7 @@ function ConfigPage() {
   // Service handlers
   const handleCreateService = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const response = await fetch(`${API_URL}/config/services`, {
         method: 'POST',
@@ -252,6 +258,8 @@ function ConfigPage() {
       }
     } catch (err) {
       setError('Failed to create service');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -323,6 +331,7 @@ function ConfigPage() {
   // Availability handlers
   const handleUpdateAvailability = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const response = await fetch(`${API_URL}/config/availability/settings`, {
         method: 'PUT',
@@ -340,6 +349,8 @@ function ConfigPage() {
       }
     } catch (err) {
       setError('Failed to update availability settings');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -408,7 +419,16 @@ function ConfigPage() {
         </div>
 
         <div className="config-content">
-          {loading && <div className="loading-message">Loading...</div>}
+          {/* Loading States */}
+          {loading && (
+            <div className="loading-container">
+              <div className="skeleton-grid">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            </div>
+          )}
 
           {/* Barbers Tab */}
           {activeTab === 'barbers' && !loading && (
@@ -509,7 +529,13 @@ function ConfigPage() {
                       <p className="file-name">Selected: {newBarber.imageFile.name}</p>
                     )}
                   </div>
-                  <button type="submit" className="btn-primary">Add Barber</button>
+                  <button type="submit" className="btn-primary" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <LoadingSpinner size="small" /> Adding...
+                      </>
+                    ) : 'Add Barber'}
+                  </button>
                 </form>
               </div>
 
@@ -653,7 +679,13 @@ function ConfigPage() {
                       />
                     </div>
                   </div>
-                  <button type="submit" className="btn-primary">Add Service</button>
+                  <button type="submit" className="btn-primary" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <LoadingSpinner size="small" /> Adding...
+                      </>
+                    ) : 'Add Service'}
+                  </button>
                 </form>
               </div>
 
@@ -789,7 +821,13 @@ function ConfigPage() {
                       ))}
                     </div>
                   </div>
-                  <button type="submit" className="btn-primary">Update Settings</button>
+                  <button type="submit" className="btn-primary" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <LoadingSpinner size="small" /> Updating...
+                      </>
+                    ) : 'Update Settings'}
+                  </button>
                 </form>
               </div>
             </div>
