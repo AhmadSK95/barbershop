@@ -24,7 +24,8 @@ function ProfilePage() {
   const [profileForm, setProfileForm] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
-    phone: user?.phone || ''
+    phone: user?.phone || '',
+    email: user?.email || ''
   });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
@@ -59,7 +60,8 @@ function ProfilePage() {
       setProfileForm({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
-        phone: user.phone || ''
+        phone: user.phone || '',
+        email: user.email || ''
       });
     }
   }, [user]);
@@ -232,7 +234,8 @@ function ProfilePage() {
           ...user,
           firstName: updatedUser.first_name,
           lastName: updatedUser.last_name,
-          phone: updatedUser.phone
+          phone: updatedUser.phone,
+          email: updatedUser.email
         });
         
         setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
@@ -425,6 +428,30 @@ function ProfilePage() {
             )}
             
             <form onSubmit={handleProfileUpdate} className="profile-form">
+              <div className="form-group">
+                <label htmlFor="username">Username</label>
+                <input
+                  type="text"
+                  id="username"
+                  value={user?.username || ''}
+                  disabled
+                  style={{ backgroundColor: '#2a2a2a', cursor: 'not-allowed', opacity: 0.7 }}
+                />
+                <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>Username cannot be changed</small>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={profileForm.email}
+                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                  required
+                  placeholder="your@email.com"
+                />
+              </div>
+              
               <div className="form-group">
                 <label htmlFor="firstName">First Name</label>
                 <input
