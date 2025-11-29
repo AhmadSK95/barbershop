@@ -104,9 +104,9 @@ const createBooking = async (req, res) => {
 
     await client.query('COMMIT');
 
-    // Get assigned barber details including phone
+    // Get assigned barber details including phone and contact email
     const barberResult = await client.query(
-      'SELECT b.id, u.first_name, u.last_name, u.phone, b.specialty FROM barbers b JOIN users u ON b.user_id = u.id WHERE b.id = $1',
+      'SELECT b.id, u.first_name, u.last_name, u.phone, u.contact_email, b.specialty FROM barbers b JOIN users u ON b.user_id = u.id WHERE b.id = $1',
       [barberId]
     );
     const assignedBarber = barberResult.rows[0];
@@ -114,6 +114,7 @@ const createBooking = async (req, res) => {
       ? `${assignedBarber.first_name} ${assignedBarber.last_name}`
       : 'Any Available';
     const barberPhone = assignedBarber?.phone;
+    const barberEmail = assignedBarber?.contact_email || assignedBarber?.email;
 
     // Send confirmation email and SMS
     try {
@@ -134,6 +135,16 @@ const createBooking = async (req, res) => {
       // Send SMS to customer if phone number exists
       if (req.user.phone_number) {
         await sendBookingConfirmationSMS(req.user.phone_number, bookingDetails);
+      }
+      
+      // Send email to barber (if contact_email is set)
+      if (barberEmail) {
+        try {
+          await sendBookingConfirmationEmail(barberEmail, assignedBarber.first_name, bookingDetails);
+          console.log(`📧 Email sent to barber at ${barberEmail}`);
+        } catch (emailError) {
+          console.error('Failed to send email to barber:', emailError);
+        }
       }
       
       // Send SMS to barber

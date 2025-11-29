@@ -10,6 +10,7 @@ const getAllBarbers = async (req, res) => {
         u.last_name,
         u.email,
         u.username,
+        u.contact_email,
         u.phone,
         b.specialty,
         b.rating,
@@ -27,7 +28,7 @@ const getAllBarbers = async (req, res) => {
       LEFT JOIN barber_services bs ON b.id = bs.barber_id
       LEFT JOIN services s ON bs.service_id = s.id
       WHERE u.role = 'barber'
-      GROUP BY b.id, u.first_name, u.last_name, u.email, u.username, u.phone, b.specialty, b.rating, b.is_available, u.created_at
+      GROUP BY b.id, u.first_name, u.last_name, u.email, u.username, u.contact_email, u.phone, b.specialty, b.rating, b.is_available, u.created_at
       ORDER BY u.first_name
     `);
     
@@ -46,7 +47,7 @@ const getAllBarbers = async (req, res) => {
 
 // Create a new barber
 const createBarber = async (req, res) => {
-  const { username, firstName, lastName, email, password, specialty, rating, serviceIds } = req.body;
+  const { username, firstName, lastName, email, password, specialty, rating, serviceIds, contactEmail } = req.body;
   
   if (!username || !firstName || !lastName || !email || !password) {
     return res.status(400).json({
@@ -64,10 +65,10 @@ const createBarber = async (req, res) => {
     
     // Create user
     const userResult = await client.query(`
-      INSERT INTO users (username, first_name, last_name, email, password, role, is_verified)
-      VALUES ($1, $2, $3, $4, $5, 'barber', true)
+      INSERT INTO users (username, first_name, last_name, email, contact_email, password, role, is_verified)
+      VALUES ($1, $2, $3, $4, $5, $6, 'barber', true)
       RETURNING id
-    `, [username.toLowerCase(), firstName, lastName, email, hashedPassword]);
+    `, [username.toLowerCase(), firstName, lastName, email, contactEmail || email, hashedPassword]);
     
     const userId = userResult.rows[0].id;
     
@@ -118,7 +119,7 @@ const createBarber = async (req, res) => {
 // Update a barber
 const updateBarber = async (req, res) => {
   const { id } = req.params; // This is barber.id
-  const { firstName, lastName, specialty, rating, isActive, serviceIds } = req.body;
+  const { firstName, lastName, contactEmail, specialty, rating, isActive, serviceIds } = req.body;
   
   const client = await pool.connect();
   try {
@@ -136,13 +137,14 @@ const updateBarber = async (req, res) => {
     const userId = barberCheck.rows[0].user_id;
     
     // Update user info
-    if (firstName || lastName) {
+    if (firstName || lastName || contactEmail) {
       await client.query(`
         UPDATE users
         SET first_name = COALESCE($1, first_name),
-            last_name = COALESCE($2, last_name)
-        WHERE id = $3
-      `, [firstName, lastName, userId]);
+            last_name = COALESCE($2, last_name),
+            contact_email = COALESCE($3, contact_email)
+        WHERE id = $4
+      `, [firstName, lastName, contactEmail, userId]);
     }
     
     // Update barber info
