@@ -10,7 +10,7 @@ const getAllBarbers = async (req, res) => {
         u.last_name,
         u.email,
         u.username,
-        u.contact_email,
+        u.phone,
         b.specialty,
         b.rating,
         b.is_available as is_active,
@@ -27,7 +27,7 @@ const getAllBarbers = async (req, res) => {
       LEFT JOIN barber_services bs ON b.id = bs.barber_id
       LEFT JOIN services s ON bs.service_id = s.id
       WHERE u.role = 'barber'
-      GROUP BY b.id, u.first_name, u.last_name, u.email, u.username, u.contact_email, b.specialty, b.rating, b.is_available, u.created_at
+      GROUP BY b.id, u.first_name, u.last_name, u.email, u.username, u.phone, b.specialty, b.rating, b.is_available, u.created_at
       ORDER BY u.first_name
     `);
     
