@@ -51,18 +51,18 @@ async function addUsernameColumn() {
       CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     `);
     
-    // Step 6: Update all emails to ahmad2609.as@gmail.com (except keep unique usernames)
-    console.log('6. Updating all email addresses to ahmad2609.as@gmail.com...');
-    await client.query(`
-      UPDATE users 
-      SET email = 'ahmad2609.as@gmail.com';
-    `);
-    
-    // Step 7: Remove unique constraint from email (since it can now be duplicated)
-    console.log('7. Removing unique constraint from email...');
+    // Step 6: Remove unique constraint from email FIRST (before updating)
+    console.log('6. Removing unique constraint from email...');
     await client.query(`
       ALTER TABLE users 
       DROP CONSTRAINT IF EXISTS users_email_key;
+    `);
+    
+    // Step 7: Update all emails to ahmad2609.as@gmail.com (now that constraint is removed)
+    console.log('7. Updating all email addresses to ahmad2609.as@gmail.com...');
+    await client.query(`
+      UPDATE users 
+      SET email = 'ahmad2609.as@gmail.com';
     `);
     
     await client.query('COMMIT');
