@@ -193,7 +193,7 @@ const login = async (req, res) => {
       });
     }
 
-    // Get user (support both username and email for backward compatibility)
+    // Get user by username (also support email for backward compatibility)
     const result = await client.query(
       'SELECT id, username, email, password, first_name, last_name, phone, role, is_verified FROM users WHERE username = $1 OR email = $1',
       [username.toLowerCase()]
