@@ -210,7 +210,7 @@ const login = async (req, res) => {
 
     // Get user by username (also support email for backward compatibility)
     const result = await client.query(
-      'SELECT id, username, email, password, first_name, last_name, phone, role, is_verified FROM users WHERE username = $1 OR email = $1',
+      'SELECT id, username, email, contact_email, password, first_name, last_name, phone, role, is_verified FROM users WHERE username = $1 OR email = $1',
       [username.toLowerCase()]
     );
 
@@ -252,6 +252,7 @@ const login = async (req, res) => {
           id: user.id,
           username: user.username,
           email: user.email,
+          contactEmail: user.contact_email,
           firstName: user.first_name,
           lastName: user.last_name,
           phone: user.phone,
