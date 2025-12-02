@@ -46,6 +46,8 @@
   align-items: flex-start;
   gap: 1.5rem;
   transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden; /* Prevent content overflow */
+  min-height: 150px; /* Ensure adequate height */
 }
 
 .info-card:hover {
@@ -56,6 +58,11 @@
 .info-icon {
   font-size: 3rem;
   flex-shrink: 0;
+}
+
+.info-details {
+  flex: 1;
+  min-width: 0; /* Allow flex item to shrink below content size */
 }
 
 .info-details h3 {
@@ -69,12 +76,18 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0.3rem 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .info-details a {
   color: var(--gold-light);
   text-decoration: none;
   transition: color 0.3s;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: inline-block;
+  max-width: 100%;
 }
 
 .info-details a:hover {
