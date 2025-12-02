@@ -25,7 +25,8 @@ function ProfilePage() {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     phone: user?.phone || '',
-    email: user?.email || ''
+    email: user?.email || '',
+    contactEmail: user?.contactEmail || ''
   });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
@@ -61,7 +62,8 @@ function ProfilePage() {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         phone: user.phone || '',
-        email: user.email || ''
+        email: user.email || '',
+        contactEmail: user.contactEmail || ''
       });
     }
   }, [user]);
@@ -235,7 +237,8 @@ function ProfilePage() {
           firstName: updatedUser.first_name,
           lastName: updatedUser.last_name,
           phone: updatedUser.phone,
-          email: updatedUser.email
+          email: updatedUser.email,
+          contactEmail: updatedUser.contact_email
         });
         
         setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
@@ -391,8 +394,9 @@ function ProfilePage() {
           </div>
           <div className="profile-info">
             <h1>{user?.firstName} {user?.lastName}</h1>
-            <p className="profile-email">{user?.email}</p>
-            {user?.phone && <p className="profile-phone">{user?.phone}</p>}
+            <p className="profile-email">📧 {user?.email}</p>
+            <p className="profile-email">📬 {user?.contactEmail}</p>
+            {user?.phone && <p className="profile-phone">📱 {user?.phone}</p>}
           </div>
         </div>
         
@@ -441,7 +445,7 @@ function ProfilePage() {
               </div>
               
               <div className="form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">Email Address</label>
                 <input
                   type="email"
                   id="email"
@@ -450,6 +454,20 @@ function ProfilePage() {
                   required
                   placeholder="your@email.com"
                 />
+                <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>Used for login purposes</small>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="contactEmail">Contact Email</label>
+                <input
+                  type="email"
+                  id="contactEmail"
+                  value={profileForm.contactEmail}
+                  onChange={(e) => setProfileForm({ ...profileForm, contactEmail: e.target.value })}
+                  required
+                  placeholder="contact@example.com"
+                />
+                <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>Where you'll receive booking confirmations and notifications</small>
               </div>
               
               <div className="form-group">

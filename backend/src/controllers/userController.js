@@ -149,7 +149,7 @@ const deleteUser = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName, phone, email } = req.body;
+    const { firstName, lastName, phone, email, contactEmail } = req.body;
     const userId = req.user.id;
 
     // Validate email format if provided
@@ -159,7 +159,19 @@ const updateProfile = async (req, res) => {
       if (emailError) {
         return res.status(400).json({
           success: false,
-          message: emailError
+          message: 'Email: ' + emailError
+        });
+      }
+    }
+
+    // Validate contactEmail format if provided
+    if (contactEmail) {
+      const { validateEmail } = require('../utils/validation');
+      const contactEmailError = validateEmail(contactEmail);
+      if (contactEmailError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Contact email: ' + contactEmailError
         });
       }
     }
@@ -170,10 +182,11 @@ const updateProfile = async (req, res) => {
            last_name = COALESCE($2, last_name),
            phone = COALESCE($3, phone),
            email = COALESCE($4, email),
+           contact_email = COALESCE($5, contact_email),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5
-       RETURNING id, email, username, first_name, last_name, phone, role, is_verified`,
-      [firstName, lastName, phone, email, userId]
+       WHERE id = $6
+       RETURNING id, email, contact_email, username, first_name, last_name, phone, role, is_verified`,
+      [firstName, lastName, phone, email, contactEmail, userId]
     );
 
     res.json({
