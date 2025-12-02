@@ -9,11 +9,14 @@ function RegisterPage() {
     firstName: '',
     lastName: '',
     email: '',
+    contactEmail: '',
     password: '',
     confirmPassword: '',
     phone: '',
     smsConsent: false,
   });
+  const [emailSameAsUsername, setEmailSameAsUsername] = useState(false);
+  const [contactEmailSameAsEmail, setContactEmailSameAsEmail] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,11 +26,52 @@ function RegisterPage() {
 
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const name = e.target.name;
+    
+    let updates = { [name]: value };
+    
+    // Auto-populate email from username if checkbox is checked
+    if (name === 'username' && emailSameAsUsername) {
+      updates.email = value;
+      // If contact_email is also synced to email, update it too
+      if (contactEmailSameAsEmail) {
+        updates.contactEmail = value;
+      }
+    }
+    
+    // Auto-populate contact_email from email if checkbox is checked
+    if (name === 'email' && contactEmailSameAsEmail) {
+      updates.contactEmail = value;
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: value,
+      ...updates,
     });
     setError('');
+  };
+  
+  const handleEmailSameAsUsername = (e) => {
+    const checked = e.target.checked;
+    setEmailSameAsUsername(checked);
+    if (checked) {
+      setFormData({
+        ...formData,
+        email: formData.username,
+        contactEmail: contactEmailSameAsEmail ? formData.username : formData.contactEmail
+      });
+    }
+  };
+  
+  const handleContactEmailSameAsEmail = (e) => {
+    const checked = e.target.checked;
+    setContactEmailSameAsEmail(checked);
+    if (checked) {
+      setFormData({
+        ...formData,
+        contactEmail: formData.email
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -127,11 +171,11 @@ function RegisterPage() {
                 pattern="[a-zA-Z0-9._-]+"
                 title="Username can only contain letters, numbers, dots, underscores, and hyphens"
               />
-              <small style={{color: '#999', fontSize: '0.85rem'}}>This will be used for login</small>
+              <small style={{color: '#999', fontSize: '0.85rem'}}>Used for login authentication</small>
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">Email Address</label>
               <input
                 type="email"
                 id="email"
@@ -140,8 +184,42 @@ function RegisterPage() {
                 onChange={handleChange}
                 required
                 placeholder="your.email@example.com"
+                disabled={emailSameAsUsername}
               />
-              <small style={{color: '#999', fontSize: '0.85rem'}}>Used for notifications only</small>
+              <small style={{color: '#999', fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem'}}>Used for login purposes (can be same as username)</small>
+              <label style={{display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#ddd'}}>
+                <input
+                  type="checkbox"
+                  checked={emailSameAsUsername}
+                  onChange={handleEmailSameAsUsername}
+                  style={{marginRight: '0.5rem', cursor: 'pointer'}}
+                />
+                Same as username
+              </label>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="contactEmail">Contact Email</label>
+              <input
+                type="email"
+                id="contactEmail"
+                name="contactEmail"
+                value={formData.contactEmail}
+                onChange={handleChange}
+                required
+                placeholder="contact@example.com"
+                disabled={contactEmailSameAsEmail}
+              />
+              <small style={{color: '#999', fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem'}}>Where you'll receive booking confirmations and notifications</small>
+              <label style={{display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#ddd'}}>
+                <input
+                  type="checkbox"
+                  checked={contactEmailSameAsEmail}
+                  onChange={handleContactEmailSameAsEmail}
+                  style={{marginRight: '0.5rem', cursor: 'pointer'}}
+                />
+                Same as email address
+              </label>
             </div>
 
             <div className="form-group">

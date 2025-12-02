@@ -28,13 +28,13 @@ const {
 const register = async (req, res) => {
   const client = await pool.connect();
   try {
-    let { email, password, firstName, lastName, phone, username, smsConsent } = req.body;
+    let { email, contactEmail, password, firstName, lastName, phone, username, smsConsent } = req.body;
 
     // Validate input
-    if (!email || !password || !firstName || !lastName || !username) {
+    if (!email || !contactEmail || !password || !firstName || !lastName || !username) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields (username, email, password, first name, last name)'
+        message: 'Please provide all required fields (username, email, contact email, password, first name, last name)'
       });
     }
 
@@ -43,7 +43,16 @@ const register = async (req, res) => {
     if (emailError) {
       return res.status(400).json({
         success: false,
-        message: emailError
+        message: 'Email: ' + emailError
+      });
+    }
+
+    // Validate contact email format
+    const contactEmailError = validateEmail(contactEmail);
+    if (contactEmailError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact email: ' + contactEmailError
       });
     }
 
@@ -86,6 +95,7 @@ const register = async (req, res) => {
 
     // Sanitize inputs
     email = sanitizeString(email, 255).toLowerCase();
+    contactEmail = sanitizeString(contactEmail, 255).toLowerCase();
     username = sanitizeString(username, 255).toLowerCase();
     firstName = sanitizeString(firstName, 50);
     lastName = sanitizeString(lastName, 50);
@@ -116,23 +126,27 @@ const register = async (req, res) => {
     const smsConsentDateValue = smsConsentValue ? new Date() : null;
     
     const result = await client.query(
-      `INSERT INTO users (username, email, password, first_name, last_name, phone, verification_token, sms_consent, sms_consent_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, username, email, first_name, last_name, role, is_verified`,
-      [username.toLowerCase(), email.toLowerCase(), hashedPassword, firstName, lastName, phone, hashedVerificationToken, smsConsentValue, smsConsentDateValue]
+      `INSERT INTO users (username, email, contact_email, password, first_name, last_name, phone, verification_token, sms_consent, sms_consent_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, username, email, contact_email, first_name, last_name, role, is_verified`,
+      [username.toLowerCase(), email.toLowerCase(), contactEmail.toLowerCase(), hashedPassword, firstName, lastName, phone, hashedVerificationToken, smsConsentValue, smsConsentDateValue]
     );
 
     const user = result.rows[0];
 
-    // Verify user email in AWS SES (for sandbox mode) and send verification email
+    // Verify user contact_email in AWS SES (for sandbox mode) and send verification email
     try {
-      // First, verify the email identity in AWS SES so we can send to it
-      console.log(`Verifying email identity in AWS SES: ${email}`);
-      await verifyEmailIdentity(email);
-      console.log(`✅ AWS SES verification request sent to ${email}`);
+      // Use contact_email for all notifications (AWS SES)
+      // email field is used for login purposes only
+      console.log(`📧 Login email (authentication): ${email}`);
+      console.log(`📬 Contact email (notifications): ${contactEmail}`);
+      console.log(`Verifying contact email identity in AWS SES: ${contactEmail}`);
+      await verifyEmailIdentity(contactEmail);
+      console.log(`✅ AWS SES verification request sent to ${contactEmail}`);
       
-      // Then send the verification email
-      await sendVerificationEmail(email, firstName, verificationToken);
+      // Send the verification email to contact_email
+      await sendVerificationEmail(contactEmail, firstName, verificationToken);
+      console.log(`📨 Verification email sent to contact email: ${contactEmail}`);
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
       // Don't fail registration if email fails - user can still use the app
@@ -151,12 +165,13 @@ const register = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: 'Registration successful. Please check your contact email to verify your account.',
       data: {
         user: {
           id: user.id,
           username: user.username,
           email: user.email,
+          contactEmail: user.contact_email,
           firstName: user.first_name,
           lastName: user.last_name,
           role: user.role,

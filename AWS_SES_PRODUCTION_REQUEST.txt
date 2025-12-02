@@ -1,0 +1,162 @@
+AWS SES PRODUCTION ACCESS REQUEST
+==================================
+
+Copy and paste this into the AWS SES Production Access Request form:
+https://console.aws.amazon.com/ses/home?region=us-east-1#/account
+
+---
+
+USE CASE TYPE:
+Transactional
+
+---
+
+DESCRIPTION OF USE CASE:
+
+We are building a custom booking backend for Balkan Barbershop (balkanbarbershop.com), a professional barbershop located in Jersey City, NJ. 
+
+Customers book haircut and shave appointments through our online booking system and provide their email during registration. We use these emails strictly to send transactional messages including:
+
+- Booking confirmations when appointments are created
+- Appointment reminders (24 hours and 2 hours before scheduled time)
+- Cancellation confirmations
+- Rescheduling notifications
+- Account verification emails
+- Password reset emails
+- Admin/staff booking notifications
+
+No marketing or promotional emails will be sent. All communications are directly related to appointments booked by customers.
+
+The website (balkanbarbershop.com) is hosted on Squarespace, but we have full DNS access and permission from the domain owner to configure SPF, DKIM, and SES verification records. The domain identity has been verified through TXT and CNAME (DKIM) records.
+
+---
+
+HOW EMAIL ADDRESSES ARE OBTAINED:
+
+Only customers who voluntarily enter their email during the booking registration process receive emails. Customers explicitly consent to receive transactional notifications about their appointments during account creation. 
+
+Email addresses are:
+- Collected directly from users during registration
+- Never purchased, scraped, or imported from third parties
+- Used only for appointment-related transactional messages
+- Not shared with third parties
+
+We do not use or maintain any third-party email lists.
+
+---
+
+HANDLING OF BOUNCES AND COMPLAINTS:
+
+We have configured Amazon SNS to receive email feedback notifications from SES:
+- SNS Topic ARN: arn:aws:sns:us-east-1:364301298768:ses-bounce-complaint-feedback
+- This topic is configured to receive both bounce and complaint notifications
+
+Our system automatically processes these notifications to:
+1. Suppress further emails to addresses that hard bounce
+2. Remove addresses that generate complaints
+3. Monitor bounce rates to maintain sender reputation
+4. Log all bounce/complaint events for audit purposes
+
+We will maintain bounce rates below 5% and complaint rates below 0.1% as required by AWS policies.
+
+---
+
+EXPECTED EMAIL SENDING VOLUME:
+
+- Initial volume: 50-150 emails per day
+- Peak volume: 300 emails per day during busy weekends
+- All emails are transactional (no bulk marketing)
+- Growth expected as business expands, but will remain transactional
+
+Breakdown:
+- Booking confirmations: ~30-100/day
+- Appointment reminders: ~40-120/day  
+- Cancellations/reschedules: ~5-15/day
+- Account verifications: ~10-30/day
+- Password resets: ~5-10/day
+
+---
+
+TYPES OF EMAILS SENT:
+
+1. **Appointment Confirmation**
+   - Sent immediately after booking
+   - Contains: service, barber, date, time, price, cancellation policy
+   
+2. **Appointment Reminders**
+   - 24-hour reminder before appointment
+   - 2-hour reminder before appointment (optional)
+   
+3. **Cancellation Confirmation**
+   - Sent when customer cancels appointment
+   - Contains: confirmation of cancellation, rebook link
+   
+4. **Reschedule Notification**
+   - Sent when appointment is moved to new date/time
+   - Contains: new appointment details
+   
+5. **Account Verification**
+   - Sent after user registration
+   - Contains: verification link
+   
+6. **Password Reset**
+   - Sent when user requests password reset
+   - Contains: secure reset link with expiration
+   
+7. **Admin/Staff Notifications**
+   - Internal notifications for new bookings
+   - Sent to staff members only
+
+All emails include:
+- Clear sender identification (Balkan Barbershop)
+- Business contact information (address, phone)
+- Unsubscribe option for optional reminders
+- Plain language about why they're receiving the email
+
+---
+
+ADDITIONAL COMPLIANCE NOTES:
+
+✅ All emails include business contact details (332 Barrow St, Jersey City, NJ 07302)
+✅ Unsubscribe instructions provided for optional reminder notifications
+✅ Customers are informed during checkout that they will receive booking confirmations
+✅ SPF record configured: v=spf1 include:amazonses.com ~all
+✅ DKIM signatures enabled through AWS SES default signing
+✅ DMARC policy configured for monitoring
+✅ SNS topic configured for bounce/complaint feedback
+✅ No marketing content - 100% transactional messages
+✅ Sender reputation monitoring in place
+✅ Email validation on registration to prevent typos
+✅ Rate limiting to prevent abuse
+
+We commit to:
+- Maintaining bounce rates below 5%
+- Maintaining complaint rates below 0.1%
+- Processing bounce/complaint feedback within 24 hours
+- Only sending emails related to customer appointments
+- Never purchasing or using third-party email lists
+- Complying with CAN-SPAM Act and AWS SES policies
+
+---
+
+SENDING DOMAIN:
+balkanbarbershop.com
+
+SENDING EMAIL ADDRESSES:
+- booking@balkanbarbershop.com (primary)
+- noreply@balkanbarbershop.com (notifications)
+
+---
+
+BUSINESS INFORMATION:
+
+Business Name: Balkan Barbershop
+Website: https://balkanbarbershop.com
+Physical Address: 332 Barrow St, Jersey City, NJ 07302
+Phone: (201) 433-2870
+Business Type: Professional barbershop services
+AWS Account ID: 364301298768
+
+---
+
+This request is for legitimate transactional email usage only, fully compliant with AWS SES policies and CAN-SPAM regulations.
