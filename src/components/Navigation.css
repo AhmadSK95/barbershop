@@ -1,9 +1,9 @@
 .navigation {
-  background: var(--color-brown-dark);
-  background-image: linear-gradient(180deg, var(--color-brown-medium), var(--color-brown-dark));
-  backdrop-filter: blur(10px);
-  border-bottom: 3px solid var(--color-gold-dark);
-  box-shadow: var(--shadow-md);
+  background: rgba(17, 17, 17, 0.95);
+  background-image: linear-gradient(180deg, rgba(13, 13, 13, 0.98), rgba(17, 17, 17, 0.95));
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #D4AF37;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -25,22 +25,23 @@
   font-size: 1.75rem;
   font-weight: 700;
   font-family: 'Playfair Display', serif;
-  background: linear-gradient(45deg, #b8860b, #d4a574);
+  background: linear-gradient(45deg, #D4AF37, #E0C097);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-decoration: none;
   transition: all 0.3s ease;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .nav-logo svg {
-  stroke: #d4a574; /* Fallback color if text-fill-color affects svg */
-  -webkit-text-fill-color: initial; /* Reset for SVG */
+  stroke: #D4AF37;
+  -webkit-text-fill-color: initial;
 }
 
 .nav-logo:hover {
   transform: scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
 }
 
 .nav-links {
@@ -76,14 +77,16 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--color-gold-light);
+  color: #E0C097;
   text-decoration: none;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   transition: all 0.3s ease;
   position: relative;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
 }
 
 .nav-link::after {
@@ -94,32 +97,33 @@
   transform: translateX(-50%);
   width: 0;
   height: 2px;
-  background: linear-gradient(45deg, #b8860b, #d4a574);
+  background: #D4AF37;
   transition: width 0.3s ease;
 }
 
 .nav-link:hover {
-  color: var(--color-gold-pale);
+  color: #D4AF37;
 }
 
 .nav-link:hover::after,
 .nav-link.active::after {
-  width: 80%;
+  width: 70%;
 }
 
 .nav-link.active {
-  color: var(--color-gold-pale);
+  color: #D4AF37;
 }
 
 .nav-link-booking {
-  background: var(--gradient-gold);
-  color: var(--color-brown-darkest) !important;
+  background: #D4AF37;
+  color: #111111 !important;
   padding: 0.7rem 1.75rem;
   border-radius: 25px;
-  box-shadow: var(--shadow-md), var(--shadow-gold);
-  border: 2px solid var(--color-gold-dark);
-  font-size: 1.125rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
+  border: 2px solid #D4AF37;
+  font-size: 1rem;
   font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .nav-link-booking::after {
@@ -128,19 +132,22 @@
 
 .nav-link-booking:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), 0 0 30px rgba(212, 165, 116, 0.5);
-  color: var(--color-brown-darkest) !important;
+  background: #E0C097;
+  border-color: #E0C097;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.5);
+  color: #111111 !important;
 }
 
 .nav-link-booking.active {
-  background: linear-gradient(135deg, #8b6914, #b8860b);
-  color: white !important;
+  background: #B8941F;
+  color: #111111 !important;
+  border-color: #B8941F;
 }
 
 .nav-user {
-  color: var(--color-gold-light);
-  font-size: 1.125rem;
-  font-weight: 600;
+  color: #E0C097;
+  font-size: 1rem;
+  font-weight: 500;
   padding: 0.5rem 1rem;
 }
 
@@ -149,22 +156,24 @@
   align-items: center;
   gap: 0.5rem;
   background: transparent;
-  border: 2px solid var(--color-gold-dark);
-  color: var(--color-gold-light);
+  border: 2px solid #D4AF37;
+  color: #E0C097;
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 4px;
   padding: 0.5rem 1rem;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
 }
 
 .nav-logout:hover {
-  background: var(--gradient-gold);
-  border-color: var(--color-gold-light);
-  color: var(--color-brown-darkest);
+  background: #D4AF37;
+  border-color: #D4AF37;
+  color: #111111;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md), var(--shadow-gold);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
 /* Mobile Menu Toggle - Hidden by default */

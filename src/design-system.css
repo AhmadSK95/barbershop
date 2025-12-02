@@ -4,48 +4,58 @@
    =================================== */
 
 :root {
-  /* Primary Colors - Rich Browns */
-  --color-brown-darkest: #1a0f0a;
-  --color-brown-dark: #2a1810;
-  --color-brown-medium: #3d2417;
-  --color-brown-light: #4a2f1f;
-  --color-brown-leather: #654321;
+  /* Primary Colors - Charcoal & Black */
+  --color-charcoal: #111111;
+  --color-charcoal-dark: #0d0d0d;
+  --color-charcoal-light: #222222;
+  --color-black: #000000;
+  --color-black-soft: #0a0a0a;
   
-  /* Accent Colors - Luxurious Golds */
-  --color-gold-dark: #8b6914;
-  --color-gold-medium: #b8860b;
-  --color-gold-light: #d4a574;
-  --color-gold-pale: #e0c097;
-  --color-gold-highlight: #f5e6d3;
+  /* Accent Colors - Premium Gold */
+  --color-gold-primary: #D4AF37;
+  --color-gold-light: #E0C097;
+  --color-gold-dark: #B8941F;
+  --color-gold-bright: #F0D888;
+  --color-gold-shadow: rgba(212, 175, 55, 0.3);
   
-  /* Neutral Colors */
-  --color-black: #0d0806;
-  --color-white: #faf8f5;
-  --color-cream: #f5e6d3;
-  --color-beige: #c8b698;
+  /* Neutral Colors - Warm Whites & Creams */
+  --color-warm-white: #FAF4E6;
+  --color-cream: #F5E6D3;
+  --color-beige: #E8D5C4;
+  --color-white-pure: #FFFFFF;
+  
+  /* Legacy brown colors for backwards compatibility */
+  --color-brown-darkest: #111111;
+  --color-brown-dark: #1a1a1a;
+  --color-brown-medium: #222222;
+  --color-brown-light: #2a2a2a;
+  --color-brown-leather: #333333;
   
   /* Status Colors */
   --color-success: #2d5016;
   --color-success-light: #4a7c23;
-  --color-warning: #8b6914;
+  --color-warning: #B8941F;
   --color-error: #7a2218;
   --color-info: #2c4a5e;
   
-  /* Gradients */
-  --gradient-gold: linear-gradient(135deg, #d4a574 0%, #b8860b 50%, #d4a574 100%);
-  --gradient-brown: linear-gradient(145deg, rgba(52, 31, 18, 0.9), rgba(70, 42, 25, 0.9));
-  --gradient-dark: linear-gradient(180deg, #1a0f0a 0%, #2a1810 50%, #1a0f0a 100%);
+  /* Premium Gradients */
+  --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #B8941F 50%, #D4AF37 100%);
+  --gradient-gold-shimmer: linear-gradient(135deg, #F0D888 0%, #D4AF37 50%, #B8941F 100%);
+  --gradient-charcoal: linear-gradient(180deg, #0d0d0d 0%, #111111 50%, #222222 100%);
+  --gradient-dark: linear-gradient(180deg, #000000 0%, #111111 50%, #000000 100%);
+  --gradient-brown: linear-gradient(145deg, rgba(17, 17, 17, 0.95), rgba(34, 34, 34, 0.95));
   
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.6);
-  --shadow-xl: 0 12px 35px rgba(0, 0, 0, 0.7);
-  --shadow-gold: 0 0 20px rgba(212, 165, 116, 0.3);
+  /* Elegant Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.8);
+  --shadow-gold: 0 0 25px rgba(212, 175, 55, 0.4);
+  --shadow-gold-strong: 0 4px 20px rgba(212, 175, 55, 0.5);
   
-  /* Typography */
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'Crimson Text', Georgia, serif;
+  /* Premium Typography */
+  --font-display: 'Playfair Display', 'Cinzel', 'Cormorant Garamond', serif;
+  --font-body: 'Inter', 'Lato', 'DM Sans', sans-serif;
   
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -78,37 +88,60 @@
 }
 
 body {
-  background-color: var(--color-brown-dark);
+  background-color: var(--color-charcoal);
   background-image: var(--gradient-dark);
-  color: var(--color-gold-light);
+  color: var(--color-warm-white);
   font-family: var(--font-body);
   font-size: 18px;
+  line-height: 1.7;
   min-height: 100vh;
 }
 
 #root {
-  background-color: var(--color-brown-dark);
+  background-color: var(--color-charcoal);
   min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  color: var(--color-gold-light);
+  color: var(--color-gold-primary);
   font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.2;
+}
+
+h1 {
+  letter-spacing: 3px;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+h2 {
+  letter-spacing: 2.5px;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+h3 {
+  letter-spacing: 2px;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
 }
 
 p, span, div, label {
-  color: var(--color-gold-light);
+  color: var(--color-warm-white);
+  line-height: 1.8;
+}
+
+p {
+  margin-bottom: 1rem;
 }
 
 a {
-  color: var(--color-gold-medium);
+  color: var(--color-gold-primary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  color: var(--color-gold-pale);
+  color: var(--color-gold-light);
 }
 
 /* ===================================
