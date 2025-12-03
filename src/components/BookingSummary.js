@@ -2,13 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { bookingAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 
 function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack }) {
   const [loading, setLoading] = useState(false);
   const [previewBarber, setPreviewBarber] = useState(null);
   const [loadingBarber, setLoadingBarber] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // Customer information for admin/barber bookings
+  const [customerInfo, setCustomerInfo] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
+  
+  const isAdminOrBarber = user?.role === 'admin' || user?.role === 'barber';
 
   // Fetch preview barber if "Any Available" is selected
   useEffect(() => {
@@ -30,6 +42,21 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
   }, [booking.barber, booking.date, booking.time]);
 
   const handleConfirm = async () => {
+    // Validate customer information for admin/barber bookings
+    if (isAdminOrBarber) {
+      if (!customerInfo.firstName || !customerInfo.lastName || !customerInfo.email) {
+        toast.error('Please provide customer name and email');
+        return;
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(customerInfo.email)) {
+        toast.error('Please provide a valid email address');
+        return;
+      }
+    }
+    
     try {
       setLoading(true);
 
@@ -45,7 +72,14 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
                   (booking.barber?.name === 'Any Available' || !booking.barber?.id) ? null : booking.barber.id,
         bookingDate: booking.date,
         bookingTime: booking.time,
-        notes: ''
+        notes: '',
+        // Include customer information for admin/barber bookings
+        ...(isAdminOrBarber && {
+          customerFirstName: customerInfo.firstName,
+          customerLastName: customerInfo.lastName,
+          customerEmail: customerInfo.email,
+          customerPhone: customerInfo.phone || null
+        })
       };
 
       console.log('Creating booking:', bookingData); // Debug log
@@ -79,6 +113,121 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
   return (
     <div className="step-container">
       <h2>Booking Summary</h2>
+      
+      {isAdminOrBarber && (
+        <div className="customer-info-section" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ color: 'var(--gold)', marginBottom: '1rem' }}>Customer Information</h3>
+          <div className="customer-info-form" style={{ 
+            background: 'rgba(26, 15, 10, 0.6)', 
+            padding: '1.5rem', 
+            borderRadius: '8px',
+            border: '1px solid var(--gold)',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem'
+          }}>
+            <div className="form-group">
+              <label htmlFor="firstName" style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem' }}>
+                First Name <span style={{ color: 'red' }}>*</span>
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                value={customerInfo.firstName}
+                onChange={(e) => setCustomerInfo({ ...customerInfo, firstName: e.target.value })}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  border: '1px solid var(--gold)',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  color: 'var(--cream)',
+                  fontSize: '1rem'
+                }}
+                placeholder="Enter first name"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="lastName" style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem' }}>
+                Last Name <span style={{ color: 'red' }}>*</span>
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                value={customerInfo.lastName}
+                onChange={(e) => setCustomerInfo({ ...customerInfo, lastName: e.target.value })}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  border: '1px solid var(--gold)',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  color: 'var(--cream)',
+                  fontSize: '1rem'
+                }}
+                placeholder="Enter last name"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="customerEmail" style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem' }}>
+                Email <span style={{ color: 'red' }}>*</span>
+              </label>
+              <input
+                type="email"
+                id="customerEmail"
+                value={customerInfo.email}
+                onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  border: '1px solid var(--gold)',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  color: 'var(--cream)',
+                  fontSize: '1rem'
+                }}
+                placeholder="customer@example.com"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="customerPhone" style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem' }}>
+                Phone (Optional)
+              </label>
+              <input
+                type="tel"
+                id="customerPhone"
+                value={customerInfo.phone}
+                onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  border: '1px solid var(--gold)',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  color: 'var(--cream)',
+                  fontSize: '1rem'
+                }}
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+          </div>
+          <p style={{ 
+            color: 'var(--gold-light)', 
+            fontSize: '0.9rem', 
+            marginTop: '0.75rem',
+            fontStyle: 'italic'
+          }}>
+            📧 Booking confirmation will be sent to this email address
+          </p>
+        </div>
+      )}
+      
       <div className="summary-card">
         <div className="summary-section">
           <h3>Services</h3>

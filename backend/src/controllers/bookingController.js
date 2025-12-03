@@ -9,10 +9,27 @@ const { sendBookingConfirmationSMS, sendBookingCancellationSMS, sendBarberBookin
 const createBooking = async (req, res) => {
   const client = await pool.connect();
   try {
-    let { serviceIds, barberId, bookingDate, bookingTime, notes } = req.body;
+    let { serviceIds, barberId, bookingDate, bookingTime, notes, customerFirstName, customerLastName, customerEmail, customerPhone } = req.body;
     const userId = req.user.id;
+    const userRole = req.user.role;
 
-    console.log('📋 Booking Request:', JSON.stringify({ serviceIds, barberId, bookingDate, bookingTime }, null, 2));
+    console.log('📋 Booking Request:', JSON.stringify({ serviceIds, barberId, bookingDate, bookingTime, customerEmail }, null, 2));
+    
+    // Determine if this is an admin/barber booking for a customer
+    const isAdminOrBarberBooking = (userRole === 'admin' || userRole === 'barber') && customerEmail;
+    
+    // Use customer information if provided by admin/barber, otherwise use logged-in user
+    const customerInfo = isAdminOrBarberBooking ? {
+      firstName: customerFirstName,
+      lastName: customerLastName,
+      email: customerEmail,
+      phone: customerPhone || null
+    } : {
+      firstName: req.user.first_name,
+      lastName: req.user.last_name,
+      email: req.user.contact_email || req.user.email,
+      phone: req.user.phone
+    };
 
     if (!serviceIds || serviceIds.length === 0 || !bookingDate || !bookingTime) {
       return res.status(400).json({
@@ -129,12 +146,13 @@ const createBooking = async (req, res) => {
         price: totalPrice.toFixed(2)
       };
 
-      // Send email to customer
-      await sendBookingConfirmationEmail(req.user.email, req.user.first_name, bookingDetails);
+      // Send email to customer (use customerInfo which works for both regular and admin/barber bookings)
+      console.log(`📧 Sending confirmation to: ${customerInfo.email} (${customerInfo.firstName} ${customerInfo.lastName})`);
+      await sendBookingConfirmationEmail(customerInfo.email, customerInfo.firstName, bookingDetails);
       
       // Send SMS to customer if phone number exists
-      if (req.user.phone_number) {
-        await sendBookingConfirmationSMS(req.user.phone_number, bookingDetails);
+      if (customerInfo.phone) {
+        await sendBookingConfirmationSMS(customerInfo.phone, bookingDetails);
       }
       
       // Send email to barber (if contact_email is set)
@@ -150,7 +168,7 @@ const createBooking = async (req, res) => {
       // Send SMS to barber
       if (barberPhone) {
         const barberSMSDetails = {
-          customerName: `${req.user.first_name} ${req.user.last_name || ''}`.trim(),
+          customerName: `${customerInfo.firstName} ${customerInfo.lastName || ''}`.trim(),
           service: servicesString,
           date: bookingDate,
           time: bookingTime,
