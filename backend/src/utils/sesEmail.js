@@ -1,4 +1,4 @@
-const { SESClient, SendEmailCommand, VerifyEmailIdentityCommand } = require('@aws-sdk/client-ses');
+const { SESClient, SendEmailCommand, SendRawEmailCommand, VerifyEmailIdentityCommand } = require('@aws-sdk/client-ses');
 
 // Create SES client
 const sesClient = new SESClient({
@@ -389,11 +389,147 @@ const sendPasswordResetEmail = async (email, firstName, resetToken) => {
   }
 };
 
+// Helper function to send job application email with attachment using SendRawEmailCommand
+const sendJobApplicationWithAttachment = async (applicationDetails, senderEmail, rootEmail) => {
+  // Create MIME email with attachment
+  const boundary = `----=_Part_${Date.now()}_${Math.random().toString().substr(2)}`;
+  
+  // Build HTML email body
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <tr>
+                <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
+                  <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold;">🎯 New Job Application</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <h2 style="margin: 0 0 20px 0; color: #333; font-size: 24px;">Application Details</h2>
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1a0f0a 0%, #2d1f18 100%); border-radius: 8px; overflow: hidden; margin: 20px 0;">
+                    <tr>
+                      <td style="padding: 25px;">
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid rgba(212, 165, 116, 0.2);">
+                              <span style="color: #D4A574; font-size: 14px; font-weight: bold;">👤 APPLICANT NAME</span><br/>
+                              <span style="color: #fff; font-size: 18px; font-weight: bold;">${applicationDetails.name}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid rgba(212, 165, 116, 0.2);">
+                              <span style="color: #D4A574; font-size: 14px; font-weight: bold;">📧 EMAIL</span><br/>
+                              <span style="color: #fff; font-size: 16px;">${applicationDetails.email}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid rgba(212, 165, 116, 0.2);">
+                              <span style="color: #D4A574; font-size: 14px; font-weight: bold;">📱 PHONE</span><br/>
+                              <span style="color: #fff; font-size: 16px;">${applicationDetails.phone}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0;">
+                              <span style="color: #D4A574; font-size: 14px; font-weight: bold;">💼 POSITION APPLIED</span><br/>
+                              <span style="color: #fff; font-size: 18px; font-weight: bold;">${applicationDetails.position}</span>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                  ${applicationDetails.message ? `
+                  <div style="background-color: #f9f9f9; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                    <p style="margin: 0 0 10px 0; color: #10b981; font-size: 14px; font-weight: bold;">📝 MESSAGE</p>
+                    <p style="margin: 0; color: #666; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${applicationDetails.message}</p>
+                  </div>
+                  ` : ''}
+                  <div style="background-color: #e8f5e9; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #666; font-size: 14px;">
+                      <strong>📎 Resume Attached:</strong> ${applicationDetails.resumeName}
+                    </p>
+                  </div>
+                  <p style="margin: 20px 0 0 0; color: #999; font-size: 14px; line-height: 1.6;">
+                    Application received on ${new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color: #f9f9f9; padding: 30px; text-align: center; border-top: 1px solid #eee;">
+                  <p style="margin: 0 0 10px 0; color: #999; font-size: 14px;">Balkan Barbers - Premium Grooming Services</p>
+                  <p style="margin: 0; color: #ccc; font-size: 12px;">© ${new Date().getFullYear()} Balkan Barbers. All rights reserved.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  // Build raw email with MIME format
+  const rawMessage = [
+    `From: ${senderEmail}`,
+    `To: ${rootEmail}`,
+    `Subject: =?UTF-8?B?${Buffer.from(`🎯 New Job Application - ${applicationDetails.position}`).toString('base64')}?=`,
+    `MIME-Version: 1.0`,
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
+    `Content-Type: text/html; charset=UTF-8`,
+    `Content-Transfer-Encoding: 7bit`,
+    '',
+    htmlBody,
+    '',
+    `--${boundary}`,
+    `Content-Type: ${applicationDetails.resumeType}`,
+    `Content-Disposition: attachment; filename="${applicationDetails.resumeName}"`,
+    `Content-Transfer-Encoding: base64`,
+    '',
+    applicationDetails.resumeBuffer.toString('base64'),
+    '',
+    `--${boundary}--`
+  ].join('\r\n');
+
+  const params = {
+    RawMessage: {
+      Data: Buffer.from(rawMessage)
+    }
+  };
+
+  try {
+    const command = new SendRawEmailCommand(params);
+    const response = await sesClient.send(command);
+    console.log(`✅ Job application notification with resume sent to ${rootEmail} via AWS SES (MessageId: ${response.MessageId})`);
+    console.log(`📎 Resume attached: ${applicationDetails.resumeName} (${(applicationDetails.resumeBuffer.length / 1024).toFixed(2)} KB)`);
+    return response;
+  } catch (error) {
+    console.error('❌ Error sending job application with attachment via AWS SES:', error);
+    throw new Error(`Failed to send job application with attachment: ${error.message}`);
+  }
+};
+
 // Send job application notification email to admin
 const sendJobApplicationEmail = async (applicationDetails) => {
   const rootEmail = process.env.ROOT_EMAIL || process.env.ADMIN_EMAIL || 'admin@balkanbarbers.com';
   const senderEmail = process.env.EMAIL_FROM || process.env.AWS_SES_FROM_EMAIL || 'noreply@balkanbarbers.com';
 
+  // If there's a resume attachment, use SendRawEmailCommand
+  if (applicationDetails.hasResume) {
+    return await sendJobApplicationWithAttachment(applicationDetails, senderEmail, rootEmail);
+  }
+
+  // Otherwise, use simple SendEmailCommand
   const params = {
     Source: senderEmail,
     Destination: {
