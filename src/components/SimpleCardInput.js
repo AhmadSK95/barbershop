@@ -67,14 +67,26 @@ const SimpleCardInput = forwardRef((props, ref) => {
       setProcessing(true);
       const stripe = await stripePromise;
 
-      // Create payment method using Stripe.js
+      // Stripe.js doesn't accept raw card details in createPaymentMethod
+      // We need to use Stripe's Token API instead
+      const { error: tokenError, token } = await stripe.createToken('card', {
+        number: cardNumber.replace(/\s/g, ''),
+        exp_month: parseInt(month),
+        exp_year: parseInt('20' + year),
+        cvc: cvc,
+        name: cardholderName
+      });
+
+      if (tokenError) {
+        toast.error(tokenError.message);
+        return null;
+      }
+
+      // Now create payment method from the token
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: {
-          number: cardNumber.replace(/\s/g, ''),
-          exp_month: parseInt(month),
-          exp_year: parseInt('20' + year),
-          cvc: cvc
+          token: token.id
         },
         billing_details: {
           name: cardholderName
