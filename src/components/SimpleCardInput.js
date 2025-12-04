@@ -1,7 +1,8 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import LoadingSpinner from './LoadingSpinner';
 import { loadStripe } from '@stripe/stripe-js';
+import api from '../services/api';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -65,63 +66,38 @@ const SimpleCardInput = forwardRef((props, ref) => {
 
     try {
       setProcessing(true);
-      const stripe = await stripePromise;
 
-      // Stripe.js doesn't accept raw card details in createPaymentMethod
-      // We need to use Stripe's Token API instead
-      const { error: tokenError, token } = await stripe.createToken('card', {
-        number: cardNumber.replace(/\s/g, ''),
-        exp_month: parseInt(month),
-        exp_year: parseInt('20' + year),
+      // Send card details to backend for secure tokenization
+      const tokenResponse = await api.post('/payments/create-payment-method', {
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        expMonth: parseInt(month),
+        expYear: parseInt('20' + year),
         cvc: cvc,
-        name: cardholderName
+        cardholderName: cardholderName
       });
 
-      if (tokenError) {
-        toast.error(tokenError.message);
+      if (!tokenResponse.data.success) {
+        toast.error(tokenResponse.data.message || 'Failed to process card');
         return null;
       }
 
-      // Now create payment method from the token
-      const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: {
-          token: token.id
-        },
-        billing_details: {
-          name: cardholderName
-        }
+      const { paymentMethodId, cardBrand, cardLast4 } = tokenResponse.data.data;
+
+      // Now verify the card with $1 authorization
+      const response = await api.post('/payments/verify-card', {
+        paymentMethodId: paymentMethodId
       });
 
-      if (error) {
-        toast.error(error.message);
-        return null;
-      }
-
-      // Send to backend for verification
-      const response = await fetch(process.env.REACT_APP_API_URL + '/payments/verify-card', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-        },
-        body: JSON.stringify({
-          paymentMethodId: paymentMethod.id
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         toast.success('Card verified successfully! Processing booking...');
-        return data.data;
+        return response.data.data;
       } else {
-        toast.error(data.message || 'Card verification failed');
+        toast.error(response.data.message || 'Card verification failed');
         return null;
       }
     } catch (err) {
       console.error('Card verification error:', err);
-      toast.error('Failed to verify card: ' + err.message);
+      toast.error('Failed to verify card: ' + (err.response?.data?.message || err.message));
       return null;
     } finally {
       setProcessing(false);

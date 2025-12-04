@@ -9,6 +9,58 @@ const {
   getCustomerPaymentMethods
 } = require('../utils/stripeClient');
 
+// @desc    Create payment method from card details (server-side tokenization)
+// @route   POST /api/payments/create-payment-method
+// @access  Private
+const createPaymentMethodFromCard = async (req, res) => {
+  try {
+    const { cardNumber, expMonth, expYear, cvc, cardholderName } = req.body;
+
+    if (!cardNumber || !expMonth || !expYear || !cvc || !cardholderName) {
+      return res.status(400).json({
+        success: false,
+        message: 'All card details are required'
+      });
+    }
+
+    // Create a token using Stripe's server-side API
+    const token = await stripe.tokens.create({
+      card: {
+        number: cardNumber,
+        exp_month: parseInt(expMonth),
+        exp_year: parseInt(expYear),
+        cvc: cvc
+      }
+    });
+
+    // Create payment method from token
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: 'card',
+      card: {
+        token: token.id
+      },
+      billing_details: {
+        name: cardholderName
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        paymentMethodId: paymentMethod.id,
+        cardBrand: paymentMethod.card.brand,
+        cardLast4: paymentMethod.card.last4
+      }
+    });
+  } catch (error) {
+    console.error('Create payment method error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to process card. Please check your card details.'
+    });
+  }
+};
+
 // @desc    Create setup intent for Payment Element
 // @route   POST /api/payments/create-setup-intent
 // @access  Private
@@ -253,6 +305,7 @@ const refundPayment = async (req, res) => {
 };
 
 module.exports = {
+  createPaymentMethodFromCard,
   createSetupIntent,
   verifyCardAndSave,
   chargeCustomerCard,
