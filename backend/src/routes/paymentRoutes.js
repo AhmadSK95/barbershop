@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  createPaymentMethodFromCard,
   createSetupIntent,
   verifyCardAndSave,
   chargeCustomerCard,
@@ -10,6 +11,11 @@ const { protect, authorize } = require('../middleware/auth');
 
 // All routes require authentication
 router.use(protect);
+
+// @route   POST /api/payments/create-payment-method
+// @desc    Create payment method from card details (server-side)
+// @access  Private
+router.post('/create-payment-method', createPaymentMethodFromCard);
 
 // @route   POST /api/payments/create-setup-intent
 // @desc    Create setup intent for Payment Element
