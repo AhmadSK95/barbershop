@@ -393,13 +393,13 @@ function ProfilePage() {
     try {
       // Import will be added at top of file
       const { default: axios } = await import('axios');
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
       
       // Get token from localStorage
       const token = localStorage.getItem('token');
       
       const response = await axios.post(
-        `${API_URL}/api/payments/create-checkout-session/${booking._id}`,
+        `${API_URL}/payments/create-checkout-session/${booking._id}`,
         {},
         {
           headers: {
