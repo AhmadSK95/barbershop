@@ -100,6 +100,10 @@ function ProfilePage() {
           status: booking.status,
           totalPrice: booking.total_price,
           notes: booking.notes,
+          paymentVerified: booking.payment_verified || false,
+          paymentStatus: booking.payment_status || null,
+          cardBrand: booking.card_brand || null,
+          cardLast4: booking.card_last_4 || null,
           service: {
             name: booking.service_name,
             duration: booking.duration
@@ -383,6 +387,43 @@ function ProfilePage() {
       console.error('Error submitting rating:', err);
       toast.error(err.response?.data?.message || 'Failed to submit rating. Please try again.');
     }
+  };
+  
+  const handlePayNow = async (booking) => {
+    try {
+      // Import will be added at top of file
+      const { default: axios } = await import('axios');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post(
+        `${API_URL}/api/payments/create-checkout-session/${booking._id}`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.data.success && response.data.data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = response.data.data.url;
+      } else {
+        toast.error('Failed to create payment session');
+      }
+    } catch (err) {
+      console.error('Error creating payment session:', err);
+      toast.error(err.response?.data?.message || 'Failed to initiate payment. Please try again.');
+    }
+  };
+  
+  const canPayNow = (booking) => {
+    // Show Pay Now button for confirmed/pending bookings that haven't been paid
+    return ['confirmed', 'pending'].includes(booking.status) && !booking.paymentVerified;
   };
 
   return (
@@ -688,6 +729,14 @@ function ProfilePage() {
                   )}
                   
                   <div className="booking-actions">
+                    {canPayNow(booking) && (
+                      <button 
+                        className="btn btn-primary pay-now-btn"
+                        onClick={() => handlePayNow(booking)}
+                      >
+                        💳 Pay Now
+                      </button>
+                    )}
                     {canReschedule(booking) && (
                       <button 
                         className="btn btn-secondary reschedule-btn"

@@ -88,16 +88,25 @@ app.use(cors({
   credentials: true
 }));
 
+// Stripe webhook needs raw body for signature verification
+app.use((req, res, next) => {
+  if (req.path === '/api/payments/webhook') {
+    express.raw({ type: 'application/json' })(req, res, next);
+  } else {
+    next();
+  }
+});
+
 // Request body size limits (prevent DoS)
 // Skip body parsing for multipart/form-data (handled by multer in careers route)
 app.use((req, res, next) => {
-  if (req.path === '/api/careers/apply') {
+  if (req.path === '/api/careers/apply' || req.path === '/api/payments/webhook') {
     return next();
   }
   express.json({ limit: '10kb' })(req, res, next);
 });
 app.use((req, res, next) => {
-  if (req.path === '/api/careers/apply') {
+  if (req.path === '/api/careers/apply' || req.path === '/api/payments/webhook') {
     return next();
   }
   express.urlencoded({ extended: true, limit: '10kb' })(req, res, next);

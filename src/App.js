@@ -26,6 +26,7 @@ const BarberDashboardPage = lazy(() => import('./pages/BarberDashboardPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const BookingSuccess = lazy(() => import('./pages/BookingSuccess'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function App() {
@@ -109,6 +110,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BarberDashboardPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/booking/success" 
+              element={
+                <ProtectedRoute>
+                  <BookingSuccess />
                 </ProtectedRoute>
               } 
             />

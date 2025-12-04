@@ -299,10 +299,200 @@ const refundPayment = async (req, res) => {
   }
 };
 
+// @desc    Create Stripe Checkout Session for existing booking
+// @route   POST /api/payments/create-checkout-session/:bookingId
+// @access  Private
+const createCheckoutSessionForBooking = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { bookingId } = req.params;
+    const userId = req.user.id;
+    const userEmail = req.user.email;
+    const userName = `${req.user.firstName} ${req.user.lastName}`;
+
+    // Get booking details
+    const bookingResult = await client.query(
+      `SELECT b.*, s.name as service_name, s.price as service_price
+       FROM bookings b
+       JOIN services s ON b.service_id = s.id
+       WHERE b.id = $1 AND b.user_id = $2`,
+      [bookingId, userId]
+    );
+
+    if (bookingResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found or you do not have permission to access it'
+      });
+    }
+
+    const booking = bookingResult.rows[0];
+
+    // Check if already paid
+    if (booking.payment_verified) {
+      return res.status(400).json({
+        success: false,
+        message: 'This booking has already been paid'
+      });
+    }
+
+    // Create Stripe customer if not exists
+    let stripeCustomerId = booking.stripe_customer_id;
+    if (!stripeCustomerId) {
+      const customer = await createCustomer(userEmail, userName);
+      stripeCustomerId = customer.id;
+      
+      // Update booking with customer ID
+      await client.query(
+        'UPDATE bookings SET stripe_customer_id = $1 WHERE id = $2',
+        [stripeCustomerId, bookingId]
+      );
+    }
+
+    // Create Stripe Checkout Session in payment mode
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer: stripeCustomerId,
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: booking.service_name,
+              description: `Barbershop Service - Booking #${bookingId}`
+            },
+            unit_amount: Math.round(booking.total_price * 100) // Convert to cents
+          },
+          quantity: 1
+        }
+      ],
+      success_url: `${process.env.FRONTEND_URL}/booking/success?session_id={CHECKOUT_SESSION_ID}&booking_id=${bookingId}`,
+      cancel_url: `${process.env.FRONTEND_URL}/profile?payment=cancelled`,
+      metadata: {
+        userId: userId.toString(),
+        bookingId: bookingId.toString(),
+        userName: userName
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        sessionId: session.id,
+        url: session.url
+      }
+    });
+  } catch (error) {
+    console.error('Create checkout session for booking error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create checkout session'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+// @desc    Handle Stripe webhook events
+// @route   POST /api/payments/webhook
+// @access  Public (verified by Stripe signature)
+const handleWebhook = async (req, res) => {
+  const client = await pool.connect();
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  let event;
+
+  try {
+    // Verify webhook signature
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object;
+        const bookingId = session.metadata.bookingId;
+        
+        console.log('Payment completed for booking:', bookingId);
+        
+        if (bookingId) {
+          // Get payment method details
+          let paymentMethodId = session.payment_method;
+          let cardBrand = null;
+          let cardLast4 = null;
+          
+          if (paymentMethodId) {
+            try {
+              const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+              cardBrand = paymentMethod.card?.brand || null;
+              cardLast4 = paymentMethod.card?.last4 || null;
+            } catch (err) {
+              console.error('Error retrieving payment method:', err);
+            }
+          }
+          
+          // Update booking with payment info
+          await client.query(
+            `UPDATE bookings 
+             SET payment_verified = true,
+                 payment_status = 'paid',
+                 payment_amount = $1,
+                 stripe_payment_method_id = $2,
+                 card_brand = $3,
+                 card_last_4 = $4,
+                 stripe_charge_id = $5,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $6`,
+            [
+              session.amount_total / 100, // Convert cents to dollars
+              paymentMethodId,
+              cardBrand,
+              cardLast4,
+              session.payment_intent,
+              bookingId
+            ]
+          );
+          
+          console.log(`✅ Booking ${bookingId} marked as paid`);
+        }
+        break;
+      }
+      
+      case 'checkout.session.expired': {
+        const session = event.data.object;
+        const bookingId = session.metadata.bookingId;
+        
+        console.log('Checkout session expired for booking:', bookingId);
+        // Optionally handle expired sessions
+        break;
+      }
+      
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
+    }
+    
+    // Return 200 to acknowledge receipt
+    res.json({ received: true });
+  } catch (err) {
+    console.error('Error handling webhook:', err);
+    res.status(500).json({ error: 'Webhook handler failed' });
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   createCheckoutSession,
+  createCheckoutSessionForBooking,
   createSetupIntent,
   verifyCardAndSave,
   chargeCustomerCard,
-  refundPayment
+  refundPayment,
+  handleWebhook
 };
