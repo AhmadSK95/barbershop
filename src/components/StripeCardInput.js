@@ -1,53 +1,67 @@
-import React, { useState, useImperativeHandle, forwardRef } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import React, { useState, useImperativeHandle, forwardRef, useEffect } from 'react';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { toast } from 'react-toastify';
 import LoadingSpinner from './LoadingSpinner';
 import api from '../services/api';
 
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      color: '#e8d7c3',
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-      fontSmoothing: 'antialiased',
-      fontSize: '16px',
-      '::placeholder': {
-        color: '#c19a6b'
-      }
-    },
-    invalid: {
-      color: '#fa755a',
-      iconColor: '#fa755a'
-    }
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+
+const PAYMENT_ELEMENT_OPTIONS = {
+  layout: {
+    type: 'tabs',
+    defaultCollapsed: false,
+    radios: false,
+    spacedAccordionItems: false
   },
-  hidePostalCode: true
+  wallets: {
+    applePay: 'auto',
+    googlePay: 'auto'
+  },
+  terms: {
+    card: 'auto'
+  }
 };
 
-const StripeCardInput = forwardRef((props, ref) => {
+// Inner component that uses Stripe hooks
+const PaymentForm = forwardRef((props, ref) => {
   const { disabled } = props;
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
-  const [cardComplete, setCardComplete] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
   const [consent, setConsent] = useState(false);
 
-  const handleCardChange = (event) => {
-    setCardComplete(event.complete);
+  const handlePaymentChange = (event) => {
+    setPaymentReady(event.complete);
   };
 
   const verifyCard = async () => {
-    if (!stripe || !elements || !cardComplete || !consent) {
+    if (!stripe || !elements || !paymentReady || !consent) {
+      if (!consent) {
+        toast.error('Please accept the payment authorization terms');
+      } else if (!paymentReady) {
+        toast.error('Please complete your payment information');
+      }
       return null;
     }
 
     try {
       setProcessing(true);
 
-      // Create payment method from card element
-      const cardElement = elements.getElement(CardElement);
-      const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
+      // Confirm the setup intent
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        toast.error(submitError.message);
+        return null;
+      }
+
+      const { error, setupIntent } = await stripe.confirmSetup({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + '/booking',
+        },
+        redirect: 'if_required',
       });
 
       if (error) {
@@ -55,21 +69,21 @@ const StripeCardInput = forwardRef((props, ref) => {
         return null;
       }
 
-      // Send payment method to backend for verification
+      // Send payment method to backend for verification and saving
       const response = await api.post('/payments/verify-card', {
-        paymentMethodId: paymentMethod.id
+        paymentMethodId: setupIntent.payment_method
       });
 
       if (response.data.success) {
-        toast.success('Card verified successfully! Processing booking...');
+        toast.success('Payment method verified successfully! Processing booking...');
         return response.data.data;
       } else {
-        toast.error(response.data.message || 'Card verification failed');
+        toast.error(response.data.message || 'Payment verification failed');
         return null;
       }
     } catch (err) {
-      console.error('Card verification error:', err);
-      toast.error(err.response?.data?.message || 'Failed to verify card');
+      console.error('Payment verification error:', err);
+      toast.error(err.response?.data?.message || 'Failed to verify payment method');
       return null;
     } finally {
       setProcessing(false);
@@ -94,16 +108,11 @@ const StripeCardInput = forwardRef((props, ref) => {
       </h3>
       
       <div style={{
-        background: 'rgba(0, 0, 0, 0.5)',
-        padding: '1rem',
-        borderRadius: '4px',
-        border: '1px solid var(--gold)',
         marginBottom: '1rem'
       }}>
-        <CardElement 
-          options={CARD_ELEMENT_OPTIONS}
-          onChange={handleCardChange}
-          disabled={disabled || processing}
+        <PaymentElement 
+          options={PAYMENT_ELEMENT_OPTIONS}
+          onChange={handlePaymentChange}
         />
       </div>
 
@@ -150,18 +159,88 @@ const StripeCardInput = forwardRef((props, ref) => {
         marginTop: '1rem',
         marginBottom: 0
       }}>
-        🔒 Your card will be securely saved for payment at checkout. A $1 verification hold will appear and be immediately released.
+        🔒 Your payment method will be securely saved for checkout. A $1 verification hold will appear and be immediately released.
       </p>
 
-      <p style={{
-        fontSize: '0.85rem',
-        color: '#c19a6b',
-        marginTop: '0.5rem',
-        marginBottom: 0
-      }}>
-        Test cards: 4242 4242 4242 4242 (success), 4000 0000 0000 0002 (decline)
-      </p>
+      {process.env.NODE_ENV === 'development' && (
+        <p style={{
+          fontSize: '0.85rem',
+          color: '#c19a6b',
+          marginTop: '0.5rem',
+          marginBottom: 0
+        }}>
+          Test cards: 4242 4242 4242 4242 (success), 4000 0000 0000 0002 (decline)
+        </p>
+      )}
     </div>
+  );
+});
+
+PaymentForm.displayName = 'PaymentForm';
+
+// Wrapper component that creates the setup intent and Elements provider
+const StripeCardInput = forwardRef((props, ref) => {
+  const { disabled } = props;
+  const [clientSecret, setClientSecret] = useState('');
+
+  // Create setup intent when component mounts
+  useEffect(() => {
+    const createSetupIntent = async () => {
+      try {
+        const response = await api.post('/payments/create-setup-intent');
+        if (response.data.success) {
+          setClientSecret(response.data.data.clientSecret);
+        }
+      } catch (error) {
+        console.error('Failed to create setup intent:', error);
+        toast.error('Failed to initialize payment form');
+      }
+    };
+
+    createSetupIntent();
+  }, []);
+
+  if (!clientSecret) {
+    return (
+      <div className="payment-section" style={{
+        background: 'rgba(26, 15, 10, 0.6)',
+        padding: '1.5rem',
+        borderRadius: '8px',
+        border: '1px solid var(--gold)',
+        marginTop: '2rem',
+        textAlign: 'center'
+      }}>
+        <h3 style={{ color: 'var(--gold)', marginBottom: '1rem' }}>
+          💳 Payment Information
+        </h3>
+        <LoadingSpinner size="small" />
+        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--gold)' }}>
+          Loading payment options...
+        </p>
+      </div>
+    );
+  }
+
+  const options = {
+    clientSecret,
+    appearance: {
+      theme: 'night',
+      variables: {
+        colorPrimary: '#c19a6b',
+        colorBackground: 'rgba(0, 0, 0, 0.5)',
+        colorText: '#e8d7c3',
+        colorDanger: '#fa755a',
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        spacingUnit: '4px',
+        borderRadius: '4px'
+      }
+    }
+  };
+
+  return (
+    <Elements stripe={stripePromise} options={options}>
+      <PaymentForm ref={ref} disabled={disabled} clientSecret={clientSecret} />
+    </Elements>
   );
 });
 

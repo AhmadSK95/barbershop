@@ -1,0 +1,36 @@
+-- Run this command on the server to update the admin password to "Admin123!"
+-- This hash was generated with bcrypt and tested locally
+
+-- Option 1: Copy this file to server and run from inside container
+docker cp update-admin-sql.txt barbershop_backend:/tmp/
+docker exec -it barbershop_backend node -e "
+const bcrypt = require('bcryptjs');
+const { Pool } = require('pg');
+const pool = new Pool({
+  user: 'barbershop_user',
+  host: 'barbershop_postgres',
+  database: 'barbershop_db',
+  password: 'barbershop_password_2024',
+  port: 5432,
+});
+
+(async () => {
+  const client = await pool.connect();
+  try {
+    const hash = await bcrypt.hash('Admin123!', 10);
+    const result = await client.query('UPDATE users SET password = \$1 WHERE id = 1 RETURNING id, username', [hash]);
+    console.log('Updated:', result.rows[0]);
+    
+    // Verify
+    const check = await client.query('SELECT password FROM users WHERE id = 1');
+    const match = await bcrypt.compare('Admin123!', check.rows[0].password);
+    console.log('Verification:', match ? '✅ SUCCESS' : '❌ FAILED');
+  } finally {
+    client.release();
+    await pool.end();
+  }
+})();
+"
+
+-- Option 2: Quick one-liner (run this directly on the server)
+docker exec -it barbershop_backend node -e "const bcrypt=require('bcryptjs');const {Pool}=require('pg');const pool=new Pool({user:'barbershop_user',host:'barbershop_postgres',database:'barbershop_db',password:'barbershop_password_2024',port:5432});(async()=>{const client=await pool.connect();try{const hash=await bcrypt.hash('Admin123!',10);const r=await client.query('UPDATE users SET password=\$1 WHERE id=1 RETURNING username',[hash]);console.log('Updated:',r.rows[0].username);const c=await client.query('SELECT password FROM users WHERE id=1');console.log('Verify:',await bcrypt.compare('Admin123!',c.rows[0].password)?'✅':'❌');}finally{client.release();await pool.end();}})();"
