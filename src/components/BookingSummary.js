@@ -89,12 +89,41 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
       // Get assigned barber info from response
       const assignedBarber = response.data.data?.assignedBarber;
       
-      // Show confirmation with assigned barber
-      if (assignedBarber && booking.barber?.name === 'Any Available') {
-        toast.success(`Booking confirmed! Your barber: ${assignedBarber.name}. You will receive a confirmation email shortly.`);
-      } else {
-        toast.success('Booking confirmed! You will receive a confirmation email shortly.');
-      }
+      // Show confirmation with assigned barber and payment option
+      const bookingConfirmMessage = assignedBarber && booking.barber?.name === 'Any Available' 
+        ? `Booking confirmed! Your barber: ${assignedBarber.name}.`
+        : 'Booking confirmed!';
+      
+      // Show payment option in toast
+      const paymentLink = 'https://71b14a51-d5c2-4074-bf25-dda3eb50f333.paylinks.godaddy.com/0072d023-d6b0-4dbd-9fa4-98d';
+      
+      // Custom toast with payment button
+      toast.success(
+        <div>
+          <p>{bookingConfirmMessage}</p>
+          <p style={{ fontSize: '0.9em', marginTop: '0.5rem' }}>Confirmation email sent.</p>
+          <button 
+            onClick={() => window.open(paymentLink, '_blank')}
+            style={{
+              marginTop: '0.75rem',
+              padding: '0.5rem 1rem',
+              background: 'var(--gold)',
+              color: 'var(--charcoal)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              width: '100%'
+            }}
+          >
+            💳 Pay Now
+          </button>
+        </div>,
+        {
+          autoClose: 10000, // Keep toast open for 10 seconds
+          closeButton: true
+        }
+      );
       
       // Reset booking state
       onConfirm();
