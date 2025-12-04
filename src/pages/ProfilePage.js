@@ -701,6 +701,15 @@ function ProfilePage() {
                       <span className="detail-value price">${booking.totalPrice}</span>
                     </div>
                     
+                    {booking.paymentVerified && (
+                      <div className="detail-row payment-status">
+                        <span className="detail-label">Payment:</span>
+                        <span className="detail-value" style={{ color: '#28a745', fontWeight: 'bold' }}>
+                          ✓ Paid {booking.cardBrand && booking.cardLast4 && `(${booking.cardBrand.toUpperCase()} •••• ${booking.cardLast4})`}
+                        </span>
+                      </div>
+                    )}
+                    
                     {bookingRatings[booking._id] && (
                       <div className="detail-row rating">
                         <span className="detail-label">Your Rating:</span>
