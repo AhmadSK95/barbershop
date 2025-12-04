@@ -1,5 +1,6 @@
 const pool = require('../config/database');
 const {
+  stripe,
   createCustomer,
   attachPaymentMethod,
   verifyCard,
@@ -7,6 +8,43 @@ const {
   processRefund,
   getCustomerPaymentMethods
 } = require('../utils/stripeClient');
+
+// @desc    Create setup intent for Payment Element
+// @route   POST /api/payments/create-setup-intent
+// @access  Private
+const createSetupIntent = async (req, res) => {
+  try {
+    // Get user info from auth middleware
+    const userId = req.user.id;
+    const userEmail = req.user.email;
+    const userName = `${req.user.firstName} ${req.user.lastName}`;
+
+    // Create setup intent for future payments
+    const setupIntent = await stripe.setupIntents.create({
+      payment_method_types: ['card'],
+      usage: 'off_session',
+      customer: req.user.stripeCustomerId || undefined,
+      metadata: {
+        userId: userId.toString(),
+        userEmail: userEmail,
+        userName: userName
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        clientSecret: setupIntent.client_secret
+      }
+    });
+  } catch (error) {
+    console.error('Create setup intent error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to initialize payment. Please try again.'
+    });
+  }
+};
 
 // @desc    Verify card with $1 authorization and save payment method
 // @route   POST /api/payments/verify-card
@@ -215,6 +253,7 @@ const refundPayment = async (req, res) => {
 };
 
 module.exports = {
+  createSetupIntent,
   verifyCardAndSave,
   chargeCustomerCard,
   refundPayment
