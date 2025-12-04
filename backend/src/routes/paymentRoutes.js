@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  createPaymentMethodFromCard,
+  createCheckoutSession,
   createSetupIntent,
   verifyCardAndSave,
   chargeCustomerCard,
@@ -12,10 +12,10 @@ const { protect, authorize } = require('../middleware/auth');
 // All routes require authentication
 router.use(protect);
 
-// @route   POST /api/payments/create-payment-method
-// @desc    Create payment method from card details (server-side)
+// @route   POST /api/payments/create-checkout-session
+// @desc    Create Stripe Checkout Session
 // @access  Private
-router.post('/create-payment-method', createPaymentMethodFromCard);
+router.post('/create-checkout-session', createCheckoutSession);
 
 // @route   POST /api/payments/create-setup-intent
 // @desc    Create setup intent for Payment Element
