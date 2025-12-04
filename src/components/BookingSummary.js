@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { bookingAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
-import StripeCardInput from './StripeCardInput';
+import SimpleCardInput from './SimpleCardInput';
 
 function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack }) {
   const [loading, setLoading] = useState(false);
@@ -318,8 +318,10 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
         </div>
       </div>
 
-      {/* Stripe Payment Section */}
-      <StripeCardInput ref={paymentRef} disabled={loading} />
+      {/* Stripe Payment Section - Only for regular customers, not admin/barber bookings */}
+      {!isAdminOrBarber && (
+        <SimpleCardInput ref={paymentRef} disabled={loading} />
+      )}
 
       <div className="button-group">
         <button className="btn btn-secondary" onClick={onBack} disabled={loading}>
