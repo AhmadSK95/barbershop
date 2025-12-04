@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Stripe Payment Element</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>Test Stripe Payment Element</h1>
+    <div id="payment-element"></div>
+    <div id="error-message"></div>
+    
+    <script>
+        const stripe = Stripe('pk_test_51SafdBFpmtsgtuDy2TStbVs6EZotEsddPU6SxteHLDovF92bv7MJTyM8Mk7w38NjOtu0JfWVn86fGk5DnxmkUbwM00S7ZNG1ec');
+        
+        // Test: Create a setup intent manually
+        fetch('https://balkan.thisisrikisart.com/api/payments/create-setup-intent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Setup intent response:', data);
+            
+            if (data.success && data.data.clientSecret) {
+                const elements = stripe.elements({
+                    clientSecret: data.data.clientSecret,
+                    appearance: {
+                        theme: 'night'
+                    }
+                });
+                
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+                
+                console.log('✅ Payment Element mounted successfully');
+            } else {
+                document.getElementById('error-message').textContent = 'Failed: ' + (data.message || 'Unknown error');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            document.getElementById('error-message').textContent = 'Error: ' + err.message;
+        });
+    </script>
+</body>
+</html>
