@@ -62,15 +62,9 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
     try {
       setLoading(true);
 
-      // Verify card and get payment details
+      // Skip payment verification for now - we'll handle this differently
       let paymentData = null;
-      if (paymentRef.current?.verifyCard) {
-        paymentData = await paymentRef.current.verifyCard();
-        if (!paymentData) {
-          setLoading(false);
-          return; // Card verification failed
-        }
-      }
+      // Payment will be added in next phase
 
       // Format the booking data for API
       console.log('DEBUG - Full booking object:', JSON.stringify(booking, null, 2));
@@ -318,10 +312,10 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
         </div>
       </div>
 
-      {/* Stripe Payment Section - Only for regular customers, not admin/barber bookings */}
-      {!isAdminOrBarber && (
+      {/* Payment section temporarily disabled - will be re-enabled with proper Stripe integration */}
+      {/* {!isAdminOrBarber && (
         <SimpleCardInput ref={paymentRef} disabled={loading} />
-      )}
+      )} */}
 
       <div className="button-group">
         <button className="btn btn-secondary" onClick={onBack} disabled={loading}>
