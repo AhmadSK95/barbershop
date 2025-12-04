@@ -217,6 +217,8 @@ const getMyBookings = async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT b.id, b.booking_date, b.booking_time, b.total_price, b.status, b.notes,
+              b.payment_verified, b.payment_status, b.card_brand, b.card_last_4,
+              b.stripe_customer_id, b.stripe_payment_method_id,
               s.name as service_name, s.duration,
               bar.id as barber_id,
               COALESCE(u.first_name, 'Any Available') as barber_first_name, 
