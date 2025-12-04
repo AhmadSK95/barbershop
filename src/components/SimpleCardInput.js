@@ -1,10 +1,7 @@
-import React, { useState, forwardRef, useImperativeHandle, useEffect, useRef } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { toast } from 'react-toastify';
 import LoadingSpinner from './LoadingSpinner';
-import { loadStripe } from '@stripe/stripe-js';
 import api from '../services/api';
-
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const SimpleCardInput = forwardRef((props, ref) => {
   const { disabled } = props;
@@ -35,69 +32,31 @@ const SimpleCardInput = forwardRef((props, ref) => {
   };
 
   const verifyCard = async () => {
-    if (!cardNumber || !expiry || !cvc || !cardholderName || !consent) {
-      if (!consent) {
-        toast.error('Please accept the payment authorization terms');
-      } else {
-        toast.error('Please fill in all card details');
-      }
-      return null;
-    }
-
-    // Validate card number length (13-19 digits)
-    const cardDigits = cardNumber.replace(/\s/g, '');
-    if (cardDigits.length < 13 || cardDigits.length > 19) {
-      toast.error('Invalid card number');
-      return null;
-    }
-
-    // Validate expiry
-    const [month, year] = expiry.split('/');
-    if (!month || !year || parseInt(month) > 12 || parseInt(month) < 1) {
-      toast.error('Invalid expiry date');
-      return null;
-    }
-
-    // Validate CVC (3-4 digits)
-    if (cvc.length < 3 || cvc.length > 4) {
-      toast.error('Invalid CVC');
+    if (!consent) {
+      toast.error('Please accept the payment authorization terms');
       return null;
     }
 
     try {
       setProcessing(true);
 
-      // Send card details to backend for secure tokenization
-      const tokenResponse = await api.post('/payments/create-payment-method', {
-        cardNumber: cardNumber.replace(/\s/g, ''),
-        expMonth: parseInt(month),
-        expYear: parseInt('20' + year),
-        cvc: cvc,
-        cardholderName: cardholderName
-      });
-
-      if (!tokenResponse.data.success) {
-        toast.error(tokenResponse.data.message || 'Failed to process card');
-        return null;
-      }
-
-      const { paymentMethodId, cardBrand, cardLast4 } = tokenResponse.data.data;
-
-      // Now verify the card with $1 authorization
-      const response = await api.post('/payments/verify-card', {
-        paymentMethodId: paymentMethodId
+      // Create Stripe Checkout session
+      const response = await api.post('/payments/create-checkout-session', {
+        amount: 1, // $1 for verification
+        bookingId: 'pending'
       });
 
       if (response.data.success) {
-        toast.success('Card verified successfully! Processing booking...');
-        return response.data.data;
+        // Redirect to Stripe Checkout
+        window.location.href = response.data.data.url;
+        return { redirecting: true };
       } else {
-        toast.error(response.data.message || 'Card verification failed');
+        toast.error(response.data.message || 'Failed to initialize payment');
         return null;
       }
     } catch (err) {
-      console.error('Card verification error:', err);
-      toast.error('Failed to verify card: ' + (err.response?.data?.message || err.message));
+      console.error('Payment initialization error:', err);
+      toast.error('Failed to initialize payment: ' + (err.response?.data?.message || err.message));
       return null;
     } finally {
       setProcessing(false);
@@ -120,98 +79,9 @@ const SimpleCardInput = forwardRef((props, ref) => {
         💳 Payment Information
       </h3>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-          Cardholder Name *
-        </label>
-        <input
-          type="text"
-          value={cardholderName}
-          onChange={(e) => setCardholderName(e.target.value)}
-          placeholder="John Doe"
-          disabled={disabled || processing}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            background: 'rgba(0, 0, 0, 0.5)',
-            border: '1px solid var(--gold)',
-            borderRadius: '4px',
-            color: '#e8d7c3',
-            fontSize: '1rem'
-          }}
-        />
-      </div>
-
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-          Card Number *
-        </label>
-        <input
-          type="text"
-          value={cardNumber}
-          onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-          placeholder="1234 5678 9012 3456"
-          maxLength="19"
-          disabled={disabled || processing}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            background: 'rgba(0, 0, 0, 0.5)',
-            border: '1px solid var(--gold)',
-            borderRadius: '4px',
-            color: '#e8d7c3',
-            fontSize: '1rem',
-            letterSpacing: '0.05em'
-          }}
-        />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-        <div>
-          <label style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-            Expiry (MM/YY) *
-          </label>
-          <input
-            type="text"
-            value={expiry}
-            onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-            placeholder="12/25"
-            maxLength="5"
-            disabled={disabled || processing}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: 'rgba(0, 0, 0, 0.5)',
-              border: '1px solid var(--gold)',
-              borderRadius: '4px',
-              color: '#e8d7c3',
-              fontSize: '1rem'
-            }}
-          />
-        </div>
-        <div>
-          <label style={{ color: 'var(--gold)', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-            CVC *
-          </label>
-          <input
-            type="text"
-            value={cvc}
-            onChange={(e) => setCvc(e.target.value.replace(/[^0-9]/g, '').substring(0, 4))}
-            placeholder="123"
-            maxLength="4"
-            disabled={disabled || processing}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: 'rgba(0, 0, 0, 0.5)',
-              border: '1px solid var(--gold)',
-              borderRadius: '4px',
-              color: '#e8d7c3',
-              fontSize: '1rem'
-            }}
-          />
-        </div>
-      </div>
+      <p style={{ color: 'var(--cream)', marginBottom: '1rem' }}>
+        You'll be redirected to Stripe's secure payment page to enter your card details.
+      </p>
 
       <div style={{
         display: 'flex',
@@ -256,16 +126,7 @@ const SimpleCardInput = forwardRef((props, ref) => {
         marginTop: '1rem',
         marginBottom: 0
       }}>
-        🔒 Your card will be securely processed by Stripe. A $1 verification hold will appear and be immediately released.
-      </p>
-
-      <p style={{
-        fontSize: '0.85rem',
-        color: '#c19a6b',
-        marginTop: '0.5rem',
-        marginBottom: 0
-      }}>
-        Test card: 4242 4242 4242 4242, Expiry: 12/25, CVC: 123
+        🔒 Powered by Stripe - PCI compliant and secure. Your card information is never stored on our servers.
       </p>
     </div>
   );
