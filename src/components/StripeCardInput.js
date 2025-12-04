@@ -187,13 +187,23 @@ const StripeCardInput = forwardRef((props, ref) => {
   useEffect(() => {
     const createSetupIntent = async () => {
       try {
+        console.log('[StripeCardInput] Requesting setup intent...');
         const response = await api.post('/payments/create-setup-intent');
-        if (response.data.success) {
+        console.log('[StripeCardInput] Setup intent response:', response.data);
+        
+        if (response.data.success && response.data.data && response.data.data.clientSecret) {
+          console.log('[StripeCardInput] Client secret received:', response.data.data.clientSecret.substring(0, 20) + '...');
           setClientSecret(response.data.data.clientSecret);
+        } else {
+          console.error('[StripeCardInput] Invalid response structure:', response.data);
+          toast.error('Payment initialization failed: Invalid response');
+          setClientSecret('ERROR'); // Set to error state to stop loading
         }
       } catch (error) {
-        console.error('Failed to create setup intent:', error);
-        toast.error('Failed to initialize payment form');
+        console.error('[StripeCardInput] Failed to create setup intent:', error);
+        console.error('[StripeCardInput] Error response:', error.response?.data);
+        toast.error('Failed to initialize payment form: ' + (error.response?.data?.message || error.message));
+        setClientSecret('ERROR'); // Set to error state to stop loading
       }
     };
 
@@ -216,6 +226,26 @@ const StripeCardInput = forwardRef((props, ref) => {
         <LoadingSpinner size="small" />
         <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--gold)' }}>
           Loading payment options...
+        </p>
+      </div>
+    );
+  }
+  
+  if (clientSecret === 'ERROR') {
+    return (
+      <div className="payment-section" style={{
+        background: 'rgba(26, 15, 10, 0.6)',
+        padding: '1.5rem',
+        borderRadius: '8px',
+        border: '1px solid var(--gold)',
+        marginTop: '2rem',
+        textAlign: 'center'
+      }}>
+        <h3 style={{ color: 'var(--gold)', marginBottom: '1rem' }}>
+          💳 Payment Information
+        </h3>
+        <p style={{ color: '#fa755a', fontSize: '0.9rem' }}>
+          ⚠️ Unable to load payment form. Please refresh the page or contact support.
         </p>
       </div>
     );
