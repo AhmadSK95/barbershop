@@ -9,7 +9,7 @@ const { sendBookingConfirmationSMS, sendBookingCancellationSMS, sendBarberBookin
 const createBooking = async (req, res) => {
   const client = await pool.connect();
   try {
-    let { serviceIds, barberId, bookingDate, bookingTime, notes, customerFirstName, customerLastName, customerEmail, customerPhone } = req.body;
+    let { serviceIds, barberId, bookingDate, bookingTime, notes, customerFirstName, customerLastName, customerEmail, customerPhone, stripeCustomerId, stripePaymentMethodId, cardBrand, cardLast4 } = req.body;
     const userId = req.user.id;
     const userRole = req.user.role;
 
@@ -106,12 +106,12 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Create booking (auto-confirmed)
+    // Create booking (auto-confirmed) with optional Stripe payment info
     const bookingResult = await client.query(
-      `INSERT INTO bookings (user_id, service_id, barber_id, booking_date, booking_time, total_price, notes, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO bookings (user_id, service_id, barber_id, booking_date, booking_time, total_price, notes, status, stripe_customer_id, stripe_payment_method_id, card_brand, card_last_4, payment_verified)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING id`,
-      [userId, serviceIds[0], barberId, bookingDate, bookingTime, totalPrice, notes, 'confirmed']
+      [userId, serviceIds[0], barberId, bookingDate, bookingTime, totalPrice, notes, 'confirmed', stripeCustomerId || null, stripePaymentMethodId || null, cardBrand || null, cardLast4 || null, stripePaymentMethodId ? true : false]
     );
 
     const bookingId = bookingResult.rows[0].id;

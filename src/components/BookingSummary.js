@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { bookingAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
+import StripeCardInput from './StripeCardInput';
 
 function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack }) {
   const [loading, setLoading] = useState(false);
@@ -11,6 +12,7 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
   const [loadingBarber, setLoadingBarber] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const paymentRef = useRef(null);
   
   // Customer information for admin/barber bookings
   const [customerInfo, setCustomerInfo] = useState({
@@ -60,6 +62,16 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
     try {
       setLoading(true);
 
+      // Verify card and get payment details
+      let paymentData = null;
+      if (paymentRef.current?.verifyCard) {
+        paymentData = await paymentRef.current.verifyCard();
+        if (!paymentData) {
+          setLoading(false);
+          return; // Card verification failed
+        }
+      }
+
       // Format the booking data for API
       console.log('DEBUG - Full booking object:', JSON.stringify(booking, null, 2));
       console.log('DEBUG - booking.barber:', booking.barber);
@@ -79,6 +91,13 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
           customerLastName: customerInfo.lastName,
           customerEmail: customerInfo.email,
           customerPhone: customerInfo.phone || null
+        }),
+        // Include Stripe payment data if available
+        ...(paymentData && {
+          stripeCustomerId: paymentData.customerId,
+          stripePaymentMethodId: paymentData.paymentMethodId,
+          cardBrand: paymentData.cardBrand,
+          cardLast4: paymentData.cardLast4
         })
       };
 
@@ -89,39 +108,24 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
       // Get assigned barber info from response
       const assignedBarber = response.data.data?.assignedBarber;
       
-      // Show confirmation with assigned barber and payment option
+      // Show confirmation with assigned barber
       const bookingConfirmMessage = assignedBarber && booking.barber?.name === 'Any Available' 
         ? `Booking confirmed! Your barber: ${assignedBarber.name}.`
         : 'Booking confirmed!';
       
-      // Show payment option in toast
-      const paymentLink = 'https://71b14a51-d5c2-4074-bf25-dda3eb50f333.paylinks.godaddy.com/0072d023-d6b0-4dbd-9fa4-98d';
-      
-      // Custom toast with payment button
+      // Simple success toast without payment link
       toast.success(
         <div>
           <p>{bookingConfirmMessage}</p>
           <p style={{ fontSize: '0.9em', marginTop: '0.5rem' }}>Confirmation email sent.</p>
-          <button 
-            onClick={() => window.open(paymentLink, '_blank')}
-            style={{
-              marginTop: '0.75rem',
-              padding: '0.5rem 1rem',
-              background: 'var(--gold)',
-              color: 'var(--charcoal)',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              width: '100%'
-            }}
-          >
-            💳 Pay Now
-          </button>
+          {paymentData && (
+            <p style={{ fontSize: '0.9em', marginTop: '0.5rem', color: 'var(--gold)' }}>
+              💳 Card saved: {paymentData.cardBrand} ••••{paymentData.cardLast4}
+            </p>
+          )}
         </div>,
         {
-          autoClose: 10000, // Keep toast open for 10 seconds
-          closeButton: true
+          autoClose: 5000
         }
       );
       
@@ -313,6 +317,9 @@ function BookingSummary({ booking, totalPrice, totalDuration, onConfirm, onBack 
           </div>
         </div>
       </div>
+
+      {/* Stripe Payment Section */}
+      <StripeCardInput ref={paymentRef} disabled={loading} />
 
       <div className="button-group">
         <button className="btn btn-secondary" onClick={onBack} disabled={loading}>

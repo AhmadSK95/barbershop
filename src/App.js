@@ -9,11 +9,14 @@ import Navigation from './components/Navigation';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
-
-// Eagerly load critical pages (home, login, register)
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 // Lazy load less critical pages for better performance
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -35,7 +38,8 @@ function App() {
     <ErrorBoundary>
       <Router>
         <AuthProvider>
-          <div className="App">
+          <Elements stripe={stripePromise}>
+            <div className="App">
             <Navigation />
             <ToastContainer
               position="top-right"
@@ -118,9 +122,10 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
             </Suspense>
-        </div>
-      </AuthProvider>
-    </Router>
+            </div>
+          </Elements>
+        </AuthProvider>
+      </Router>
     </ErrorBoundary>
   );
 }
