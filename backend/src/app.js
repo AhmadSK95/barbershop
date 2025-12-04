@@ -38,6 +38,7 @@ const barberRoutes = require('./routes/barberRoutes');
 const adminAnalyticsRoutes = require('./routes/adminAnalyticsRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -131,6 +132,7 @@ app.use('/api/barbers', barberRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/admin/audit', auditRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // 404 handler
 app.use((req, res) => {
