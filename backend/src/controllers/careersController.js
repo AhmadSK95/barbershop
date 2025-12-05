@@ -1,4 +1,4 @@
-const { sendJobApplicationEmail } = require('../utils/sesEmail');
+const { sendJobApplicationEmail } = require('../utils/sesEmail'); // Job applications use SES with attachments
 const { validateEmail, validatePhone, validateName } = require('../utils/validation');
 
 // @desc    Submit job application
