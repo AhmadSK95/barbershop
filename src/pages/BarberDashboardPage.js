@@ -276,7 +276,7 @@ function BarberDashboardPage() {
               {upcoming.map(booking => (
                 <div key={booking.id} className="upcoming-item">
                   <div className="upcoming-date">
-                    {formatDate(booking.booking_date)}
+                    {booking.booking_date ? formatDate(booking.booking_date.split('T')[0]) : booking.booking_date}
                   </div>
                   <div className="upcoming-time">
                     {formatTime(booking.booking_time)}

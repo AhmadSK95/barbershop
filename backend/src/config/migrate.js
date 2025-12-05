@@ -258,7 +258,7 @@ const seedData = async () => {
       { email: 'riza@balkanbarbers.com', firstName: 'Riza', lastName: 'Balkan', specialty: 'Senior Barber - Classic Styles', rating: 4.7 },
     ];
 
-    const defaultBarberPassword = await bcrypt.hash('Barber@123', 10);
+    const defaultBarberPassword = await bcrypt.hash('Barber123!', 10);
 
     const assignServicesToBarber = async (barberId, isMaster) => {
       const allServiceNames = Object.keys(serviceIdsByName);

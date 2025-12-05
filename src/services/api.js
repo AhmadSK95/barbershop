@@ -90,4 +90,12 @@ export const ratingAPI = {
   getBookingRating: (bookingId) => api.get(`/ratings/${bookingId}`),
 };
 
+// Payment API calls
+export const paymentAPI = {
+  chargeBooking: (bookingId, amount) => api.post('/payments/charge', { bookingId, amount }),
+  refundPayment: (chargeId, amount, bookingId) => api.post('/payments/refund', { chargeId, amount, bookingId }),
+  createSetupIntent: () => api.post('/payments/create-setup-intent'),
+  verifyCard: (paymentMethodId) => api.post('/payments/verify-card', { paymentMethodId }),
+};
+
 export default api;

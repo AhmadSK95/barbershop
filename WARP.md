@@ -290,11 +290,17 @@ node src/utils/cleanupRefreshTokens.js
 **Admin:** `admin@barbershop.com` / `Admin@123456`
 
 **Barbers:** 
-- `al@balkanbarbers.com` / `Barber@123`
-- `cynthia@balkanbarbers.com` / `Barber@123`
-- `eric@balkanbarbers.com` / `Barber@123`
-- `john@balkanbarbers.com` / `Barber@123`
-- `nick@balkanbarbers.com` / `Barber@123`
-- `riza@balkanbarbers.com` / `Barber@123`
+- `al@balkanbarbers.com` / `Barber123!`
+- `cynthia@balkanbarbers.com` / `Barber123!`
+- `eric@balkanbarbers.com` / `Barber123!`
+- `john@balkanbarbers.com` / `Barber123!`
+- `nick@balkanbarbers.com` / `Barber123!`
+- `riza@balkanbarbers.com` / `Barber123!`
 
 ⚠️ **IMPORTANT**: Change these in production via `.env` variables or admin panel.
+
+**To update barber passwords:**
+```bash
+cd backend
+node src/config/update-barber-passwords.js
+```

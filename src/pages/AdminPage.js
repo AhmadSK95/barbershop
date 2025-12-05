@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import RescheduleModal from '../components/RescheduleModal';
+import PaymentModal from '../components/PaymentModal';
 import { SkeletonTable } from '../components/SkeletonLoader';
 import './AdminPage.css';
 
@@ -21,6 +22,8 @@ function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedPaymentBooking, setSelectedPaymentBooking] = useState(null);
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -54,6 +57,15 @@ function AdminPage() {
         notes: booking.notes,
         createdAt: booking.created_at,
         barber_id: booking.barber_id,
+        // Payment fields
+        stripeCustomerId: booking.stripe_customer_id,
+        stripePaymentMethodId: booking.stripe_payment_method_id,
+        cardBrand: booking.card_brand,
+        cardLast4: booking.card_last_4,
+        paymentStatus: booking.payment_status || 'pending',
+        paymentAmount: booking.payment_amount,
+        paymentVerified: booking.payment_verified,
+        stripeChargeId: booking.stripe_charge_id,
         service: {
           name: booking.service_name
         },
@@ -115,6 +127,41 @@ function AdminPage() {
     setRescheduleModalOpen(false);
     setSelectedBooking(null);
     fetchAllBookings();
+  };
+  
+  const handlePayNow = (booking) => {
+    setSelectedPaymentBooking(booking);
+    setPaymentModalOpen(true);
+  };
+  
+  const handlePaymentSuccess = () => {
+    setPaymentModalOpen(false);
+    setSelectedPaymentBooking(null);
+    fetchAllBookings();
+  };
+  
+  const getPaymentStatusBadge = (status) => {
+    const statusClasses = {
+      paid: 'payment-status-paid',
+      pending: 'payment-status-pending',
+      refunded: 'payment-status-refunded'
+    };
+    const statusText = {
+      paid: '✓ Paid',
+      pending: '⏳ Pending',
+      refunded: '↩ Refunded'
+    };
+    return (
+      <span className={`payment-status-badge ${statusClasses[status] || statusClasses.pending}`}>
+        {statusText[status] || statusText.pending}
+      </span>
+    );
+  };
+  
+  const formatCardInfo = (brand, last4) => {
+    if (!brand || !last4) return 'No card saved';
+    const brandFormatted = brand.charAt(0).toUpperCase() + brand.slice(1);
+    return `${brandFormatted} ••••${last4}`;
   };
 
   const handleStatusChange = async (bookingId, newStatus) => {
@@ -474,6 +521,8 @@ function AdminPage() {
                     <th>Date & Time</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Payment</th>
+                    <th>Card</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -497,6 +546,10 @@ function AdminPage() {
                       </td>
                       <td className="price-cell">${booking.totalPrice}</td>
                       <td>{getStatusBadge(booking.status)}</td>
+                      <td>{getPaymentStatusBadge(booking.paymentStatus)}</td>
+                      <td className="card-info-cell">
+                        {formatCardInfo(booking.cardBrand, booking.cardLast4)}
+                      </td>
                       <td>
                         <div className="action-buttons">
                           {booking.status !== 'cancelled' && booking.status !== 'completed' && (
@@ -517,6 +570,17 @@ function AdminPage() {
                               >
                                 📅
                               </button>
+                              {booking.stripePaymentMethodId && 
+                               booking.paymentStatus === 'pending' && 
+                               (booking.status === 'confirmed' || booking.status === 'completed') && (
+                                <button 
+                                  className="pay-now-btn"
+                                  onClick={() => handlePayNow(booking)}
+                                  title="Charge saved payment method"
+                                >
+                                  💳 Pay Now
+                                </button>
+                              )}
                               <button 
                                 className="cancel-btn"
                                 onClick={() => handleCancelBooking(booking.id)}
@@ -547,6 +611,17 @@ function AdminPage() {
             setSelectedBooking(null);
           }}
           onSuccess={handleRescheduleSuccess}
+        />
+      )}
+      
+      {paymentModalOpen && selectedPaymentBooking && (
+        <PaymentModal
+          booking={selectedPaymentBooking}
+          onClose={() => {
+            setPaymentModalOpen(false);
+            setSelectedPaymentBooking(null);
+          }}
+          onSuccess={handlePaymentSuccess}
         />
       )}
     </div>
