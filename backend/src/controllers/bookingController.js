@@ -1,6 +1,6 @@
 const pool = require('../config/database');
-// Use AWS SES for email sending
-const { sendBookingConfirmationEmail } = require('../utils/sesEmail');
+// Use configured email service (AWS SES or SMTP/Gmail)
+const { sendBookingConfirmationEmail } = require('../utils/emailService');
 const { sendBookingConfirmationSMS, sendBookingCancellationSMS, sendBarberBookingNotificationSMS } = require('../../services/twilio-sms');
 
 // @desc    Create new booking

@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { sendEmail } = require('../../services/email');
+const { sendEmail } = require('../../services/email'); // Uses AWS SES
 const { sendSMS } = require('../../services/sms');
 
 // Reschedule a booking
