@@ -255,6 +255,8 @@ const getAllBookings = async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT b.id, b.booking_date, b.booking_time, b.total_price, b.status, b.notes, b.created_at,
+              b.stripe_customer_id, b.stripe_payment_method_id, b.card_brand, b.card_last_4,
+              b.payment_status, b.payment_amount, b.payment_verified, b.stripe_charge_id,
               s.name as service_name,
               u1.first_name as customer_first_name, u1.last_name as customer_last_name, u1.email as customer_email,
               u2.first_name as barber_first_name, u2.last_name as barber_last_name
