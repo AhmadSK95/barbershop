@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { bookingAPI, userAPI, ratingAPI } from '../services/api';
 import { format } from 'date-fns';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { services } from '../data';
 import { toast } from 'react-toastify';
 import RescheduleModal from '../components/RescheduleModal';
@@ -14,6 +14,7 @@ function ProfilePage() {
   const { user, setUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -54,6 +55,21 @@ function ProfilePage() {
       fetchBookings();
     }
   }, [location, activeTab]); // Refresh when navigation changes or tab switches to orders
+  
+  useEffect(() => {
+    // Check for payment success/cancelled and force refresh
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      toast.success('Payment successful! Your booking has been confirmed.');
+      // Force refresh bookings to show updated payment status
+      fetchBookings(true);
+      // Clean up URL
+      setSearchParams({});
+    } else if (paymentStatus === 'cancelled') {
+      toast.info('Payment was cancelled. You can try again from your bookings.');
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
   
   useEffect(() => {
     // Update profile form when user changes
