@@ -1,7 +1,7 @@
 const pool = require('../config/database');
 // Use configured email service (AWS SES or SMTP/Gmail)
 const { sendBookingConfirmationEmail } = require('../utils/emailService');
-const { sendBookingConfirmationSMS, sendBookingCancellationSMS, sendBarberBookingNotificationSMS } = require('../../services/twilio-sms');
+const { sendBookingConfirmationSMS, sendBookingCancellationSMS, sendBarberBookingNotificationSMS } = require('../../services/sns-sms');
 
 // @desc    Create new booking
 // @route   POST /api/bookings
@@ -152,7 +152,15 @@ const createBooking = async (req, res) => {
       
       // Send SMS to customer if phone number exists
       if (customerInfo.phone) {
-        await sendBookingConfirmationSMS(customerInfo.phone, bookingDetails);
+        const smsDetails = {
+          customerName: `${customerInfo.firstName} ${customerInfo.lastName || ''}`.trim(),
+          date: bookingDetails.date,
+          time: bookingDetails.time,
+          barber: bookingDetails.barber
+        };
+        await sendBookingConfirmationSMS(customerInfo.phone, smsDetails).catch(err => {
+          console.error('SMS notification failed (non-blocking):', err.message);
+        });
       }
       
       // Send email to barber (if contact_email is set)
@@ -174,10 +182,9 @@ const createBooking = async (req, res) => {
           time: bookingTime,
           price: totalPrice.toFixed(2)
         };
-        await sendBarberBookingNotificationSMS(barberPhone, barberSMSDetails);
-        console.log(`📱 SMS sent to barber at ${barberPhone}`);
-      } else {
-        console.log('⚠️  Barber has no phone number - SMS not sent');
+        await sendBarberBookingNotificationSMS(barberPhone, barberSMSDetails).catch(err => {
+          console.error('Barber SMS notification failed (non-blocking):', err.message);
+        });
       }
     } catch (notificationError) {
       console.error('Failed to send notifications:', notificationError);
@@ -374,9 +381,11 @@ const cancelBooking = async (req, res) => {
           barberName: barberName
         };
 
-        // Send SMS if phone exists
+        // Send SMS if phone exists (non-blocking)
         if (details.phone_number) {
-          await sendBookingCancellationSMS(details.phone_number, cancelDetails);
+          await sendBookingCancellationSMS(details.phone_number, cancelDetails).catch(err => {
+            console.error('Cancellation SMS failed (non-blocking):', err.message);
+          });
         }
       }
     } catch (notificationError) {

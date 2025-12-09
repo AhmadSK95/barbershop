@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { sendBarberBookingNotificationSMS } = require('../../services/twilio-sms');
+const { sendBarberBookingNotificationSMS } = require('../../services/sns-sms');
 
 // Get barber dashboard overview - today's schedule and stats
 const getDashboard = async (req, res) => {
@@ -257,7 +257,7 @@ const updateBookingStatus = async (req, res) => {
     // Send SMS notification to barber if status is confirmed
     if (status === 'confirmed') {
       try {
-        // Get booking details, customer info, and barber phone
+        // Get booking details and barber phone
         const bookingDetails = await pool.query(
           `SELECT b.booking_date, b.booking_time, b.total_price,
                   u.first_name as customer_first_name, u.last_name as customer_last_name,
@@ -285,15 +285,13 @@ const updateBookingStatus = async (req, res) => {
               price: booking.total_price
             };
             
-            await sendBarberBookingNotificationSMS(barberPhone, smsDetails);
-            console.log(`📱 SMS sent to barber at ${barberPhone}`);
-          } else {
-            console.log('⚠️  Barber has no phone number configured');
+            await sendBarberBookingNotificationSMS(barberPhone, smsDetails).catch(err => {
+              console.error('Barber SMS notification failed (non-blocking):', err.message);
+            });
           }
         }
-      } catch (smsError) {
-        console.error('Failed to send SMS to barber:', smsError);
-        // Don't fail the booking status update if SMS fails
+      } catch (error) {
+        console.error('Failed to send SMS notification (non-blocking):', error.message);
       }
     }
     
