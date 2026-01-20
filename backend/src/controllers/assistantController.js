@@ -1,5 +1,5 @@
 const { runMetric, listMetrics, getSchemaSnapshot } = require('../utils/assistantTools');
-const { v4: uuidv4 } = require('crypto').randomUUID ? require('crypto') : require('uuid');
+const crypto = require('crypto');
 
 /**
  * List available metrics
@@ -33,7 +33,7 @@ const getAvailableMetrics = async (req, res) => {
  */
 const executeMetric = async (req, res) => {
   const startTime = Date.now();
-  const requestId = uuidv4();
+  const requestId = crypto.randomUUID();
   
   try {
     const { metric, params = {}, revealPII = false } = req.body;
