@@ -9,7 +9,7 @@ const SQL_VALIDATION = {
   MULTI_STATEMENT: /;\s*\w/,
   
   // Block comments (can hide malicious code)
-  COMMENTS: /(--|\\/\\*|\\*\\/|#)/,
+  COMMENTS: /(--)|(\/)|(\*)|(#)/,
   
   // Complexity limits
   MAX_JOINS: 5,
