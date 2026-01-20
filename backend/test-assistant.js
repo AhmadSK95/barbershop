@@ -7,8 +7,8 @@ const axios = require('axios');
 const API_URL = process.env.API_URL || 'https://balkan.thisisrikisart.com/api';
 
 // Test credentials (use your admin account)
-const ADMIN_EMAIL = 'ahmadskmoin2021@gmail.com';
-const ADMIN_PASSWORD = 'Admin@123456';
+const ADMIN_USERNAME = 'ahmadskmoin2021@gmail.com'; // username field
+const ADMIN_PASSWORD = 'Admin123!';
 
 let accessToken = '';
 
@@ -19,7 +19,7 @@ const test = async () => {
     // 1. Login as admin
     console.log('1️⃣  Logging in as admin...');
     const loginRes = await axios.post(`${API_URL}/auth/login`, {
-      email: ADMIN_EMAIL,
+      username: ADMIN_USERNAME,
       password: ADMIN_PASSWORD
     });
     accessToken = loginRes.data.data.accessToken;
