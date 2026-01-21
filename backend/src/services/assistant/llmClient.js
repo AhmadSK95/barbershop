@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://ollama:11434';
-const MODEL_NAME = 'qwen2.5:7b-instruct-q4_k_m';
+const MODEL_NAME = process.env.OLLAMA_MODEL || 'qwen2.5:3b';
 const REQUEST_TIMEOUT = 30000; // 30 seconds
 
 /**
