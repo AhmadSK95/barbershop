@@ -29,6 +29,49 @@
   font-weight: 600;
 }
 
+/* Admin Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 3px solid var(--color-gold-dark);
+  padding-bottom: 0;
+}
+
+.admin-tab {
+  padding: 1rem 2rem;
+  background: rgba(26, 15, 10, 0.4);
+  border: 2px solid var(--color-gold-dark);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  color: var(--color-gold-pale);
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  bottom: -3px;
+}
+
+.admin-tab:hover {
+  background: rgba(181, 147, 78, 0.2);
+  color: var(--color-gold-light);
+  transform: translateY(-2px);
+}
+
+.admin-tab.active {
+  background: var(--gradient-gold);
+  color: var(--color-brown-darkest);
+  border-bottom: 3px solid var(--gradient-gold);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+}
+
+/* Assistant Tab Content */
+.assistant-tab-content {
+  margin-top: 2rem;
+}
+
 /* Revenue Banner */
 .revenue-banner {
   background: var(--gradient-gold);

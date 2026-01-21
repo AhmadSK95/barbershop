@@ -7,12 +7,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import RescheduleModal from '../components/RescheduleModal';
 import PaymentModal from '../components/PaymentModal';
 import { SkeletonTable } from '../components/SkeletonLoader';
+import AssistantChat from '../components/AssistantChat';
 import './AdminPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 function AdminPage() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('bookings'); // 'bookings' or 'assistant'
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -361,6 +363,25 @@ function AdminPage() {
           <p className="admin-subtitle">Manage all bookings and appointments</p>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="admin-tabs">
+          <button
+            className={`admin-tab ${activeTab === 'bookings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bookings')}
+          >
+            📅 Bookings
+          </button>
+          <button
+            className={`admin-tab ${activeTab === 'assistant' ? 'active' : ''}`}
+            onClick={() => setActiveTab('assistant')}
+          >
+            🤖 Assistant
+          </button>
+        </div>
+
+        {/* Bookings Tab Content */}
+        {activeTab === 'bookings' && (<>
+
         {/* Revenue Highlight Banner */}
         <div className="revenue-banner">
           <div className="revenue-main">
@@ -601,6 +622,14 @@ function AdminPage() {
             </div>
           )}
         </div>
+        </>) /* End Bookings Tab Content */}
+
+        {/* Assistant Tab Content */}
+        {activeTab === 'assistant' && (
+          <div className="assistant-tab-content">
+            <AssistantChat />
+          </div>
+        )}
       </div>
       
       {rescheduleModalOpen && selectedBooking && (
@@ -613,7 +642,7 @@ function AdminPage() {
           onSuccess={handleRescheduleSuccess}
         />
       )}
-      
+
       {paymentModalOpen && selectedPaymentBooking && (
         <PaymentModal
           booking={selectedPaymentBooking}

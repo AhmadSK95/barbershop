@@ -98,4 +98,23 @@ export const paymentAPI = {
   verifyCard: (paymentMethodId) => api.post('/payments/verify-card', { paymentMethodId }),
 };
 
+// Assistant API calls (Admin only)
+export const assistantAPI = {
+  getMetrics: async () => {
+    const response = await api.get('/admin/assistant/metrics');
+    return response.data;
+  },
+  query: async (question, revealPII = false) => {
+    const response = await api.post('/admin/assistant/query', {
+      question,
+      revealPII
+    });
+    return response.data;
+  },
+  getSchema: async () => {
+    const response = await api.get('/admin/assistant/schema');
+    return response.data;
+  },
+};
+
 export default api;
