@@ -20,6 +20,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: barbershop_ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - barbershop_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # Backend API
   backend:
     build:
@@ -56,10 +74,17 @@ services:
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      ASSISTANT_ENABLED: ${ASSISTANT_ENABLED:-true}
+      ASSISTANT_MODE: ${ASSISTANT_MODE:-local_llm}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      ASSISTANT_MAX_ROWS: ${ASSISTANT_MAX_ROWS:-2000}
+      ASSISTANT_QUERY_TIMEOUT_MS: ${ASSISTANT_QUERY_TIMEOUT_MS:-2000}
     ports:
       - "5001:5001"
     depends_on:
       postgres:
+        condition: service_healthy
+      ollama:
         condition: service_healthy
     networks:
       - barbershop_network
@@ -89,4 +114,6 @@ networks:
 
 volumes:
   postgres_data:
+    driver: local
+  ollama_data:
     driver: local

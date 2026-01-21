@@ -1,4 +1,6 @@
 const { runMetric, listMetrics, getSchemaSnapshot } = require('../utils/assistantTools');
+const { resolveIntent } = require('../services/assistant/intentResolver');
+const { suggestVisualization } = require('../services/assistant/visualizationPlanner');
 const crypto = require('crypto');
 
 /**
@@ -36,29 +38,47 @@ const executeMetric = async (req, res) => {
   const requestId = crypto.randomUUID();
   
   try {
-    const { metric, params = {}, revealPII = false } = req.body;
+    const { question, metric, params = {}, revealPII = false } = req.body;
 
-    if (!metric) {
+    let resolvedMetric = metric;
+    let resolvedParams = params;
+    let confidence = 'high';
+    let reasoning = '';
+
+    // If question provided, use LLM to resolve intent
+    if (question && !metric) {
+      const intent = await resolveIntent(question);
+      resolvedMetric = intent.metric;
+      resolvedParams = intent.params;
+      confidence = intent.confidence;
+      reasoning = intent.reasoning;
+    } else if (!metric) {
       return res.status(400).json({
         success: false,
-        message: 'Metric name is required'
+        message: 'Either question or metric name is required'
       });
     }
 
     // Execute metric
-    const result = await runMetric(metric, params, revealPII);
+    const result = await runMetric(resolvedMetric, resolvedParams, revealPII);
     
     // Log to audit (will be handled by middleware)
     const latency = Date.now() - startTime;
 
+    // Get visualization suggestion
+    const visualization = suggestVisualization(resolvedMetric, result.rows);
+
     res.json({
       success: true,
+      message: generateSummary(resolvedMetric, result),
       data: {
         requestId,
         ...result,
-        summary: generateSummary(metric, result),
+        summary: generateSummary(resolvedMetric, result),
         assumptions: generateAssumptions(result.params),
-        confidence: 'high'
+        confidence,
+        reasoning,
+        visualization
       }
     });
 
