@@ -23,8 +23,9 @@ async function resolveIntent(question) {
 
     return parseIntentResponse(response, question);
   } catch (error) {
-    console.error('Intent resolution error:', error);
-    throw new Error('Failed to understand your question. Please try rephrasing.');
+    console.error('Intent resolution error (using fallback):', error.message);
+    // Use keyword fallback when LLM unavailable
+    return findBestMetricFallback(question);
   }
 }
 
