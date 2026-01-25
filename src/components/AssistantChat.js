@@ -124,30 +124,6 @@ const AssistantChat = () => {
         )}
       </div>
 
-      <div className="chat-messages">
-        {messages.map((message, index) => (
-          <AssistantMessage key={index} message={message} />
-        ))}
-        
-        {loading && (
-          <div className="assistant-message assistant loading-message">
-            <div className="message-header">
-              <span className="message-role">🤖 Assistant</span>
-            </div>
-            <div className="message-content">
-              <div className="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <span className="loading-text">Analyzing your question...</span>
-            </div>
-          </div>
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
-
       <div className="faq-section">
         <div className="faq-header">
           <h3>📋 Frequently Asked Questions</h3>
@@ -196,6 +172,30 @@ const AssistantChat = () => {
           💡 Tip: Ask specific questions like "revenue last 30 days" or "top 5 barbers this week"
         </div>
       </form>
+
+      <div className="chat-messages">
+        {messages.map((message, index) => (
+          <AssistantMessage key={index} message={message} />
+        ))}
+        
+        {loading && (
+          <div className="assistant-message assistant loading-message">
+            <div className="message-header">
+              <span className="message-role">🤖 Assistant</span>
+            </div>
+            <div className="message-content">
+              <div className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <span className="loading-text">Analyzing your question...</span>
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
     </div>
   );
 };
