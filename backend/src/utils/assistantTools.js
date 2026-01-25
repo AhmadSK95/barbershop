@@ -27,7 +27,7 @@ const METRIC_TEMPLATES = {
       ORDER BY count DESC
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
   top_barbers: {
@@ -50,7 +50,7 @@ const METRIC_TEMPLATES = {
       LIMIT $3
     `,
     params: ['startDate', 'endDate', 'limit'],
-    defaults: { startDate: 'last_30_days', endDate: 'today', limit: 10 }
+    defaults: { startDate: '2025-11-01', endDate: 'today', limit: 10 }
   },
 
   payment_summary: {
@@ -69,10 +69,10 @@ const METRIC_TEMPLATES = {
       ORDER BY bookings DESC
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  no_show_rate: {
+  no_show_rate:
     description: 'No-show rate calculation',
     query: `
       SELECT 
@@ -88,10 +88,10 @@ const METRIC_TEMPLATES = {
         AND status = 'completed'
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  service_popularity: {
+  service_popularity:
     description: 'Most popular services by bookings',
     query: `
       SELECT 
@@ -108,10 +108,10 @@ const METRIC_TEMPLATES = {
       ORDER BY total_bookings DESC
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  reminder_effectiveness: {
+  reminder_effectiveness:
     description: 'Email reminder effectiveness metrics',
     query: `
       SELECT 
@@ -129,10 +129,10 @@ const METRIC_TEMPLATES = {
       WHERE booking_date >= $1 AND booking_date <= $2
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  revenue_trends: {
+  revenue_trends:
     description: 'Daily revenue trends',
     query: `
       SELECT 
@@ -146,10 +146,10 @@ const METRIC_TEMPLATES = {
       ORDER BY booking_date
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  audit_summary: {
+  audit_summary:
     description: 'Audit log summary by action type',
     query: `
       SELECT 
@@ -199,10 +199,10 @@ const METRIC_TEMPLATES = {
       LIMIT 20
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  peak_hours: {
+  peak_hours:
     description: 'Most popular booking times',
     query: `
       SELECT 
@@ -216,7 +216,7 @@ const METRIC_TEMPLATES = {
       ORDER BY bookings DESC
     `,
     params: ['startDate', 'endDate'],
-    defaults: { startDate: 'last_30_days', endDate: 'today' }
+    defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
   ratings_summary: {
