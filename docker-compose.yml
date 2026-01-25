@@ -1,26 +1,5 @@
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: barbershop_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME:-barbershop_db}
-      POSTGRES_USER: ${DB_USER:-barbershop_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - barbershop_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-barbershop_user} -d ${DB_NAME:-barbershop_db}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Backend API
+  # Backend API (uses AWS RDS for database)
   backend:
     build:
       context: ./backend
@@ -64,9 +43,6 @@ services:
       ASSISTANT_QUERY_TIMEOUT_MS: ${ASSISTANT_QUERY_TIMEOUT_MS:-2000}
     ports:
       - "5001:5001"
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - barbershop_network
     command: npm start
@@ -92,7 +68,3 @@ services:
 networks:
   barbershop_network:
     driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local
