@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS services (
 -- Add-ons table
 CREATE TABLE IF NOT EXISTS addons (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
+  name VARCHAR(100) UNIQUE NOT NULL,
   price DECIMAL(10, 2) NOT NULL,
   duration INTEGER NOT NULL,
   is_active BOOLEAN DEFAULT true,
@@ -159,10 +159,18 @@ CREATE TABLE IF NOT EXISTS blackout_dates (
 );
 
 -- Add new columns to existing tables
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS contact_email VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS sms_consent BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS sms_consent_date TIMESTAMP;
 ALTER TABLE barbers ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS no_show BOOLEAN DEFAULT false;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_24h_sent BOOLEAN DEFAULT false;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_2h_sent BOOLEAN DEFAULT false;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50);
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_amount DECIMAL(10,2);
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255);
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS stripe_payment_intent_id VARCHAR(255);
 
 -- Ratings table
 CREATE TABLE IF NOT EXISTS ratings (
@@ -177,7 +185,16 @@ CREATE TABLE IF NOT EXISTS ratings (
   UNIQUE(booking_id)
 );
 
+-- Add unique constraint to username if not exists
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_username_key') THEN
+    ALTER TABLE users ADD CONSTRAINT users_username_key UNIQUE (username);
+  END IF;
+END $$;
+
 -- Create additional indexes
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(setting_key);
 CREATE INDEX IF NOT EXISTS idx_barber_availability_barber ON barber_availability(barber_id);
 CREATE INDEX IF NOT EXISTS idx_barber_availability_date ON barber_availability(date_override);
@@ -208,7 +225,7 @@ const seedData = async () => {
 
     for (const service of servicesData) {
       await client.query(
-        'INSERT INTO services (name, description, price, duration) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
+        'INSERT INTO services (name, description, price, duration) VALUES ($1, $2, $3, $4) ON CONFLICT (name) DO NOTHING',
         service
       );
     }
@@ -226,7 +243,7 @@ const seedData = async () => {
 
     for (const addon of addonsData) {
       await client.query(
-        'INSERT INTO addons (name, price, duration) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+        'INSERT INTO addons (name, price, duration) VALUES ($1, $2, $3) ON CONFLICT (name) DO NOTHING',
         addon
       );
     }
@@ -237,11 +254,11 @@ const seedData = async () => {
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
     const adminResult = await client.query(
-      `INSERT INTO users (email, password, first_name, last_name, role, is_verified) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
-       ON CONFLICT (email) DO NOTHING
+      `INSERT INTO users (username, email, contact_email, password, first_name, last_name, role, is_verified) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+       ON CONFLICT (username) DO NOTHING
        RETURNING id`,
-      [adminEmail, hashedPassword, 'Admin', 'User', 'admin', true]
+      [adminEmail, adminEmail, adminEmail, hashedPassword, 'Admin', 'User', 'admin', true]
     );
 
     // Create sample barbers and assign services
@@ -286,11 +303,11 @@ const seedData = async () => {
     // Insert masters
     for (const b of masterBarbers) {
       const userResult = await client.query(
-        `INSERT INTO users (email, password, first_name, last_name, role, is_verified)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (email) DO NOTHING
+        `INSERT INTO users (username, email, contact_email, password, first_name, last_name, role, is_verified)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (username) DO NOTHING
          RETURNING id`,
-        [b.email, defaultBarberPassword, b.firstName, b.lastName, 'barber', true]
+        [b.email, b.email, b.email, defaultBarberPassword, b.firstName, b.lastName, 'barber', true]
       );
 
       if (userResult.rows.length > 0) {
@@ -305,11 +322,11 @@ const seedData = async () => {
     // Insert seniors
     for (const b of seniorBarbers) {
       const userResult = await client.query(
-        `INSERT INTO users (email, password, first_name, last_name, role, is_verified)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (email) DO NOTHING
+        `INSERT INTO users (username, email, contact_email, password, first_name, last_name, role, is_verified)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (username) DO NOTHING
          RETURNING id`,
-        [b.email, defaultBarberPassword, b.firstName, b.lastName, 'barber', true]
+        [b.email, b.email, b.email, defaultBarberPassword, b.firstName, b.lastName, 'barber', true]
       );
 
       if (userResult.rows.length > 0) {
