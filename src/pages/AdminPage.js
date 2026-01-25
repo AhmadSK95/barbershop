@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import RescheduleModal from '../components/RescheduleModal';
 import PaymentModal from '../components/PaymentModal';
 import { SkeletonTable } from '../components/SkeletonLoader';
-import ChatInterface from '../components/assistant/ChatInterface';
+import AssistantChat from '../components/AssistantChat';
 import './AdminPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -627,7 +627,7 @@ function AdminPage() {
         {/* Assistant Tab Content */}
         {activeTab === 'assistant' && (
           <div className="assistant-tab-content">
-            <ChatInterface />
+            <AssistantChat />
           </div>
         )}
       </div>
