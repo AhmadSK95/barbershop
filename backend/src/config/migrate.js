@@ -185,6 +185,17 @@ CREATE TABLE IF NOT EXISTS ratings (
   UNIQUE(booking_id)
 );
 
+-- Populate username from email for existing users
+UPDATE users SET username = email WHERE username IS NULL;
+
+-- Make username NOT NULL after populating it
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='username' AND is_nullable='YES') THEN
+    ALTER TABLE users ALTER COLUMN username SET NOT NULL;
+  END IF;
+END $$;
+
 -- Add unique constraint to username if not exists
 DO $$ 
 BEGIN
