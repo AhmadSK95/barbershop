@@ -57,14 +57,8 @@ const AssistantMessage = ({ message }) => {
         )}
         
         {/* Metadata */}
-        {(params || assumptions || confidence) && (
+        {(assumptions || confidence) && (
           <div className="data-metadata">
-            {params && (
-              <div className="metadata-item">
-                <span className="metadata-label">Parameters:</span>
-                <code>{JSON.stringify(params, null, 2)}</code>
-              </div>
-            )}
             {assumptions && (
               <div className="metadata-item">
                 <span className="metadata-label">ℹ️ Assumptions:</span>
