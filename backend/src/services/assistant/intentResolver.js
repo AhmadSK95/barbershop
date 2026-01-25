@@ -33,7 +33,15 @@ async function resolveIntent(question) {
  * Build the LLM prompt for intent classification
  */
 function buildIntentPrompt(question, metrics) {
-  return `You are a data assistant for a barbershop booking system. Your ONLY job is to map user questions to predefined database metrics.
+  return `You are a data assistant for a BARBERSHOP BOOKING SYSTEM. Map user questions to predefined database metrics.
+
+DATABASE CONTEXT:
+- Bookings: appointments with services, barbers, dates/times, prices, status (pending/confirmed/completed/cancelled)
+- Users: customers who make bookings
+- Barbers: staff who perform services (Al, Cynthia, John, Nick, Eric, Riza)
+- Services: haircuts, shaves, beard trims ($20-$120)
+- Revenue: calculated from completed bookings
+- Ratings: customer feedback on barbers (1-5 stars)
 
 AVAILABLE METRICS:
 ${metrics.map((m, i) => `${i + 1}. ${m.name}
@@ -47,6 +55,10 @@ RULES:
 - Extract parameter values if mentioned (dates, limits, etc.)
 - If no specific dates mentioned, use defaults: startDate="last_30_days", endDate="today"
 - If question asks for "top N", extract limit parameter
+- Revenue questions → revenue_trends
+- Barber performance → top_barbers
+- Service popularity → service_popularity
+- Booking status → bookings_by_status
 - Return ONLY valid JSON, no extra text
 
 RESPONSE FORMAT (JSON only):
