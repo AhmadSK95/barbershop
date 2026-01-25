@@ -185,6 +185,21 @@ CREATE TABLE IF NOT EXISTS ratings (
   UNIQUE(booking_id)
 );
 
+-- Add unique constraints to services and addons if not exists
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'services_name_key') THEN
+    ALTER TABLE services ADD CONSTRAINT services_name_key UNIQUE (name);
+  END IF;
+END $$;
+
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'addons_name_key') THEN
+    ALTER TABLE addons ADD CONSTRAINT addons_name_key UNIQUE (name);
+  END IF;
+END $$;
+
 -- Populate username from email for existing users
 UPDATE users SET username = email WHERE username IS NULL;
 
