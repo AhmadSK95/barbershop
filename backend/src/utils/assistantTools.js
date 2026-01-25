@@ -72,7 +72,7 @@ const METRIC_TEMPLATES = {
     defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  no_show_rate:
+  no_show_rate: {
     description: 'No-show rate calculation',
     query: `
       SELECT 
