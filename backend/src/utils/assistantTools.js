@@ -91,7 +91,7 @@ const METRIC_TEMPLATES = {
     defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  service_popularity:
+  service_popularity: {
     description: 'Most popular services by bookings',
     query: `
       SELECT 
@@ -111,7 +111,7 @@ const METRIC_TEMPLATES = {
     defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  reminder_effectiveness:
+  reminder_effectiveness: {
     description: 'Email reminder effectiveness metrics',
     query: `
       SELECT 
@@ -132,7 +132,7 @@ const METRIC_TEMPLATES = {
     defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  revenue_trends:
+  revenue_trends: {
     description: 'Daily revenue trends',
     query: `
       SELECT 
@@ -149,7 +149,7 @@ const METRIC_TEMPLATES = {
     defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  audit_summary:
+  audit_summary: {
     description: 'Audit log summary by action type',
     query: `
       SELECT 
@@ -202,7 +202,7 @@ const METRIC_TEMPLATES = {
     defaults: { startDate: '2025-11-01', endDate: 'today' }
   },
 
-  peak_hours:
+  peak_hours: {
     description: 'Most popular booking times',
     query: `
       SELECT 
