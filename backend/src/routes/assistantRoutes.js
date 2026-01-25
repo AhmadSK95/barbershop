@@ -5,6 +5,10 @@ const {
   executeMetric,
   getDatabaseSchema
 } = require('../controllers/assistantController');
+const {
+  streamChat,
+  getChatHistory
+} = require('../controllers/chatController');
 const { protect, adminOnly } = require('../middleware/auth');
 const { assistantLimiter } = require('../middleware/assistantRateLimiter');
 
@@ -22,5 +26,11 @@ router.post('/query', executeMetric);
 
 // Get database schema
 router.get('/schema', getDatabaseSchema);
+
+// ChatGPT-like streaming chat endpoint
+router.post('/chat', streamChat);
+
+// Get chat session history
+router.get('/chat/:sessionId', getChatHistory);
 
 module.exports = router;

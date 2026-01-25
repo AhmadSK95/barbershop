@@ -1,6 +1,7 @@
 const { runMetric, listMetrics, getSchemaSnapshot } = require('../utils/assistantTools');
 const { resolveIntent } = require('../services/assistant/intentResolver');
 const { suggestVisualization } = require('../services/assistant/visualizationPlanner');
+const { formatConversationalResponse } = require('../services/assistant/responseFormatter');
 const crypto = require('crypto');
 
 /**
@@ -67,14 +68,31 @@ const executeMetric = async (req, res) => {
 
     // Get visualization suggestion
     const visualization = suggestVisualization(resolvedMetric, result.rows);
+    
+    // Generate conversational response if question was provided
+    let conversationalResponse = null;
+    if (question) {
+      try {
+        conversationalResponse = await formatConversationalResponse(
+          question,
+          { ...result, params: resolvedParams },
+          resolvedMetric
+        );
+      } catch (error) {
+        console.error('Failed to format conversational response:', error.message);
+        // Fallback to basic summary
+        conversationalResponse = generateSummary(resolvedMetric, result);
+      }
+    }
 
     res.json({
       success: true,
-      message: generateSummary(resolvedMetric, result),
+      message: conversationalResponse || generateSummary(resolvedMetric, result),
       data: {
         requestId,
         ...result,
         summary: generateSummary(resolvedMetric, result),
+        conversationalResponse,
         assumptions: generateAssumptions(result.params),
         confidence,
         reasoning,

@@ -53,10 +53,17 @@ USER QUESTION: "${question}"
 RULES:
 - Choose the ONE best metric that answers this question
 - Extract parameter values if mentioned (dates, limits, etc.)
-- If no specific dates mentioned, use defaults: startDate="last_30_days", endDate="today"
+- DATE PARSING (CRITICAL):
+  * If user says "this month" → use current month dates (2026-01-01 to 2026-01-31)
+  * If user says "last month" → use previous month dates
+  * If user says "this week" → use current week dates
+  * If user says "today" → use today's date only
+  * If user specifies a month/year (e.g. "January 2026") → use that full month
+  * If NO dates mentioned → use "all" (returns ALL available data, no filtering)
+  * Today is: 2026-01-25
 - If question asks for "top N", extract limit parameter
 - Revenue questions → revenue_trends
-- Barber performance → top_barbers
+- Barber performance → top_barbers  
 - Service popularity → service_popularity
 - Booking status → bookings_by_status
 - Return ONLY valid JSON, no extra text
@@ -65,8 +72,8 @@ RESPONSE FORMAT (JSON only):
 {
   "metric": "metric_name_here",
   "params": {
-    "startDate": "YYYY-MM-DD or shortcut like last_30_days",
-    "endDate": "YYYY-MM-DD or shortcut like today",
+    "startDate": "YYYY-MM-DD or 'all' for no date filter",
+    "endDate": "YYYY-MM-DD or 'all' for no date filter",
     "limit": 10
   },
   "confidence": "high|medium|low",

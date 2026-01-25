@@ -104,6 +104,11 @@ const validateTableNames = (sql, allowedTables) => {
 const parseDateShortcut = (dateStr) => {
   if (!dateStr) return null;
   
+  // Special case: 'all' means no date filtering
+  if (dateStr.toLowerCase() === 'all') {
+    return null; // Will be handled by query logic
+  }
+  
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
