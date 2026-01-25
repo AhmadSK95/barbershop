@@ -24,39 +24,41 @@
 .message-role {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-gold-pale);
 }
 
 .assistant-message.user .message-role {
-  color: #2563eb;
+  color: var(--color-gold-light);
 }
 
 .assistant-message.assistant .message-role {
-  color: #059669;
+  color: var(--color-gold-light);
 }
 
 .message-time {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--color-gold-pale);
+  opacity: 0.7;
 }
 
 .message-content {
-  background: #f8f9fa;
+  background: rgba(26, 15, 10, 0.6);
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   line-height: 1.6;
-  color: #333;
+  color: var(--color-gold-pale);
   font-size: 0.95rem;
+  border: 2px solid var(--color-gold-dark);
 }
 
 .assistant-message.user .message-content {
-  background: #eff6ff;
-  border-left: 3px solid #2563eb;
+  background: rgba(139, 90, 43, 0.4);
+  border-left: 3px solid var(--color-gold-light);
 }
 
 .assistant-message.assistant .message-content {
-  background: #f0fdf4;
-  border-left: 3px solid #059669;
+  background: rgba(26, 15, 10, 0.7);
+  border-left: 3px solid var(--color-gold-dark);
 }
 
 /* Assistant Data Sections */
@@ -65,24 +67,26 @@
 }
 
 .data-summary {
-  background: #fefce8;
-  border-left: 3px solid #eab308;
+  background: var(--gradient-gold);
+  border-left: 3px solid var(--color-gold-light);
   padding: 0.875rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
   font-size: 0.9rem;
-  color: #854d0e;
+  color: var(--color-brown-darkest);
+  font-weight: 600;
 }
 
 .data-summary strong {
-  color: #a16207;
+  color: var(--color-brown-darkest);
+  font-weight: 800;
 }
 
 /* Data Table */
 .data-table-container {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: rgba(26, 15, 10, 0.8);
+  border: 2px solid var(--color-gold-dark);
+  border-radius: var(--radius-md);
   overflow: hidden;
   margin-bottom: 1rem;
 }
@@ -92,20 +96,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--gradient-gold);
+  border-bottom: 2px solid var(--color-gold-dark);
 }
 
 .table-title {
-  font-weight: 600;
-  color: #374151;
+  font-weight: 700;
+  color: var(--color-brown-darkest);
   font-size: 0.9rem;
 }
 
 .table-meta {
   font-size: 0.75rem;
-  color: #6b7280;
-  font-weight: 500;
+  color: var(--color-brown-dark);
+  font-weight: 600;
 }
 
 .data-table-scroll {
@@ -120,7 +124,7 @@
 }
 
 .data-table thead {
-  background: #f9fafb;
+  background: rgba(139, 90, 43, 0.6);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -129,22 +133,22 @@
 .data-table th {
   padding: 0.75rem;
   text-align: left;
-  font-weight: 600;
-  color: #374151;
-  border-bottom: 2px solid #e5e7eb;
+  font-weight: 700;
+  color: var(--color-gold-light);
+  border-bottom: 2px solid var(--color-gold-dark);
   text-transform: capitalize;
   white-space: nowrap;
 }
 
 .data-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
-  color: #1f2937;
+  border-bottom: 1px solid rgba(139, 90, 43, 0.3);
+  color: var(--color-gold-pale);
   white-space: nowrap;
 }
 
 .data-table tbody tr:hover {
-  background: #f9fafb;
+  background: rgba(139, 90, 43, 0.4);
 }
 
 .data-table tbody tr:last-child td {
@@ -153,9 +157,9 @@
 
 /* Metadata */
 .data-metadata {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: rgba(26, 15, 10, 0.6);
+  border: 2px solid var(--color-gold-dark);
+  border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
 }

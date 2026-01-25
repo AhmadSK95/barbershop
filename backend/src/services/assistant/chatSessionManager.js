@@ -25,12 +25,12 @@ class ChatSession {
     this.lastActivityAt = Date.now();
   }
 
-  addMessage(role, content, toolCalls = null, toolResults = null) {
+  addMessage(role, content, toolCalls = null, toolCallId = null) {
     const message = {
       role, // 'user', 'assistant', 'tool'
       content,
       toolCalls,
-      toolResults,
+      toolCallId, // For tool messages, store the tool_call_id
       timestamp: Date.now()
     };
 
@@ -51,13 +51,24 @@ class ChatSession {
 
   getConversationHistory() {
     // Format for OpenAI API
-    return this.messages
-      .filter(m => m.role !== 'tool') // Tool results handled separately
-      .map(m => ({
+    return this.messages.map(m => {
+      const message = {
         role: m.role,
-        content: m.content || '',
-        ...(m.toolCalls && { tool_calls: m.toolCalls })
-      }));
+        content: m.content || ''
+      };
+      
+      // Add tool_calls for assistant messages
+      if (m.toolCalls) {
+        message.tool_calls = m.toolCalls;
+      }
+      
+      // Add tool_call_id for tool messages
+      if (m.role === 'tool' && m.toolCallId) {
+        message.tool_call_id = m.toolCallId;
+      }
+      
+      return message;
+    });
   }
 
   updateContext(updates) {

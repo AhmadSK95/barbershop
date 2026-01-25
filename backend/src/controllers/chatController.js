@@ -149,6 +149,11 @@ const streamChat = async (req, res) => {
 
         // Format tool results for OpenAI
         const toolMessages = formatToolResultsForOpenAI(toolResults);
+        
+        // Add tool result messages to session history
+        for (const toolMessage of toolMessages) {
+          session.addMessage('tool', toolMessage.content, null, toolMessage.tool_call_id);
+        }
 
         // Continue conversation with tool results
         const followUpMessages = [

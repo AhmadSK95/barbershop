@@ -97,12 +97,15 @@ const AssistantChat = () => {
     inputRef.current?.focus();
   };
 
-  const quickQuestions = [
-    "What's my revenue this month?",
-    "Show me top performing barbers",
-    "What's my no-show rate?",
-    "Show me booking status breakdown",
-    "Which services are most popular?",
+  const faqQuestions = [
+    { emoji: '💰', question: "What is revenue numbers for the month of January 2026" },
+    { emoji: '⭐', question: "Show me top performing barbers" },
+    { emoji: '📊', question: "What's my no-show rate?" },
+    { emoji: '📈', question: "Show me booking status breakdown" },
+    { emoji: '✂️', question: "Which services are most popular?" },
+    { emoji: '👥', question: "How many customers this month?" },
+    { emoji: '💵', question: "Average transaction value" },
+    { emoji: '🎯', question: "Busiest day of the week" },
   ];
 
   return (
@@ -145,23 +148,25 @@ const AssistantChat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {messages.length === 1 && (
-        <div className="quick-questions">
-          <div className="quick-questions-label">Try asking:</div>
-          <div className="quick-questions-grid">
-            {quickQuestions.map((question, index) => (
-              <button
-                key={index}
-                className="quick-question-btn"
-                onClick={() => handleQuickQuestion(question)}
-                disabled={loading}
-              >
-                {question}
-              </button>
-            ))}
-          </div>
+      <div className="faq-section">
+        <div className="faq-header">
+          <h3>📋 Frequently Asked Questions</h3>
+          <p className="faq-subtitle">Click any question below or type your own</p>
         </div>
-      )}
+        <div className="faq-grid">
+          {faqQuestions.map((item, index) => (
+            <button
+              key={index}
+              className="faq-btn"
+              onClick={() => handleQuickQuestion(item.question)}
+              disabled={loading}
+            >
+              <span className="faq-emoji">{item.emoji}</span>
+              <span className="faq-text">{item.question}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <form className="chat-input-form" onSubmit={handleSubmit}>
         <div className="chat-input-container">
